@@ -1,0 +1,1852 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nine Lives Edu — Encuentra apuntes y tutores al instante</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#7c3aed">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* ─────────────────────────────────────────
+           CSS CUSTOM PROPERTIES
+        ───────────────────────────────────────── */
+        :root {
+            --c-purple:      #7c3aed;
+            --c-purple-mid:  #8b5cf6;
+            --c-purple-light:#a78bfa;
+            --c-pink:        #ec4899;
+            --c-orange:      #f97316;
+            --c-orange-warm: #ff6b35;
+            --c-bg:          #0d0b18;
+            --c-bg-2:        #120f22;
+            --c-surface:     rgba(255,255,255,0.05);
+            --c-surface-md:  rgba(255,255,255,0.08);
+            --c-surface-lg:  rgba(255,255,255,0.12);
+            --c-border:      rgba(255,255,255,0.1);
+            --c-border-glow: rgba(139,92,246,0.4);
+            --c-text:        #f1f0ff;
+            --c-text-muted:  #9d98c4;
+            --c-text-dim:    #6b6690;
+
+            --font-display: 'Syne', sans-serif;
+            --font-body:    'DM Sans', sans-serif;
+
+            --ease-out-expo:  cubic-bezier(0.16,1,0.3,1);
+            --ease-out-quart: cubic-bezier(0.25,1,0.5,1);
+            --ease-spring:    cubic-bezier(0.34,1.56,0.64,1);
+
+            --radius-sm: 12px;
+            --radius-md: 18px;
+            --radius-lg: 28px;
+            --radius-xl: 40px;
+
+            --nav-h: 72px;
+            --container: 1240px;
+        }
+
+        /* ─────────────────────────────────────────
+           RESET & BASE
+        ───────────────────────────────────────── */
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        html { scroll-behavior: smooth; font-size: 16px; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--c-bg);
+            color: var(--c-text);
+            line-height: 1.65;
+            overflow-x: hidden;
+        }
+
+        /* ─────────────────────────────────────────
+           CANVAS BACKGROUND
+        ───────────────────────────────────────── */
+        #network-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ─────────────────────────────────────────
+           LAYOUT UTILITIES
+        ───────────────────────────────────────── */
+        .container {
+            width: 100%;
+            max-width: var(--container);
+            margin: 0 auto;
+            padding: 0 clamp(1rem, 4vw, 2.5rem);
+        }
+
+        .sr-only {
+            position: absolute; width:1px; height:1px;
+            overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap;
+        }
+
+        /* ─────────────────────────────────────────
+           NAVBAR — GLASSMORPHISM
+        ───────────────────────────────────────── */
+        .header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: var(--nav-h);
+            z-index: 900;
+            transition: background 0.4s var(--ease-out-quart),
+                        border-color 0.4s var(--ease-out-quart),
+                        box-shadow 0.4s var(--ease-out-quart);
+        }
+
+        .header::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: rgba(13,11,24,0.55);
+            backdrop-filter: blur(20px) saturate(1.6);
+            -webkit-backdrop-filter: blur(20px) saturate(1.6);
+            border-bottom: 1px solid var(--c-border);
+            z-index: -1;
+            transition: background 0.4s var(--ease-out-quart),
+                        border-color 0.4s var(--ease-out-quart);
+        }
+
+        .header.scrolled::before {
+            background: rgba(13,11,24,0.78);
+            border-color: rgba(139,92,246,0.2);
+        }
+
+        .header-content {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+        }
+
+        /* Logo */
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+        .logo-img {
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            border: 2px solid var(--c-orange-warm);
+            object-fit: cover;
+        }
+        .logo-text {
+            font-family: var(--font-display);
+            font-size: 1.35rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--c-purple-light) 0%, var(--c-pink) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        /* Nav links */
+        .nav-list {
+            display: flex;
+            list-style: none;
+            gap: 0.25rem;
+        }
+        .nav-link {
+            position: relative;
+            text-decoration: none;
+            color: var(--c-text-muted);
+            font-size: 0.92rem;
+            font-weight: 500;
+            padding: 0.4rem 0.85rem;
+            border-radius: var(--radius-sm);
+            transition: color 0.25s, background 0.25s;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px; left: 50%;
+            transform: translateX(-50%) scaleX(0);
+            width: 60%; height: 2px;
+            background: linear-gradient(90deg, var(--c-purple-mid), var(--c-pink));
+            border-radius: 99px;
+            transition: transform 0.3s var(--ease-spring);
+        }
+        .nav-link:hover, .nav-link.active {
+            color: var(--c-text);
+            background: var(--c-surface-md);
+        }
+        .nav-link.active::after,
+        .nav-link:hover::after {
+            transform: translateX(-50%) scaleX(1);
+        }
+
+        /* Header buttons */
+        .header-buttons { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; }
+
+        .btn-tutor {
+            background: linear-gradient(135deg, var(--c-orange-warm), var(--c-orange));
+            color: white;
+            border: none;
+            padding: 0.6rem 1.35rem;
+            border-radius: 999px;
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: transform 0.25s var(--ease-spring),
+                        box-shadow 0.25s var(--ease-out-quart),
+                        filter 0.25s;
+        }
+        .btn-tutor:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(249,115,22,0.45);
+            filter: brightness(1.05);
+        }
+
+        .btn-login {
+            background: var(--c-surface-md);
+            color: var(--c-purple-light);
+            border: 1px solid var(--c-border-glow);
+            padding: 0.6rem 1.35rem;
+            border-radius: 999px;
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: background 0.25s, color 0.25s, box-shadow 0.25s, transform 0.25s var(--ease-spring);
+            backdrop-filter: blur(8px);
+        }
+        .btn-login:hover {
+            background: var(--c-border-glow);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(139,92,246,0.35);
+        }
+
+        /* ─────────────────────────────────────────
+           HERO
+        ───────────────────────────────────────── */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: calc(var(--nav-h) + 4rem) 0 5rem;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        /* Radial glow blobs */
+        .hero::before, .hero::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: drift 12s ease-in-out infinite alternate;
+        }
+        .hero::before {
+            width: 640px; height: 640px;
+            background: radial-gradient(circle, rgba(124,58,237,0.22) 0%, transparent 70%);
+            top: -200px; right: -100px;
+        }
+        .hero::after {
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(236,72,153,0.16) 0%, transparent 70%);
+            bottom: 0; left: -150px;
+            animation-delay: -6s;
+        }
+
+        @keyframes drift {
+            from { transform: translate(0,0) scale(1); }
+            to   { transform: translate(30px,20px) scale(1.05); }
+        }
+
+        .hero-inner {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        /* Hero text */
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(139,92,246,0.15);
+            border: 1px solid rgba(139,92,246,0.3);
+            color: var(--c-purple-light);
+            font-size: 0.82rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 0.35rem 1rem 0.35rem 0.5rem;
+            border-radius: 999px;
+            margin-bottom: 1.5rem;
+        }
+        .hero-eyebrow span.dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--c-purple-light);
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity:1; transform:scale(1); }
+            50% { opacity:0.5; transform:scale(0.7); }
+        }
+
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: clamp(2.6rem, 5vw, 4.2rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.035em;
+            color: var(--c-text);
+            margin-bottom: 1.5rem;
+        }
+        .hero-title .highlight {
+            background: linear-gradient(135deg, var(--c-purple-light) 0%, var(--c-pink) 50%, var(--c-orange) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            color: var(--c-text-muted);
+            font-size: clamp(1rem, 1.8vw, 1.15rem);
+            line-height: 1.7;
+            max-width: 500px;
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2.5rem;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--c-purple) 0%, var(--c-pink) 100%);
+            color: white;
+            border: none;
+            padding: 0.9rem 2rem;
+            border-radius: 999px;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s var(--ease-spring),
+                        box-shadow 0.3s var(--ease-out-quart),
+                        filter 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 40px rgba(139,92,246,0.5);
+        }
+        .btn-primary:hover::after { opacity: 1; }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--c-surface-md);
+            color: var(--c-text);
+            border: 1px solid var(--c-border);
+            padding: 0.9rem 2rem;
+            border-radius: 999px;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.25s, border-color 0.25s, transform 0.3s var(--ease-spring), box-shadow 0.25s;
+            backdrop-filter: blur(8px);
+        }
+        .btn-secondary:hover {
+            background: var(--c-surface-lg);
+            border-color: var(--c-border-glow);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .hero-badges {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.9rem;
+            border-radius: 999px;
+            background: var(--c-surface);
+            border: 1px solid var(--c-border);
+            font-size: 0.82rem;
+            color: var(--c-text-muted);
+            backdrop-filter: blur(4px);
+        }
+        .hero-badge i { color: var(--c-orange); }
+
+        /* Hero visual side */
+        .hero-visual {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+        }
+
+        .hero-glass-card {
+            position: relative;
+            background: var(--c-surface-md);
+            border: 1px solid var(--c-border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            backdrop-filter: blur(24px) saturate(1.4);
+            -webkit-backdrop-filter: blur(24px) saturate(1.4);
+            width: 340px;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        .hgc-tag {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--c-purple-light);
+            background: rgba(139,92,246,0.15);
+            border: 1px solid rgba(139,92,246,0.25);
+            padding: 0.25rem 0.65rem;
+            border-radius: 999px;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+        .hgc-title {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--c-text);
+            margin-bottom: 0.4rem;
+        }
+        .hgc-sub {
+            font-size: 0.85rem;
+            color: var(--c-text-muted);
+            margin-bottom: 1.25rem;
+        }
+        .hgc-stars {
+            color: #fbbf24;
+            font-size: 0.85rem;
+            margin-bottom: 1.25rem;
+            letter-spacing: 0.05em;
+        }
+        .hgc-tutor {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.85rem;
+            background: var(--c-surface);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--c-border);
+            margin-bottom: 0.75rem;
+            transition: background 0.2s, transform 0.25s var(--ease-spring);
+            cursor: default;
+        }
+        .hgc-tutor:hover {
+            background: var(--c-surface-md);
+            transform: translateX(3px);
+        }
+        .hgc-avatar {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+        .hgc-tutor-info small {
+            display: block;
+            font-size: 0.72rem;
+            color: var(--c-text-dim);
+        }
+        .hgc-tutor-info span {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--c-text);
+        }
+        .hgc-pill {
+            margin-left: auto;
+            font-size: 0.72rem;
+            padding: 0.2rem 0.55rem;
+            border-radius: 999px;
+            font-weight: 600;
+        }
+        .hgc-pill.online { background: rgba(34,197,94,0.15); color: #4ade80; }
+        .hgc-pill.busy   { background: rgba(249,115,22,0.15); color: var(--c-orange); }
+
+        .hgc-btn {
+            width: 100%;
+            margin-top: 0.5rem;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, var(--c-purple), var(--c-pink));
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.92rem;
+            cursor: pointer;
+            transition: filter 0.2s, transform 0.25s var(--ease-spring), box-shadow 0.2s;
+        }
+        .hgc-btn:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(139,92,246,0.4);
+        }
+
+        /* Floating stat badges */
+        .stat-badge {
+            position: absolute;
+            background: var(--c-surface-md);
+            border: 1px solid var(--c-border);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: var(--radius-md);
+            padding: 0.85rem 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+        }
+        .stat-badge-1 { top: 0; left: -30px; animation: float 7s ease-in-out infinite 1s; }
+        .stat-badge-2 { bottom: 30px; right: -20px; animation: float 5s ease-in-out infinite 3s; }
+
+        .sb-icon {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem;
+        }
+        .sb-icon.purple { background: rgba(139,92,246,0.2); color: var(--c-purple-light); }
+        .sb-icon.orange { background: rgba(249,115,22,0.2); color: var(--c-orange); }
+        .stat-badge span { font-size: 1.2rem; font-weight: 700; color: var(--c-text); font-family: var(--font-display); }
+        .stat-badge small { font-size: 0.72rem; color: var(--c-text-muted); display: block; }
+
+        /* ─────────────────────────────────────────
+           METRICS STRIP
+        ───────────────────────────────────────── */
+        .metrics {
+            position: relative;
+            z-index: 1;
+            border-top: 1px solid var(--c-border);
+            border-bottom: 1px solid var(--c-border);
+            background: var(--c-surface);
+            backdrop-filter: blur(16px);
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0;
+        }
+        .metric-card {
+            padding: 2.5rem 2rem;
+            border-right: 1px solid var(--c-border);
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            transition: background 0.25s;
+        }
+        .metric-card:last-child { border-right: none; }
+        .metric-card:hover { background: var(--c-surface-md); }
+        .metric-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--c-text-dim);
+        }
+        .metric-value {
+            font-family: var(--font-display);
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: var(--c-text);
+            line-height: 1;
+        }
+        .metric-detail {
+            font-size: 0.82rem;
+            color: var(--c-purple-light);
+            font-weight: 500;
+        }
+
+        /* ─────────────────────────────────────────
+           SECTION GENERIC
+        ───────────────────────────────────────── */
+        section { position: relative; z-index: 1; }
+
+        .section-eyebrow {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--c-purple-light);
+            margin-bottom: 0.75rem;
+        }
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(1.8rem, 4vw, 3rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: var(--c-text);
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+        .section-sub {
+            color: var(--c-text-muted);
+            font-size: 1.05rem;
+            max-width: 560px;
+        }
+
+        /* ─────────────────────────────────────────
+           PLATFORM TILES
+        ───────────────────────────────────────── */
+        .platform-tiles {
+            padding: clamp(4rem, 8vw, 6rem) 0;
+        }
+        .tiles-header {
+            text-align: center;
+            margin-bottom: 3.5rem;
+        }
+        .tiles-header .section-sub { margin: 0 auto; }
+
+        .tiles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .tile-card {
+            position: relative;
+            background: var(--c-surface);
+            border: 1px solid var(--c-border);
+            border-radius: var(--radius-lg);
+            padding: 2.25rem;
+            backdrop-filter: blur(16px);
+            transition: transform 0.4s var(--ease-spring),
+                        box-shadow 0.4s var(--ease-out-quart),
+                        border-color 0.3s,
+                        background 0.3s;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .tile-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(236,72,153,0.06) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tile-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--c-border-glow);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(139,92,246,0.2);
+        }
+        .tile-card:hover::before { opacity: 1; }
+
+        .tile-icon {
+            width: 64px; height: 64px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--c-purple) 0%, var(--c-pink) 100%);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem;
+            color: white;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 25px rgba(124,58,237,0.35);
+            transition: transform 0.3s var(--ease-spring), box-shadow 0.3s;
+        }
+        .tile-card:hover .tile-icon {
+            transform: scale(1.1) rotate(-3deg);
+            box-shadow: 0 16px 35px rgba(124,58,237,0.5);
+        }
+        .tile-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--c-text);
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.02em;
+        }
+        .tile-card p {
+            color: var(--c-text-muted);
+            font-size: 0.93rem;
+            line-height: 1.65;
+            margin-bottom: 1.5rem;
+        }
+        .tile-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--c-purple-light);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: gap 0.25s var(--ease-spring), color 0.2s;
+        }
+        .tile-link:hover { gap: 0.7rem; color: var(--c-pink); }
+
+        /* ─────────────────────────────────────────
+           BENEFITS
+        ───────────────────────────────────────── */
+        .benefits {
+            padding: clamp(4rem, 8vw, 6rem) 0;
+            background: rgba(255,255,255,0.02);
+            border-top: 1px solid var(--c-border);
+            border-bottom: 1px solid var(--c-border);
+        }
+        .benefits-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.6fr;
+            gap: 5rem;
+            align-items: center;
+        }
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+        .benefit-card {
+            background: var(--c-surface);
+            border: 1px solid var(--c-border);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            backdrop-filter: blur(12px);
+            transition: transform 0.35s var(--ease-spring),
+                        border-color 0.3s,
+                        box-shadow 0.35s;
+        }
+        .benefit-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--c-border-glow);
+            box-shadow: 0 20px 45px rgba(0,0,0,0.35);
+        }
+        .benefit-icon {
+            width: 48px; height: 48px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, rgba(139,92,246,0.25), rgba(236,72,153,0.2));
+            border: 1px solid rgba(139,92,246,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+            color: var(--c-purple-light);
+            margin-bottom: 1rem;
+            transition: transform 0.3s var(--ease-spring);
+        }
+        .benefit-card:hover .benefit-icon { transform: scale(1.15) rotate(-5deg); }
+        .benefit-card h3 {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--c-text);
+            margin-bottom: 0.4rem;
+            letter-spacing: -0.015em;
+        }
+        .benefit-card p {
+            font-size: 0.85rem;
+            color: var(--c-text-muted);
+            line-height: 1.6;
+        }
+
+        /* ─────────────────────────────────────────
+           TESTIMONIALS
+        ───────────────────────────────────────── */
+        .testimonials {
+            padding: clamp(4rem, 8vw, 6rem) 0;
+        }
+        .testimonials-header { text-align: center; margin-bottom: 3rem; }
+        .testimonials-header .section-sub { margin: 0 auto; }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .testimonial-card {
+            background: var(--c-surface);
+            border: 1px solid var(--c-border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            backdrop-filter: blur(16px);
+            transition: transform 0.4s var(--ease-spring), border-color 0.3s, box-shadow 0.4s;
+        }
+        .testimonial-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--c-border-glow);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        }
+        .testimonial-quote {
+            font-size: 2rem;
+            color: var(--c-purple-mid);
+            line-height: 1;
+            margin-bottom: 0.75rem;
+            font-family: Georgia, serif;
+        }
+        .testimonial-content p {
+            color: var(--c-text-muted);
+            font-size: 0.93rem;
+            line-height: 1.7;
+            font-style: italic;
+            margin-bottom: 1.5rem;
+        }
+        .testimonial-stars { color: #fbbf24; font-size: 0.85rem; margin-bottom: 1rem; letter-spacing: 2px; }
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .author-avatar {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+        .author-info h4 {
+            font-weight: 600;
+            font-size: 0.92rem;
+            color: var(--c-text);
+        }
+        .author-info span {
+            font-size: 0.78rem;
+            color: var(--c-text-dim);
+        }
+
+        /* ─────────────────────────────────────────
+           CTA BANNER
+        ───────────────────────────────────────── */
+        .cta {
+            padding: clamp(4rem, 8vw, 6rem) 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .cta-inner {
+            background: linear-gradient(135deg, rgba(124,58,237,0.3) 0%, rgba(236,72,153,0.2) 100%);
+            border: 1px solid rgba(139,92,246,0.3);
+            border-radius: var(--radius-xl);
+            padding: clamp(3rem, 6vw, 5rem) clamp(2rem, 5vw, 4rem);
+            text-align: center;
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+        .cta-inner::before {
+            content: '';
+            position: absolute;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%);
+            top: 50%; left: 50%;
+            transform: translate(-50%,-50%);
+            pointer-events: none;
+        }
+        .cta-inner h2 {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: var(--c-text);
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        .cta-inner p {
+            color: var(--c-text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 2.5rem;
+            position: relative;
+        }
+        .cta-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            position: relative;
+        }
+        .btn-cta {
+            background: linear-gradient(135deg, var(--c-orange-warm), var(--c-orange));
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 999px;
+            font-family: var(--font-body);
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.3s var(--ease-spring), box-shadow 0.3s, filter 0.25s;
+        }
+        .btn-cta:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 16px 40px rgba(249,115,22,0.5);
+            filter: brightness(1.05);
+        }
+
+        /* ─────────────────────────────────────────
+           FOOTER
+        ───────────────────────────────────────── */
+        .footer {
+            position: relative;
+            z-index: 1;
+            background: var(--c-bg-2);
+            border-top: 1px solid var(--c-border);
+            padding: 4rem 0 2rem;
+        }
+        .footer-content {
+            display: grid;
+            grid-template-columns: 1.5fr repeat(3, 1fr);
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+        .footer-brand p {
+            color: var(--c-text-muted);
+            font-size: 0.88rem;
+            line-height: 1.7;
+            margin: 1rem 0 1.5rem;
+            max-width: 280px;
+        }
+        .social-links {
+            display: flex;
+            gap: 0.75rem;
+        }
+        .social-links a {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            background: var(--c-surface);
+            border: 1px solid var(--c-border);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--c-text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: background 0.25s, color 0.25s, border-color 0.25s, transform 0.25s var(--ease-spring);
+        }
+        .social-links a:hover {
+            background: rgba(139,92,246,0.2);
+            color: var(--c-purple-light);
+            border-color: var(--c-border-glow);
+            transform: translateY(-3px);
+        }
+        .footer-section h3 {
+            font-family: var(--font-display);
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--c-text);
+            margin-bottom: 1.25rem;
+        }
+        .footer-section ul { list-style: none; display: flex; flex-direction: column; gap: 0.65rem; }
+        .footer-section ul li a {
+            color: var(--c-text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+        .footer-section ul li a:hover { color: var(--c-purple-light); }
+        .footer-bottom {
+            border-top: 1px solid var(--c-border);
+            padding-top: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .footer-bottom p { color: var(--c-text-dim); font-size: 0.82rem; }
+
+        /* ─────────────────────────────────────────
+           MODAL
+        ───────────────────────────────────────── */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(6,4,15,0.75);
+            backdrop-filter: blur(12px);
+            display: flex; align-items: center; justify-content: center;
+            padding: 1.5rem;
+            z-index: 2000;
+            opacity: 0; visibility: hidden; pointer-events: none;
+            transition: opacity 0.35s, visibility 0s linear 0.35s;
+        }
+        .modal-overlay.is-visible {
+            opacity: 1; visibility: visible; pointer-events: auto;
+            transition: opacity 0.35s, visibility 0s linear 0s;
+        }
+        .modal-card {
+            width: 100%; max-width: 480px;
+            background: rgba(20,16,42,0.95);
+            border: 1px solid var(--c-border-glow);
+            border-radius: var(--radius-lg);
+            padding: 2.25rem;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.07);
+            position: relative;
+            transform: scale(0.94) translateY(16px);
+            opacity: 0;
+            transition: transform 0.4s var(--ease-out-expo), opacity 0.3s;
+            backdrop-filter: blur(20px);
+        }
+        .modal-overlay.is-visible .modal-card {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+        .modal-close {
+            position: absolute; top: 1.25rem; right: 1.25rem;
+            width: 36px; height: 36px;
+            border-radius: 50%; border: none;
+            background: var(--c-surface); color: var(--c-text-muted);
+            cursor: pointer; font-size: 1.1rem;
+            transition: background 0.2s, color 0.2s, transform 0.3s var(--ease-spring);
+        }
+        .modal-close:hover {
+            background: rgba(139,92,246,0.2); color: var(--c-purple-light);
+            transform: rotate(90deg);
+        }
+        .modal-header-simple h2 {
+            font-family: var(--font-display);
+            font-size: 1.5rem; font-weight: 800;
+            color: var(--c-text); margin-bottom: 0.35rem;
+        }
+        .modal-header-simple p { color: var(--c-text-muted); font-size: 0.93rem; margin-bottom: 1.5rem; }
+        .modal-form { display: flex; flex-direction: column; gap: 0.85rem; }
+        .modal-form input, .modal-form select {
+            background: var(--c-surface);
+            border: 1px solid var(--c-border);
+            border-radius: var(--radius-sm);
+            padding: 0.85rem 1rem;
+            color: var(--c-text);
+            font-family: var(--font-body);
+            font-size: 0.93rem;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+        .modal-form input::placeholder { color: var(--c-text-dim); }
+        .modal-form input:focus, .modal-form select:focus {
+            outline: none;
+            border-color: var(--c-purple-mid);
+            box-shadow: 0 0 0 3px rgba(139,92,246,0.2);
+        }
+        .modal-form select option { background: #1a1535; }
+        .modal-form button {
+            border: none; border-radius: var(--radius-sm);
+            padding: 0.95rem;
+            font-family: var(--font-body); font-weight: 700; font-size: 0.95rem;
+            cursor: pointer;
+            transition: filter 0.2s, transform 0.25s var(--ease-spring), box-shadow 0.25s;
+        }
+        .modal-form button.primary {
+            background: linear-gradient(135deg, var(--c-purple), var(--c-pink));
+            color: white;
+        }
+        .modal-form button.secondary {
+            background: linear-gradient(135deg, var(--c-orange-warm), var(--c-orange));
+            color: white;
+        }
+        .modal-form button:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(139,92,246,0.4); }
+        .modal-form small { font-size: 0.82rem; color: var(--c-text-dim); text-align: center; }
+        .form-error { color: #f87171; font-weight: 600; }
+        .link-highlight { color: var(--c-purple-light); font-weight: 600; text-decoration: none; }
+        .link-highlight:hover { text-decoration: underline; }
+        .is-hidden { display: none !important; }
+
+        /* ─────────────────────────────────────────
+           SEARCH FOCUS GLOW (shared with apuntes)
+        ───────────────────────────────────────── */
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+        }
+
+        /* ─────────────────────────────────────────
+           SCROLL REVEAL
+        ───────────────────────────────────────── */
+        .reveal {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.7s var(--ease-out-expo),
+                        transform 0.7s var(--ease-out-expo);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.2s; }
+        .reveal-delay-3 { transition-delay: 0.3s; }
+        .reveal-delay-4 { transition-delay: 0.4s; }
+
+        /* ─────────────────────────────────────────
+           RESPONSIVE
+        ───────────────────────────────────────── */
+        @media (max-width: 1024px) {
+            .hero-inner { grid-template-columns: 1fr; gap: 3rem; }
+            .hero-visual { display: none; }
+            .hero { min-height: auto; padding-bottom: 4rem; }
+            .benefits-layout { grid-template-columns: 1fr; gap: 3rem; }
+            .footer-content { grid-template-columns: 1fr 1fr; gap: 2rem; }
+        }
+
+        @media (max-width: 768px) {
+            :root { --nav-h: 60px; }
+            .nav-list { gap: 0.1rem; justify-content: center; flex-wrap: wrap; }
+            .metrics-grid { grid-template-columns: 1fr 1fr; }
+            .metric-card:nth-child(2) { border-right: none; }
+            .metric-card:nth-child(3),
+            .metric-card:nth-child(4) { border-top: 1px solid var(--c-border); }
+            .benefits-grid { grid-template-columns: 1fr; }
+            .footer-content { grid-template-columns: 1fr; gap: 2rem; }
+            .footer-bottom { flex-direction: column; text-align: center; }
+        }
+
+        @media (max-width: 480px) {
+            .hero-actions { flex-direction: column; }
+            .btn-primary, .btn-secondary { justify-content: center; }
+            .metrics-grid { grid-template-columns: 1fr; }
+            .metric-card { border-right: none; border-bottom: 1px solid var(--c-border); }
+            .metric-card:last-child { border-bottom: none; }
+            .header-buttons { display: none; }
+        }
+
+        /* Touch devices — hide canvas interaction hint */
+        @media (hover: none) {
+            .hero-visual { display: none; }
+        }
+    </style>
+    <link rel="stylesheet" href="components.css">
+</head>
+<body>
+
+    <!-- NETWORK CANVAS -->
+    <canvas id="network-canvas"></canvas>
+
+    <!-- ════════════════════════════════
+         HEADER
+    ════════════════════════════════ -->
+    <header class="header" id="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo">
+                    <img src="logo.png" alt="Nine Lives Edu" class="logo-img">
+                    <span class="logo-text">Nine Lives Edu</span>
+                </a>
+
+                <nav class="nav" aria-label="Navegación principal">
+                    <ul class="nav-list">
+                        <li><a href="index.html" class="nav-link active">Inicio</a></li>
+                        <li><a href="apuntes.html" class="nav-link">Apuntes</a></li>
+                        <li><a href="tutores.html" class="nav-link">Tutores</a></li>
+                        <li><a href="foros.html" class="nav-link">Foros</a></li>
+                        <li><a href="#contacto" class="nav-link">Contacto</a></li>
+                    </ul>
+                </nav>
+
+                <div class="header-buttons">
+                    <button class="btn-tutor">Unirse como tutor</button>
+                    <button class="btn-login">Registro / Iniciar Sesión</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ════════════════════════════════
+         HERO
+    ════════════════════════════════ -->
+    <section class="hero" id="inicio">
+        <div class="container">
+            <div class="hero-inner">
+
+                <!-- Text side -->
+                <div class="hero-text">
+                    <div class="hero-eyebrow">
+                        <span class="dot"></span>
+                        Plataforma educativa colaborativa
+                    </div>
+                    <h1 class="hero-title">
+                        Encuentra apuntes<br>y tutores<br>
+                        <span class="highlight">al instante.</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Centraliza tus apuntes, reserva sesiones 1:1 y participa en comunidades académicas — todo en un solo lugar, adaptado a tu nivel.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="btn-primary">
+                            <i class="fas fa-search"></i>
+                            Buscar apuntes
+                        </button>
+                        <button class="btn-secondary">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                            Ofrecer tutorías
+                        </button>
+                    </div>
+                    <div class="hero-badges">
+                        <span class="hero-badge"><i class="fas fa-shield-alt"></i> Pagos protegidos</span>
+                        <span class="hero-badge"><i class="fas fa-video"></i> Aulas HD</span>
+                        <span class="hero-badge"><i class="fas fa-mobile-alt"></i> 100% responsive</span>
+                    </div>
+                </div>
+
+                <!-- Visual side -->
+                <div class="hero-visual">
+                    <div class="stat-badge stat-badge-1">
+                        <div class="sb-icon purple"><i class="fas fa-file-alt"></i></div>
+                        <div>
+                            <span>4,500+</span>
+                            <small>Apuntes disponibles</small>
+                        </div>
+                    </div>
+
+                    <div class="hero-glass-card">
+                        <span class="hgc-tag">Tutores online</span>
+                        <p class="hgc-title">Reserva una sesión 1:1</p>
+                        <p class="hgc-sub">Tutores verificados disponibles ahora</p>
+                        <div class="hgc-stars">★★★★★</div>
+                        <div class="hgc-tutor">
+                            <div class="hgc-avatar" style="background:linear-gradient(135deg,#7c3aed,#ec4899)">M</div>
+                            <div class="hgc-tutor-info">
+                                <span>María González</span>
+                                <small>Matemáticas · Bachillerato</small>
+                            </div>
+                            <span class="hgc-pill online">● Online</span>
+                        </div>
+                        <div class="hgc-tutor">
+                            <div class="hgc-avatar" style="background:linear-gradient(135deg,#f97316,#ec4899)">C</div>
+                            <div class="hgc-tutor-info">
+                                <span>Carlos Ruiz</span>
+                                <small>Física · Universidad</small>
+                            </div>
+                            <span class="hgc-pill busy">● Ocupado</span>
+                        </div>
+                        <button class="hgc-btn">Ver todos los tutores</button>
+                    </div>
+
+                    <div class="stat-badge stat-badge-2">
+                        <div class="sb-icon orange"><i class="fas fa-users"></i></div>
+                        <div>
+                            <span>32k+</span>
+                            <small>Estudiantes activos</small>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════
+         METRICS STRIP
+    ════════════════════════════════ -->
+    <div class="metrics">
+        <div class="container metrics-grid">
+            <div class="metric-card reveal">
+                <span class="metric-label">Estudiantes activos</span>
+                <span class="metric-value">32k+</span>
+                <span class="metric-detail">Aprendiendo cada semana</span>
+            </div>
+            <div class="metric-card reveal reveal-delay-1">
+                <span class="metric-label">Apuntes premium</span>
+                <span class="metric-value">4.5k</span>
+                <span class="metric-detail">Curados por docentes</span>
+            </div>
+            <div class="metric-card reveal reveal-delay-2">
+                <span class="metric-label">Sesiones completadas</span>
+                <span class="metric-value">18k</span>
+                <span class="metric-detail">Con garantía Study Wawa</span>
+            </div>
+            <div class="metric-card reveal reveal-delay-3">
+                <span class="metric-label">Comunidades activas</span>
+                <span class="metric-value">86</span>
+                <span class="metric-detail">Foros moderados</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════
+         PLATFORM TILES
+    ════════════════════════════════ -->
+    <section class="platform-tiles">
+        <div class="container">
+            <div class="tiles-header reveal">
+                <p class="section-eyebrow">Todo en un solo lugar</p>
+                <h2 class="section-title">Tu ecosistema académico completo</h2>
+                <p class="section-sub">Apuntes, tutores y comunidad — diseñados para que aprender sea más rápido, más fácil y más conectado.</p>
+            </div>
+            <div class="tiles-grid">
+                <article class="tile-card reveal">
+                    <div class="tile-icon"><i class="fas fa-book-reader"></i></div>
+                    <h3>Biblioteca inteligente</h3>
+                    <p>Filtra apuntes por nivel, tipo de archivo y calificación. Encuentra exactamente lo que necesitas en segundos.</p>
+                    <a href="apuntes.html" class="tile-link">Explorar apuntes <i class="fas fa-arrow-right"></i></a>
+                </article>
+                <article class="tile-card reveal reveal-delay-1">
+                    <div class="tile-icon" style="background:linear-gradient(135deg,#f97316,#ec4899)"><i class="fas fa-user-graduate"></i></div>
+                    <h3>Tutores verificados</h3>
+                    <p>Perfiles con disponibilidad en tiempo real, especialidades y reseñas. Reserva en un solo clic.</p>
+                    <a href="tutores.html" class="tile-link">Conocer tutores <i class="fas fa-arrow-right"></i></a>
+                </article>
+                <article class="tile-card reveal reveal-delay-2">
+                    <div class="tile-icon" style="background:linear-gradient(135deg,#06b6d4,#7c3aed)"><i class="fas fa-comments"></i></div>
+                    <h3>Foros colaborativos</h3>
+                    <p>Debates por materia, preguntas y recursos. Aprende de la comunidad y comparte tu conocimiento.</p>
+                    <a href="foros.html" class="tile-link">Abrir comunidad <i class="fas fa-arrow-right"></i></a>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════
+         BENEFITS
+    ════════════════════════════════ -->
+    <section class="benefits">
+        <div class="container">
+            <div class="benefits-layout">
+                <div class="reveal">
+                    <p class="section-eyebrow">¿Por qué Nine Lives Edu?</p>
+                    <h2 class="section-title">Todo lo que necesitas para aprender mejor</h2>
+                    <p class="section-sub" style="margin-top:.75rem">Una plataforma construida pensando en estudiantes reales, con herramientas que hacen diferencia de verdad.</p>
+                </div>
+                <div class="benefits-grid">
+                    <div class="benefit-card reveal">
+                        <div class="benefit-icon"><i class="fas fa-folder-open"></i></div>
+                        <h3>Apuntes Organizados</h3>
+                        <p>Por nivel, materia y tipo. Siempre a mano.</p>
+                    </div>
+                    <div class="benefit-card reveal reveal-delay-1">
+                        <div class="benefit-icon"><i class="fas fa-user-check"></i></div>
+                        <h3>Tutores Verificados</h3>
+                        <p>Cada tutor pasa por un proceso de validación riguroso.</p>
+                    </div>
+                    <div class="benefit-card reveal reveal-delay-2">
+                        <div class="benefit-icon"><i class="fas fa-video"></i></div>
+                        <h3>Videollamadas HD</h3>
+                        <p>Sesiones fluidas directamente desde el navegador.</p>
+                    </div>
+                    <div class="benefit-card reveal reveal-delay-3">
+                        <div class="benefit-icon"><i class="fas fa-shield-alt"></i></div>
+                        <h3>Pagos Seguros</h3>
+                        <p>Transacciones protegidas. Reembolso garantizado.</p>
+                    </div>
+                    <div class="benefit-card reveal">
+                        <div class="benefit-icon"><i class="fas fa-mobile-alt"></i></div>
+                        <h3>App Responsive</h3>
+                        <p>Desde cualquier dispositivo, siempre perfecto.</p>
+                    </div>
+                    <div class="benefit-card reveal reveal-delay-1">
+                        <div class="benefit-icon"><i class="fas fa-comments"></i></div>
+                        <h3>Comunidad Activa</h3>
+                        <p>Foros moderados donde todos participan con respeto.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════
+         TESTIMONIALS
+    ════════════════════════════════ -->
+    <section class="testimonials">
+        <div class="container">
+            <div class="testimonials-header reveal">
+                <p class="section-eyebrow">Lo que dicen nuestros usuarios</p>
+                <h2 class="section-title">Historias reales de aprendizaje</h2>
+                <p class="section-sub">Más de 32.000 estudiantes ya confían en Study Wawa para sus estudios.</p>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card reveal">
+                    <div class="testimonial-quote">"</div>
+                    <div class="testimonial-content">
+                        <p>Encontré los mejores apuntes de cálculo justo antes de mi parcial. La organización por materias es increíble, en 5 minutos tenía todo lo que necesitaba.</p>
+                    </div>
+                    <div class="testimonial-stars">★★★★★</div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar" style="background:linear-gradient(135deg,#7c3aed,#ec4899)">S</div>
+                        <div class="author-info">
+                            <h4>Sofía Ramírez</h4>
+                            <span>Ingeniería — Universidad de Buenos Aires</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card reveal reveal-delay-1">
+                    <div class="testimonial-quote">"</div>
+                    <div class="testimonial-content">
+                        <p>Mi tutor de física me explicó en dos horas lo que no entendí en un semestre. El sistema de reservas es rapidísimo y el tutor muy profesional.</p>
+                    </div>
+                    <div class="testimonial-stars">★★★★★</div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar" style="background:linear-gradient(135deg,#f97316,#ec4899)">L</div>
+                        <div class="author-info">
+                            <h4>Lucas Torres</h4>
+                            <span>Bachillerato — Córdoba</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card reveal reveal-delay-2">
+                    <div class="testimonial-quote">"</div>
+                    <div class="testimonial-content">
+                        <p>Los foros me ayudaron a conectar con otros estudiantes de mi carrera. Ahora formamos grupo de estudio semanal gracias a la comunidad.</p>
+                    </div>
+                    <div class="testimonial-stars">★★★★★</div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar" style="background:linear-gradient(135deg,#06b6d4,#7c3aed)">A</div>
+                        <div class="author-info">
+                            <h4>Ana Medina</h4>
+                            <span>Medicina — Rosario</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════
+         CTA
+    ════════════════════════════════ -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-inner reveal">
+                <h2>¿Listo para aprender sin límites?</h2>
+                <p>Únete gratis. Accede a miles de apuntes y conecta con tutores verificados hoy mismo.</p>
+                <div class="cta-actions">
+                    <button class="btn-cta">Crear cuenta gratis</button>
+                    <button class="btn-secondary">Ver tutores disponibles</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════
+         FOOTER
+    ════════════════════════════════ -->
+    <footer class="footer" id="contacto">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <a href="index.html" class="logo">
+                        <img src="logo.png" alt="Study Wawa" class="logo-img">
+                        <span class="logo-text">Study Wawa</span>
+                    </a>
+                    <p>Plataforma educativa que conecta estudiantes con los mejores apuntes y tutores verificados de toda la región.</p>
+                    <div class="social-links">
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Plataforma</h3>
+                    <ul>
+                        <li><a href="apuntes.html">Biblioteca de Apuntes</a></li>
+                        <li><a href="tutores.html">Catálogo de Tutores</a></li>
+                        <li><a href="foros.html">Foros Comunitarios</a></li>
+                        <li><a href="#">Panel de Usuario</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Tutores</h3>
+                    <ul>
+                        <li><a href="#">Unirse como Tutor</a></li>
+                        <li><a href="#">Guía de Tutores</a></li>
+                        <li><a href="#">Política de Pagos</a></li>
+                        <li><a href="#">Código de Conducta</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Soporte</h3>
+                    <ul>
+                        <li><a href="#">Centro de Ayuda</a></li>
+                        <li><a href="#">Términos de Uso</a></li>
+                        <li><a href="#">Privacidad</a></li>
+                        <li><a href="#">Contacto</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 Nine Lives Edu — Todos los derechos reservados.</p>
+                <p style="color:var(--c-text-dim)">Hecho con <span style="color:#ec4899">♥</span> para estudiantes de toda la región</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ════════════════════════════════
+         SCRIPTS
+    ════════════════════════════════ -->
+    <script>
+    /* ─────────────────────────────────────────
+       CANVAS — NETWORK OF KNOWLEDGE
+       Optimised: requestAnimationFrame, particle
+       cap, mobile detection, resize debounce.
+    ───────────────────────────────────────── */
+    (function() {
+        const canvas = document.getElementById('network-canvas');
+        const ctx    = canvas.getContext('2d');
+
+        const isMobile = () => window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+        const isLowEnd = () => navigator.hardwareConcurrency !== undefined && navigator.hardwareConcurrency <= 2;
+
+        /* Config */
+        const CFG = {
+            particleCount: isMobile() ? 40 : (isLowEnd() ? 60 : 100),
+            maxDist: isMobile() ? 120 : 160,
+            mouseInfluenceRadius: 180,
+            mouseForce: isMobile() ? 0 : 0.5,
+            speed: 0.45,
+            particleRadius: 1.8,
+            lineWidth: 0.65,
+            /* Colors (palette) */
+            colors: [
+                'rgba(139,92,246,',   // purple
+                'rgba(236,72,153,',   // pink
+                'rgba(249,115,22,',   // orange
+                'rgba(167,139,250,',  // light purple
+            ]
+        };
+
+        let W, H, particles = [], mouse = { x: -9999, y: -9999 };
+        let raf, lastTime = 0;
+        const TARGET_FPS = 60;
+        const FRAME_MS   = 1000 / TARGET_FPS;
+
+        function resize() {
+            W = canvas.width  = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+        }
+
+        function createParticle() {
+            const colorBase = CFG.colors[Math.floor(Math.random() * CFG.colors.length)];
+            return {
+                x:  Math.random() * W,
+                y:  Math.random() * H,
+                vx: (Math.random() - 0.5) * CFG.speed,
+                vy: (Math.random() - 0.5) * CFG.speed,
+                r:  CFG.particleRadius + Math.random() * 1.2,
+                colorBase,
+                alpha: 0.25 + Math.random() * 0.45
+            };
+        }
+
+        function initParticles() {
+            particles = Array.from({ length: CFG.particleCount }, createParticle);
+        }
+
+        function drawFrame(now) {
+            const delta = now - lastTime;
+            if (delta < FRAME_MS - 1) { raf = requestAnimationFrame(drawFrame); return; }
+            lastTime = now - (delta % FRAME_MS);
+
+            ctx.clearRect(0, 0, W, H);
+
+            /* Move */
+            for (let i = 0; i < particles.length; i++) {
+                const p = particles[i];
+
+                /* Mouse repulsion */
+                if (CFG.mouseForce > 0) {
+                    const dx = p.x - mouse.x;
+                    const dy = p.y - mouse.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < CFG.mouseInfluenceRadius && dist > 0) {
+                        const force = (1 - dist / CFG.mouseInfluenceRadius) * CFG.mouseForce;
+                        p.vx += (dx / dist) * force * 0.08;
+                        p.vy += (dy / dist) * force * 0.08;
+                    }
+                }
+
+                /* Damping */
+                p.vx *= 0.995;
+                p.vy *= 0.995;
+                /* Clamp speed */
+                const spd = Math.sqrt(p.vx*p.vx + p.vy*p.vy);
+                if (spd > CFG.speed * 2) { p.vx *= CFG.speed * 2 / spd; p.vy *= CFG.speed * 2 / spd; }
+                if (spd < CFG.speed * 0.2) { p.vx += (Math.random()-0.5)*0.02; p.vy += (Math.random()-0.5)*0.02; }
+
+                p.x += p.vx;
+                p.y += p.vy;
+
+                /* Wrap */
+                if (p.x < -20) p.x = W + 20;
+                else if (p.x > W + 20) p.x = -20;
+                if (p.y < -20) p.y = H + 20;
+                else if (p.y > H + 20) p.y = -20;
+            }
+
+            /* Draw connections (only nearby pairs) */
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const a = particles[i], b = particles[j];
+                    const dx = a.x - b.x, dy = a.y - b.y;
+                    const distSq = dx*dx + dy*dy;
+                    if (distSq < CFG.maxDist * CFG.maxDist) {
+                        const alpha = (1 - Math.sqrt(distSq) / CFG.maxDist) * 0.25;
+                        ctx.beginPath();
+                        ctx.strokeStyle = a.colorBase + alpha + ')';
+                        ctx.lineWidth = CFG.lineWidth;
+                        ctx.moveTo(a.x, a.y);
+                        ctx.lineTo(b.x, b.y);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            /* Draw particles */
+            for (let i = 0; i < particles.length; i++) {
+                const p = particles[i];
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = p.colorBase + p.alpha + ')';
+                ctx.fill();
+            }
+
+            raf = requestAnimationFrame(drawFrame);
+        }
+
+        /* Debounced resize */
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                resize();
+                initParticles();
+            }, 150);
+        });
+
+        /* Mouse tracking (desktop only) */
+        if (!isMobile()) {
+            window.addEventListener('mousemove', e => {
+                mouse.x = e.clientX;
+                mouse.y = e.clientY;
+            }, { passive: true });
+            window.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
+        }
+
+        /* Page Visibility API — pause when hidden */
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                cancelAnimationFrame(raf);
+            } else {
+                lastTime = performance.now();
+                raf = requestAnimationFrame(drawFrame);
+            }
+        });
+
+        /* Init */
+        resize();
+        initParticles();
+        raf = requestAnimationFrame(drawFrame);
+    })();
+
+    /* ─────────────────────────────────────────
+       SCROLL BEHAVIORS
+    ───────────────────────────────────────── */
+    (function() {
+        const header = document.getElementById('header');
+        window.addEventListener('scroll', () => {
+            header.classList.toggle('scrolled', window.scrollY > 60);
+        }, { passive: true });
+
+        /* Smooth scroll */
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', e => {
+                const target = document.querySelector(a.getAttribute('href'));
+                if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+            });
+        });
+    })();
+
+    /* ─────────────────────────────────────────
+       SCROLL REVEAL
+    ───────────────────────────────────────── */
+    (function() {
+        const els = document.querySelectorAll('.reveal');
+        const io = new IntersectionObserver(entries => {
+            entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+        els.forEach(el => io.observe(el));
+    })();
+
+    /* ─────────────────────────────────────────
+       AUTH & SESSION
+    ───────────────────────────────────────── */
+    (function() {
+        const SESSION_KEY = 'sw_session';
+        const USERS_KEY   = 'sw_users';
+
+        function getUsers() { try { return JSON.parse(localStorage.getItem(USERS_KEY)) || []; } catch { return []; } }
+        function saveUsers(u) { localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
+        function getSession() { try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch { return null; } }
+        function setSession(s) { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
+        function logout() { localStorage.removeItem(SESSION_KEY); updateUI(); }
+
+        function updateUI() {
+            const s = getSession();
+            const loginBtn = document.querySelector('.btn-login');
+            const tutorBtn = document.querySelector('.btn-tutor');
+            if (s) {
+                if (loginBtn) loginBtn.textContent = 'Cerrar sesión';
+                if (tutorBtn) tutorBtn.textContent = `Hola, ${s.name.split(' ')[0]} 👋`;
+            } else {
+                if (loginBtn) loginBtn.textContent = 'Registro / Iniciar Sesión';
+                if (tutorBtn) tutorBtn.textContent = 'Unirse como tutor';
+            }
+        }
+
+        function showModal(type) {
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            overlay.innerHTML = buildModal(type);
+            document.body.appendChild(overlay);
+            requestAnimationFrame(() => overlay.classList.add('is-visible'));
+
+            const close = () => {
+                overlay.classList.remove('is-visible');
+                setTimeout(() => overlay.remove(), 400);
+            };
+            overlay.querySelector('.modal-close')?.addEventListener('click', close);
+            overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+            overlay.querySelectorAll('[data-open]').forEach(el => {
+                el.addEventListener('click', e => { e.preventDefault(); close(); setTimeout(() => showModal(el.dataset.open), 150); });
+            });
+
+            const lf = overlay.querySelector('#loginForm');
+            const rf = overlay.querySelector('#registerForm');
+
+            if (lf) {
+                lf.addEventListener('submit', e => {
+                    e.preventDefault();
+                    const email = lf.querySelector('#loginEmail').value.trim().toLowerCase();
+                    const pwd   = lf.querySelector('#loginPassword').value;
+                    const err   = lf.querySelector('#loginError');
+                    const user  = getUsers().find(u => u.email === email && u.password === pwd);
+                    if (!user) { err.textContent = 'Credenciales inválidas.'; err.classList.remove('is-hidden'); return; }
+                    setSession({ name: user.name, email: user.email });
+                    updateUI(); close();
+                });
+            }
+            if (rf) {
+                rf.addEventListener('submit', e => {
+                    e.preventDefault();
+                    const name  = rf.querySelector('#rName').value.trim();
+                    const email = rf.querySelector('#rEmail').value.trim().toLowerCase();
+                    const pwd   = rf.querySelector('#rPwd').value;
+                    const err   = rf.querySelector('#registerError');
+                    if (!name || !email || !pwd) { err.textContent = 'Completa todos los campos.'; err.classList.remove('is-hidden'); return; }
+                    const users = getUsers();
+                    if (users.some(u => u.email === email)) { err.textContent = 'Ese correo ya está registrado.'; err.classList.remove('is-hidden'); return; }
+                    users.push({ name, email, password: pwd });
+                    saveUsers(users);
+                    setSession({ name, email });
+                    updateUI(); close();
+                });
+            }
+        }
+
+        function buildModal(type) {
+            if (type === 'login') return `
+                <div class="modal-card">
+                    <button class="modal-close">&times;</button>
+                    <div class="modal-header-simple">
+                        <h2>Iniciar Sesión</h2>
+                        <p>Accede a tu panel y continúa donde te quedaste.</p>
+                    </div>
+                    <form class="modal-form" id="loginForm">
+                        <input type="email" id="loginEmail" placeholder="Correo electrónico" required>
+                        <input type="password" id="loginPassword" placeholder="Contraseña" required>
+                        <button type="submit" class="primary">Ingresar</button>
+                        <small>¿No tienes cuenta? <a href="#" class="link-highlight" data-open="register">Regístrate aquí</a></small>
+                        <small id="loginError" class="form-error is-hidden"></small>
+                    </form>
+                </div>`;
+            if (type === 'register') return `
+                <div class="modal-card">
+                    <button class="modal-close">&times;</button>
+                    <div class="modal-header-simple">
+                        <h2>Crear cuenta</h2>
+                        <p>Personaliza tu experiencia y guarda tus apuntes.</p>
+                    </div>
+                    <form class="modal-form" id="registerForm">
+                        <input type="text" id="rName" placeholder="Nombre completo" required>
+                        <input type="email" id="rEmail" placeholder="Correo electrónico" required>
+                        <input type="password" id="rPwd" placeholder="Contraseña" required>
+                        <button type="submit" class="primary">Registrarme</button>
+                        <small>¿Ya tienes cuenta? <a href="#" class="link-highlight" data-open="login">Inicia sesión</a></small>
+                        <small id="registerError" class="form-error is-hidden"></small>
+                    </form>
+                </div>`;
+            return `
+                <div class="modal-card">
+                    <button class="modal-close">&times;</button>
+                    <div class="modal-header-simple">
+                        <h2>Unirse como Tutor</h2>
+                        <p>Tu perfil será validado en menos de 24h.</p>
+                    </div>
+                    <form class="modal-form">
+                        <input type="text" placeholder="Nombre completo" required>
+                        <input type="email" placeholder="Correo profesional" required>
+                        <select required>
+                            <option value="">Especialidad principal</option>
+                            <option>Matemáticas</option><option>Física</option>
+                            <option>Química</option><option>Biología</option>
+                            <option>Historia</option><option>Literatura</option>
+                            <option>Inglés</option>
+                        </select>
+                        <button type="submit" class="secondary">Enviar solicitud</button>
+                        <small>Al continuar aceptas nuestro código de conducta para tutores.</small>
+                    </form>
+                </div>`;
+        }
+
+        updateUI();
+
+        document.querySelector('.btn-login')?.addEventListener('click', () => {
+            if (getSession()) logout(); else showModal('login');
+        });
+        document.querySelector('.btn-tutor')?.addEventListener('click', () => {
+            showModal(getSession() ? 'login' : 'tutor');
+        });
+        document.querySelector('.btn-primary')?.addEventListener('click', () => window.location.href = 'apuntes.html');
+        document.querySelector('.btn-secondary')?.addEventListener('click', () => window.location.href = 'tutores.html');
+        document.querySelector('.btn-cta')?.addEventListener('click', () => showModal('register'));
+        document.querySelector('.hgc-btn')?.addEventListener('click', () => window.location.href = 'tutores.html');
+    })();
+
+    /* Service Worker */
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+    }
+    </script>
+    <script src="components.js"></script>
+</body>
+</html>

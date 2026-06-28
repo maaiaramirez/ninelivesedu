@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutores — Study Wawa</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#7c3aed">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .tutores-main {
+            margin-top: var(--nav-h);
+            padding: 3rem 0;
+            min-height: calc(100vh - var(--nav-h));
+            position: relative; z-index: 1;
+        }
+        .page-header { text-align: center; margin-bottom: 3rem; }
+        .page-header p { color: var(--c-text-muted); font-size: 1.05rem; max-width: 500px; margin: 0 auto; }
+
+        /* ── SEARCH SECTION ── */
+        .search-section {
+            background: var(--c-surface); border: 1px solid var(--c-border);
+            border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 2rem;
+            backdrop-filter: blur(20px);
+        }
+        .search-bar { margin-bottom: 1.5rem; }
+        .search-input-container { position: relative; display: flex; align-items: center; }
+        .search-input-container i.fa-search {
+            position: absolute; left: 1.1rem; color: var(--c-text-dim);
+            pointer-events: none; transition: color var(--motion-base);
+        }
+        .search-input-container:focus-within i.fa-search { color: var(--c-purple-light); }
+        #searchInput {
+            width: 100%; background: var(--c-surface); border: 1.5px solid var(--c-border);
+            border-radius: 999px; padding: 0.92rem 6.5rem 0.92rem 3rem;
+            color: var(--c-text); font-family: var(--font-body); font-size: 0.97rem;
+            transition: border-color var(--motion-base), box-shadow var(--motion-base), background var(--motion-base);
+        }
+        #searchInput::placeholder { color: var(--c-text-dim); }
+        #searchInput:focus {
+            outline: none; border-color: var(--c-purple-mid); background: var(--c-surface-md);
+            box-shadow: 0 0 0 4px rgba(139,92,246,0.18), 0 8px 30px rgba(139,92,246,0.15);
+        }
+        .search-btn {
+            position: absolute; right: 0.5rem;
+            background: var(--grad-primary); color: white; border: none;
+            padding: 0.65rem 1.4rem; border-radius: 999px;
+            font-family: var(--font-body); font-weight: 600; font-size: 0.87rem;
+            cursor: pointer; transition: filter var(--motion-fast), transform var(--motion-base) var(--ease-spring);
+        }
+        .search-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .filters-row { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; }
+        .filter-group { display: flex; flex-direction: column; gap: 0.4rem; min-width: 145px; flex: 1; }
+        .filter-group label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--c-text-dim); }
+        .filter-select {
+            background: var(--c-surface); border: 1.5px solid var(--c-border); border-radius: var(--radius-sm);
+            padding: 0.7rem 2.5rem 0.7rem 0.9rem; color: var(--c-text); font-family: var(--font-body);
+            font-size: 0.88rem; cursor: pointer; appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239d98c4' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 0.85rem center;
+            transition: border-color var(--motion-base), box-shadow var(--motion-base);
+        }
+        .filter-select option { background: var(--c-bg-3); }
+        .filter-select:focus { outline: none; border-color: var(--c-purple-mid); box-shadow: 0 0 0 3px rgba(139,92,246,0.18); }
+
+        /* ── SWAP SECTION ── */
+        .swap-section { margin-bottom: 2rem; }
+        .swap-card {
+            display: grid; grid-template-columns: 1fr 1.4fr; gap: 3rem;
+            background: var(--c-surface); border: 1px solid var(--c-border-glow);
+            border-radius: var(--radius-lg); padding: 2.5rem;
+            backdrop-filter: blur(20px); position: relative; overflow: hidden;
+        }
+        .swap-card::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(139,92,246,0.07) 0%, rgba(249,115,22,0.05) 100%);
+            pointer-events: none;
+        }
+        .swap-info h2 {
+            font-family: var(--font-display); font-size: 1.5rem; font-weight: 800;
+            color: var(--c-text); margin-bottom: 0.75rem; letter-spacing: -0.02em;
+        }
+        .swap-info p { color: var(--c-text-muted); font-size: 0.93rem; line-height: 1.65; margin-bottom: 1.25rem; }
+        .swap-info ul { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+        .swap-info ul li { display: flex; align-items: center; gap: 0.6rem; font-size: 0.88rem; color: var(--c-text-muted); }
+        .swap-info ul li i { color: var(--c-purple-light); width: 16px; }
+        .swap-form { display: flex; flex-direction: column; gap: 1rem; position: relative; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+        .form-group label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--c-text-dim); }
+        .form-group input, .form-group select, .form-group textarea {
+            background: var(--c-surface-md); border: 1.5px solid var(--c-border);
+            border-radius: var(--radius-sm); padding: 0.78rem 1rem;
+            color: var(--c-text); font-family: var(--font-body); font-size: 0.9rem;
+            transition: border-color var(--motion-base), box-shadow var(--motion-base); resize: vertical;
+        }
+        .form-group input::placeholder, .form-group textarea::placeholder { color: var(--c-text-dim); }
+        .form-group select option { background: var(--c-bg-3); }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none; border-color: var(--c-purple-mid); box-shadow: 0 0 0 3px rgba(139,92,246,0.2);
+        }
+        .btn-swap {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: var(--grad-warm); color: white; border: none;
+            padding: 0.88rem 1.75rem; border-radius: var(--radius-sm);
+            font-family: var(--font-body); font-weight: 700; font-size: 0.93rem;
+            cursor: pointer; align-self: flex-start;
+            transition: filter var(--motion-fast), transform var(--motion-base) var(--ease-spring), box-shadow var(--motion-base);
+        }
+        .btn-swap:hover { filter: brightness(1.08); transform: translateY(-2px); box-shadow: 0 10px 26px rgba(249,115,22,0.4); }
+
+        /* ── LAYOUT ── */
+        .content-layout { display: grid; grid-template-columns: 230px 1fr; gap: 1.75rem; }
+        .filters-sidebar {
+            background: var(--c-surface); border: 1px solid var(--c-border);
+            border-radius: var(--radius-lg); padding: 1.5rem;
+            height: fit-content; position: sticky; top: calc(var(--nav-h) + 1.5rem);
+            backdrop-filter: blur(18px);
+        }
+        .filters-sidebar h3 { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--c-text); margin-bottom: 1.5rem; }
+        .filter-section { margin-bottom: 1.75rem; }
+        .filter-section h4 { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--c-text-dim); margin-bottom: 0.85rem; }
+        .availability-filter, .language-filter, .experience-filter { display: flex; flex-direction: column; gap: 0.5rem; }
+        .availability-filter label, .language-filter label, .experience-filter label {
+            display: flex; align-items: center; gap: 0.6rem; font-size: 0.87rem; color: var(--c-text-muted);
+            cursor: pointer; padding: 0.3rem 0.4rem; border-radius: var(--radius-xs);
+            transition: color var(--motion-fast), background var(--motion-fast);
+        }
+        .availability-filter label:hover, .language-filter label:hover, .experience-filter label:hover { color: var(--c-text); background: var(--c-surface-md); }
+        .availability-filter input, .language-filter input, .experience-filter input { accent-color: var(--c-purple-mid); }
+        .btn-limpiar-filtros {
+            width: 100%; background: transparent; color: var(--c-purple-light);
+            border: 1.5px solid var(--c-border-glow); padding: 0.7rem; border-radius: var(--radius-sm);
+            font-family: var(--font-body); font-weight: 600; font-size: 0.87rem; cursor: pointer;
+            transition: background var(--motion-base), color var(--motion-base), transform var(--motion-base) var(--ease-spring);
+        }
+        .btn-limpiar-filtros:hover { background: rgba(139,92,246,0.15); color: white; transform: translateY(-1px); }
+
+        /* ── TUTORES GRID ── */
+        .tutores-grid {
+            background: var(--c-surface); border: 1px solid var(--c-border);
+            border-radius: var(--radius-lg); padding: 1.75rem; backdrop-filter: blur(18px);
+        }
+        .results-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 1.75rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--c-border);
+        }
+        .results-header span { font-size: 0.88rem; font-weight: 600; color: var(--c-text-muted); }
+        .results-header strong { color: var(--c-text); }
+        .view-toggle { display: flex; gap: 0.4rem; }
+        .view-btn {
+            width: 36px; height: 36px; border: 1.5px solid var(--c-border);
+            background: var(--c-surface); border-radius: var(--radius-xs); cursor: pointer;
+            display: flex; align-items: center; justify-content: center; color: var(--c-text-dim);
+            font-size: 0.85rem; transition: background var(--motion-base), border-color var(--motion-base), color var(--motion-base);
+        }
+        .view-btn.active, .view-btn:hover { border-color: var(--c-border-glow); color: var(--c-purple-light); background: rgba(139,92,246,0.1); }
+
+        #tutoresContainer {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.25rem; margin-bottom: 1.75rem;
+        }
+        #tutoresContainer.list-view { grid-template-columns: 1fr; }
+
+        /* ── TUTOR CARD ── */
+        .tutor-card {
+            background: var(--c-surface-md); border: 1px solid var(--c-border);
+            border-radius: var(--radius-md); padding: 1.5rem; cursor: pointer;
+            transition: transform var(--motion-slow) var(--ease-spring), border-color var(--motion-base),
+                        box-shadow var(--motion-slow), background var(--motion-base);
+            position: relative; overflow: hidden;
+        }
+        .tutor-card::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(139,92,246,0.06) 0%, rgba(236,72,153,0.04) 100%);
+            opacity: 0; transition: opacity var(--motion-base);
+        }
+        .tutor-card:hover { transform: translateY(-7px); border-color: var(--c-border-glow); box-shadow: 0 24px 50px rgba(0,0,0,0.4), 0 0 0 1px rgba(139,92,246,0.12); }
+        .tutor-card:hover::before { opacity: 1; }
+
+        .tutor-card.list-view { display: flex; align-items: center; gap: 1.25rem; }
+        .tutor-card.list-view .tutor-top { flex-shrink: 0; margin-bottom: 0; }
+        .tutor-card.list-view .tutor-body { flex: 1; min-width: 0; }
+        .tutor-card.list-view .tutor-actions { flex-shrink: 0; flex-direction: column; }
+
+        .tutor-top { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
+        .tutor-avatar {
+            width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-display); font-size: 1.35rem; font-weight: 800; color: white;
+            transition: transform var(--motion-base) var(--ease-spring);
+        }
+        .tutor-card:hover .tutor-avatar { transform: scale(1.08); }
+        .tutor-head { flex: 1; min-width: 0; }
+        .tutor-name { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--c-text); margin-bottom: 0.2rem; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .tutor-title { font-size: 0.8rem; color: var(--c-text-dim); }
+        .online-badge {
+            display: flex; align-items: center; gap: 0.3rem;
+            font-size: 0.72rem; font-weight: 600; padding: 0.22rem 0.6rem;
+            border-radius: 999px; flex-shrink: 0;
+        }
+        .online-badge.online { background: rgba(34,197,94,0.15); color: #4ade80; }
+        .online-badge.busy { background: rgba(249,115,22,0.15); color: #fdba74; }
+        .online-badge.offline { background: rgba(107,102,144,0.15); color: var(--c-text-dim); }
+        .online-badge::before { content: '●'; font-size: 0.55rem; }
+
+        .tutor-rating { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.85rem; }
+        .stars { color: #fbbf24; font-size: 0.82rem; }
+        .rating-num { font-size: 0.85rem; font-weight: 600; color: var(--c-text); }
+        .rating-count { font-size: 0.78rem; color: var(--c-text-dim); }
+
+        .tutor-subjects { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.85rem; }
+        .tutor-bio { font-size: 0.85rem; color: var(--c-text-muted); line-height: 1.55; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        .tutor-footer { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; }
+        .tutor-price { font-family: var(--font-display); font-size: 1.1rem; font-weight: 800; color: var(--c-text); }
+        .tutor-price small { font-family: var(--font-body); font-size: 0.72rem; font-weight: 400; color: var(--c-text-dim); display: block; line-height: 1; }
+        .tutor-actions { display: flex; gap: 0.5rem; }
+        .btn-reservar {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            background: var(--grad-primary); color: white; border: none;
+            padding: 0.48rem 1rem; border-radius: 999px;
+            font-family: var(--font-body); font-size: 0.8rem; font-weight: 600; cursor: pointer;
+            transition: filter var(--motion-fast), transform var(--motion-base) var(--ease-spring), box-shadow var(--motion-base);
+        }
+        .btn-reservar:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(139,92,246,0.4); }
+        .btn-ver-perfil {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 34px; height: 34px; border-radius: 50%;
+            background: var(--c-surface); border: 1.5px solid var(--c-border);
+            color: var(--c-text-muted); font-size: 0.82rem; cursor: pointer;
+            transition: background var(--motion-base), border-color var(--motion-base), color var(--motion-base), transform var(--motion-base) var(--ease-spring);
+        }
+        .btn-ver-perfil:hover { background: var(--c-surface-lg); border-color: var(--c-border-glow); color: var(--c-purple-light); transform: scale(1.1); }
+
+        /* ── TUTOR PROFILE MODAL ── */
+        .tutor-modal { max-width: 620px; max-height: 90vh; overflow-y: auto; padding: 0; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 2rem; border-bottom: 1px solid var(--c-border); }
+        .modal-header h2 { font-family: var(--font-display); font-size: 1.35rem; font-weight: 800; color: var(--c-text); }
+        .close-modal { background: none; border: none; color: var(--c-text-muted); font-size: 1.4rem; cursor: pointer; transition: color var(--motion-fast), transform var(--motion-base) var(--ease-spring); }
+        .close-modal:hover { color: var(--c-purple-light); transform: rotate(90deg); }
+        .modal-body-inner { padding: 1.75rem 2rem; }
+        .tutor-profile-hero { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; }
+        .tutor-profile-avatar { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 2rem; font-weight: 800; color: white; flex-shrink: 0; }
+        .tutor-profile-info h3 { font-family: var(--font-display); font-size: 1.3rem; font-weight: 800; color: var(--c-text); margin-bottom: 0.3rem; }
+        .tutor-profile-info .rating-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem; }
+        .tutor-profile-info .price-tag { font-size: 1.15rem; font-weight: 700; color: var(--c-purple-light); font-family: var(--font-display); }
+        .detail-section { margin-bottom: 1.5rem; }
+        .detail-section h4 { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--c-text-dim); margin-bottom: 0.75rem; }
+        .detail-section p { font-size: 0.92rem; color: var(--c-text-muted); line-height: 1.65; }
+        .subjects-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .availability-calendar { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .avail-slot { padding: 0.3rem 0.75rem; background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.25); border-radius: 999px; font-size: 0.78rem; color: #4ade80; font-weight: 600; }
+        .reviews-list { display: flex; flex-direction: column; gap: 0.85rem; }
+        .review-item { padding: 0.85rem 1rem; background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-sm); }
+        .review-item .rev-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem; }
+        .review-item .rev-author { font-size: 0.85rem; font-weight: 600; color: var(--c-text); }
+        .review-item .rev-stars { color: #fbbf24; font-size: 0.78rem; }
+        .review-item p { font-size: 0.83rem; color: var(--c-text-muted); line-height: 1.55; font-style: italic; }
+        .modal-actions { display: flex; gap: 1rem; padding-top: 0.5rem; }
+        .btn-contactar {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            background: var(--c-surface); color: var(--c-text-muted); border: 1.5px solid var(--c-border);
+            padding: 0.78rem 1.4rem; border-radius: var(--radius-sm);
+            font-family: var(--font-body); font-weight: 600; font-size: 0.9rem; cursor: pointer;
+            transition: border-color var(--motion-base), color var(--motion-base), background var(--motion-base);
+        }
+        .btn-contactar:hover { border-color: var(--c-border-glow); color: var(--c-purple-light); background: var(--c-surface-md); }
+        .btn-reservar-modal {
+            flex: 1; background: var(--grad-primary); color: white; border: none;
+            padding: 0.78rem; border-radius: var(--radius-sm);
+            font-family: var(--font-body); font-weight: 700; font-size: 0.95rem; cursor: pointer;
+            transition: filter var(--motion-fast), transform var(--motion-base) var(--ease-spring);
+        }
+        .btn-reservar-modal:hover { filter: brightness(1.1); transform: translateY(-2px); }
+
+        /* ── RESERVATION MODAL ── */
+        .reservation-modal { max-width: 480px; padding: 0; }
+        .reservation-tutor { font-size: 0.9rem; color: var(--c-purple-light); font-weight: 600; margin-bottom: 1.25rem; }
+        .form-actions { display: flex; gap: 0.85rem; justify-content: flex-end; padding-top: 0.5rem; }
+        .btn-cancel { background: transparent; color: var(--c-text-muted); border: 1.5px solid var(--c-border); padding: 0.72rem 1.4rem; border-radius: var(--radius-sm); font-family: var(--font-body); font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: border-color var(--motion-base), color var(--motion-base); }
+        .btn-cancel:hover { border-color: var(--c-text-dim); color: var(--c-text); }
+        .btn-submit { background: var(--grad-primary); color: white; border: none; padding: 0.72rem 1.6rem; border-radius: var(--radius-sm); font-family: var(--font-body); font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: filter var(--motion-fast), transform var(--motion-base) var(--ease-spring); }
+        .btn-submit:hover { filter: brightness(1.1); transform: translateY(-2px); }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 1000px) { .content-layout { grid-template-columns: 1fr; } .filters-sidebar { position: static; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; align-items: start; } .filters-sidebar h3 { grid-column: 1/-1; margin-bottom: 0; } .btn-limpiar-filtros { grid-column: 1/-1; } .swap-card { grid-template-columns: 1fr; gap: 1.5rem; } }
+        @media (max-width: 600px) { .filters-row { flex-direction: column; } .filter-group { min-width: auto; width: 100%; } #tutoresContainer { grid-template-columns: 1fr; } .form-row { grid-template-columns: 1fr; } }
+    </style>
+    <link rel="stylesheet" href="components.css">
+</head>
+<body>
+    <canvas id="network-canvas"></canvas>
+
+    <header class="header" id="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo">
+                    <img src="logo.png" alt="Study Wawa" class="logo-img">
+                    <span class="logo-text">Study Wawa</span>
+                </a>
+                <nav class="nav">
+                    <ul class="nav-list">
+                        <li><a href="index.html" class="nav-link">Inicio</a></li>
+                        <li><a href="apuntes.html" class="nav-link">Apuntes</a></li>
+                        <li><a href="tutores.html" class="nav-link active">Tutores</a></li>
+                        <li><a href="foros.html" class="nav-link">Foros</a></li>
+                        <li><a href="index.html#contacto" class="nav-link">Contacto</a></li>
+                    </ul>
+                </nav>
+                <div class="header-buttons">
+                    <button class="btn-tutor">Unirse como tutor</button>
+                    <button class="btn-login">Registro / Iniciar Sesión</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="tutores-main">
+        <div class="container">
+            <div class="page-header reveal">
+                <p class="section-eyebrow">Tutores verificados</p>
+                <h1 class="section-title">Encuentra tu Tutor Ideal</h1>
+                <p>Conecta con tutores verificados y experimentados en tu materia</p>
+            </div>
+
+            <div class="search-section reveal reveal-delay-1">
+                <div class="search-bar">
+                    <div class="search-input-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Buscar tutores por nombre, materia o especialidad...">
+                        <button class="search-btn">Buscar</button>
+                    </div>
+                </div>
+                <div class="filters-row">
+                    <div class="filter-group">
+                        <label for="nivelFilter">Nivel</label>
+                        <select id="nivelFilter" class="filter-select">
+                            <option value="">Todos los niveles</option>
+                            <option value="primaria">Primaria</option>
+                            <option value="secundaria">Secundaria</option>
+                            <option value="bachillerato">Bachillerato</option>
+                            <option value="universidad">Universidad</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="materiaFilter">Materia</label>
+                        <select id="materiaFilter" class="filter-select">
+                            <option value="">Todas las materias</option>
+                            <option value="matematicas">Matemáticas</option>
+                            <option value="fisica">Física</option>
+                            <option value="quimica">Química</option>
+                            <option value="biologia">Biología</option>
+                            <option value="historia">Historia</option>
+                            <option value="literatura">Literatura</option>
+                            <option value="ingles">Inglés</option>
+                            <option value="filosofia">Filosofía</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="precioFilter">Precio / hora</label>
+                        <select id="precioFilter" class="filter-select">
+                            <option value="">Cualquier precio</option>
+                            <option value="0-15">$0 – $15</option>
+                            <option value="15-25">$15 – $25</option>
+                            <option value="25-40">$25 – $40</option>
+                            <option value="40+">$40+</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="ratingFilter">Valoración mín.</label>
+                        <select id="ratingFilter" class="filter-select">
+                            <option value="">Cualquier valoración</option>
+                            <option value="4.5">4.5+ ⭐</option>
+                            <option value="4.0">4.0+ ⭐</option>
+                            <option value="3.5">3.5+ ⭐</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Swap section -->
+            <section class="swap-section reveal">
+                <div class="swap-card">
+                    <div class="swap-info">
+                        <h2>Intercambia Tutorías</h2>
+                        <p>Ofrece tus conocimientos en una materia y recibe ayuda en otra. Crea un intercambio justo y verificado dentro de Study Wawa.</p>
+                        <ul>
+                            <li><i class="fas fa-exchange-alt"></i> Trueques aprobados por el equipo</li>
+                            <li><i class="fas fa-user-shield"></i> Identidad verificada</li>
+                            <li><i class="fas fa-comments"></i> Chat seguro dentro de la plataforma</li>
+                        </ul>
+                    </div>
+                    <form id="swapForm" class="swap-form">
+                        <div class="form-group">
+                            <label for="swapNombre">Tu nombre completo</label>
+                            <input type="text" id="swapNombre" placeholder="Ej: Carla Rodríguez" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="swapOfreces">Materia que ofreces</label>
+                                <select id="swapOfreces" required>
+                                    <option value="">Selecciona una materia</option>
+                                    <option value="matematicas">Matemáticas</option>
+                                    <option value="fisica">Física</option>
+                                    <option value="quimica">Química</option>
+                                    <option value="biologia">Biología</option>
+                                    <option value="historia">Historia</option>
+                                    <option value="literatura">Literatura</option>
+                                    <option value="ingles">Inglés</option>
+                                    <option value="filosofia">Filosofía</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="swapSolicitas">Materia que necesitas</label>
+                                <select id="swapSolicitas" required>
+                                    <option value="">Selecciona una materia</option>
+                                    <option value="matematicas">Matemáticas</option>
+                                    <option value="fisica">Física</option>
+                                    <option value="quimica">Química</option>
+                                    <option value="biologia">Biología</option>
+                                    <option value="historia">Historia</option>
+                                    <option value="literatura">Literatura</option>
+                                    <option value="ingles">Inglés</option>
+                                    <option value="filosofia">Filosofía</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="swapDescripcion">Cuéntanos más <span style="font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></label>
+                            <textarea id="swapDescripcion" rows="2" placeholder="Disponibilidad, objetivos, nivel educativo..."></textarea>
+                        </div>
+                        <button type="submit" class="btn-swap"><i class="fas fa-handshake"></i> Publicar intercambio</button>
+                    </form>
+                </div>
+            </section>
+
+            <div class="content-layout">
+                <aside class="filters-sidebar reveal">
+                    <h3>Filtros</h3>
+                    <div class="filter-section">
+                        <h4>Disponibilidad</h4>
+                        <div class="availability-filter">
+                            <label><input type="checkbox" value="mañana"> Mañana (8:00–12:00)</label>
+                            <label><input type="checkbox" value="tarde"> Tarde (12:00–18:00)</label>
+                            <label><input type="checkbox" value="noche"> Noche (18:00–22:00)</label>
+                            <label><input type="checkbox" value="fines"> Fines de semana</label>
+                        </div>
+                    </div>
+                    <div class="filter-section">
+                        <h4>Idioma</h4>
+                        <div class="language-filter">
+                            <label><input type="checkbox" value="español"> Español</label>
+                            <label><input type="checkbox" value="ingles"> Inglés</label>
+                            <label><input type="checkbox" value="frances"> Francés</label>
+                        </div>
+                    </div>
+                    <div class="filter-section">
+                        <h4>Experiencia</h4>
+                        <div class="experience-filter">
+                            <label><input type="radio" name="experience" value="5+"> 5+ años</label>
+                            <label><input type="radio" name="experience" value="3-5"> 3–5 años</label>
+                            <label><input type="radio" name="experience" value="1-3"> 1–3 años</label>
+                        </div>
+                    </div>
+                    <button class="btn-limpiar-filtros">Limpiar Filtros</button>
+                </aside>
+
+                <section class="tutores-grid reveal reveal-delay-1">
+                    <div class="results-header">
+                        <span id="resultsCount">Mostrando <strong>8</strong> tutores</span>
+                        <div class="view-toggle">
+                            <button class="view-btn active" data-view="grid"><i class="fas fa-th"></i></button>
+                            <button class="view-btn" data-view="list"><i class="fas fa-list"></i></button>
+                        </div>
+                    </div>
+                    <div id="tutoresContainer"></div>
+                    <div class="pagination">
+                        <button class="page-btn" disabled><i class="fas fa-chevron-left"></i></button>
+                        <span class="page-numbers">
+                            <button class="page-number active">1</button>
+                            <button class="page-number">2</button>
+                            <button class="page-number">3</button>
+                        </span>
+                        <button class="page-btn"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- TUTOR PROFILE MODAL -->
+    <div class="modal-overlay" id="tutorModal">
+        <div class="modal-card tutor-modal">
+            <div class="modal-header">
+                <h2>Perfil del Tutor</h2>
+                <button class="close-modal" id="closeTutorModal">&times;</button>
+            </div>
+            <div class="modal-body-inner" id="tutorModalBody"></div>
+        </div>
+    </div>
+
+    <!-- RESERVATION MODAL -->
+    <div class="modal-overlay" id="reservationModal">
+        <div class="modal-card reservation-modal">
+            <div class="modal-header">
+                <h2>Solicitar clase</h2>
+                <button class="close-modal" id="closeReservationModal">&times;</button>
+            </div>
+            <div class="modal-body-inner">
+                <p class="reservation-tutor" id="reservationTutorName"></p>
+                <form id="reservationForm">
+                    <div class="form-group" style="margin-bottom:1rem">
+                        <label for="reservaNombre">Tu nombre completo</label>
+                        <input type="text" id="reservaNombre" placeholder="Ej: Laura Fernández" required>
+                    </div>
+                    <div class="form-row" style="margin-bottom:1rem">
+                        <div class="form-group">
+                            <label for="reservaFecha">Fecha preferida</label>
+                            <input type="date" id="reservaFecha" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="reservaHora">Horario</label>
+                            <input type="time" id="reservaHora" required>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom:1.25rem">
+                        <label for="reservaModalidad">Modalidad</label>
+                        <select id="reservaModalidad">
+                            <option value="online">Online</option>
+                            <option value="presencial">Presencial</option>
+                            <option value="hibrida">Híbrida</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" id="cancelReservation">Cancelar</button>
+                        <button type="submit" class="btn-submit">Confirmar reserva</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+    /* CANVAS */
+    (function(){
+        const cv=document.getElementById('network-canvas'),ctx=cv.getContext('2d');
+        const mob=window.matchMedia('(hover:none) and (pointer:coarse)').matches;
+        let W,H,pts=[],mouse={x:-9999,y:-9999},raf,last=0;
+        const C=['rgba(139,92,246,','rgba(236,72,153,','rgba(249,115,22,','rgba(167,139,250,'];
+        const N=mob?35:85,MD=mob?110:150;
+        function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
+        function init(){pts=Array.from({length:N},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4,r:1.5+Math.random(),a:.2+Math.random()*.4,c:C[Math.floor(Math.random()*C.length)]}));}
+        function tick(now){const d=now-last;if(d<14){raf=requestAnimationFrame(tick);return;}last=now-(d%14);ctx.clearRect(0,0,W,H);
+        pts.forEach(p=>{if(!mob){const dx=p.x-mouse.x,dy=p.y-mouse.y,dist=Math.hypot(dx,dy);if(dist<160&&dist>0){const f=(1-dist/160)*.4;p.vx+=(dx/dist)*f*.07;p.vy+=(dy/dist)*f*.07;}}p.vx*=.996;p.vy*=.996;p.x+=p.vx;p.y+=p.vy;if(p.x<-10)p.x=W+10;else if(p.x>W+10)p.x=-10;if(p.y<-10)p.y=H+10;else if(p.y>H+10)p.y=-10;});
+        for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const a=pts[i],b=pts[j],dx=a.x-b.x,dy=a.y-b.y,sq=dx*dx+dy*dy;if(sq<MD*MD){ctx.beginPath();ctx.strokeStyle=a.c+(1-Math.sqrt(sq)/MD)*.2+')';ctx.lineWidth=.6;ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}
+        pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.c+p.a+')';ctx.fill();});raf=requestAnimationFrame(tick);}
+        let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{resize();init();},150);});
+        if(!mob)window.addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;},{passive:true});
+        document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAnimationFrame(raf);else{last=performance.now();raf=requestAnimationFrame(tick);}});
+        resize();init();raf=requestAnimationFrame(tick);
+    })();
+
+    window.addEventListener('scroll',()=>document.getElementById('header').classList.toggle('scrolled',scrollY>60),{passive:true});
+    document.querySelectorAll('.reveal').forEach(el=>new IntersectionObserver((en,obs)=>{en.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:0.1,rootMargin:'0px 0px -30px 0px'}).observe(el));
+
+    /* DATA */
+    const TUTORES = [
+        {id:1,nombre:'María González',titulo:'Doctora en Matemáticas',materias:['matematicas'],nivel:['bachillerato','universidad'],rating:4.9,reviews:124,precio:28,bio:'Especialista en cálculo, álgebra lineal y estadística con 8 años de experiencia universitaria.',disponibilidad:['Mañana','Tarde','Fines de semana'],idiomas:['Español','Inglés'],experiencia:'8 años',online:true,color:'linear-gradient(135deg,#7c3aed,#ec4899)',inicial:'M'},
+        {id:2,nombre:'Carlos Ruiz',titulo:'Físico — Investigador CONICET',materias:['fisica','matematicas'],nivel:['bachillerato','universidad'],rating:4.8,reviews:89,precio:32,bio:'Investigador activo con experiencia en mecánica clásica, termodinámica y física cuántica básica.',disponibilidad:['Tarde','Noche'],idiomas:['Español'],experiencia:'6 años',online:false,color:'linear-gradient(135deg,#f97316,#ec4899)',inicial:'C'},
+        {id:3,nombre:'Ana Medina',titulo:'Licenciada en Química',materias:['quimica','biologia'],nivel:['secundaria','bachillerato'],rating:4.7,reviews:67,precio:18,bio:'Apasionada por hacer la química accesible y divertida. Especialidad en química orgánica e inorgánica.',disponibilidad:['Mañana','Fines de semana'],idiomas:['Español','Francés'],experiencia:'4 años',online:true,color:'linear-gradient(135deg,#06b6d4,#7c3aed)',inicial:'A'},
+        {id:4,nombre:'Lucas Torres',titulo:'Biólogo Molecular',materias:['biologia'],nivel:['bachillerato','universidad'],rating:4.9,reviews:103,precio:24,bio:'Experto en genética, biología celular y molecular. Clases con metodología visual y ejemplos del mundo real.',disponibilidad:['Tarde','Noche','Fines de semana'],idiomas:['Español'],experiencia:'5 años',online:true,color:'linear-gradient(135deg,#10b981,#06b6d4)',inicial:'L'},
+        {id:5,nombre:'Marta López',titulo:'Profesora de Historia',materias:['historia'],nivel:['secundaria','bachillerato'],rating:4.6,reviews:55,precio:15,bio:'Historiadora con especialización en historia contemporánea y América Latina. Clases dinámicas y contextualizadas.',disponibilidad:['Mañana','Tarde'],idiomas:['Español'],experiencia:'10 años',online:true,color:'linear-gradient(135deg,#ec4899,#f97316)',inicial:'M'},
+        {id:6,nombre:'Roberto Díaz',titulo:'Licenciado en Letras',materias:['literatura'],nivel:['secundaria','bachillerato','universidad'],rating:4.5,reviews:41,precio:16,bio:'Especialista en literatura hispanohablante, análisis textual y escritura creativa. Fomento del pensamiento crítico.',disponibilidad:['Noche','Fines de semana'],idiomas:['Español'],experiencia:'7 años',online:false,color:'linear-gradient(135deg,#8b5cf6,#ec4899)',inicial:'R'},
+        {id:7,nombre:'Emma Watson',titulo:'Teacher — TEFL Certified',materias:['ingles'],nivel:['primaria','secundaria','bachillerato'],rating:4.8,reviews:78,precio:22,bio:'Native English speaker with TEFL certification. Focus on conversational skills, grammar and exam preparation.',disponibilidad:['Mañana','Tarde','Fines de semana'],idiomas:['Inglés','Español'],experiencia:'5 años',online:true,color:'linear-gradient(135deg,#06b6d4,#10b981)',inicial:'E'},
+        {id:8,nombre:'Javier Muñoz',titulo:'Doctor en Filosofía — UBA',materias:['filosofia'],nivel:['bachillerato','universidad'],rating:4.7,reviews:62,precio:20,bio:'Especialista en filosofía antigua, ética y epistemología. Clases estructuradas con debate socrático.',disponibilidad:['Tarde','Noche'],idiomas:['Español','Francés'],experiencia:'9 años',online:true,color:'linear-gradient(135deg,#7c3aed,#06b6d4)',inicial:'J'},
+    ];
+    const MATERIA_LABELS={matematicas:'Matemáticas',fisica:'Física',quimica:'Química',biologia:'Biología',historia:'Historia',literatura:'Literatura',ingles:'Inglés',filosofia:'Filosofía'};
+    const CHIP_CLASS={matematicas:'chip-purple',fisica:'chip-teal',quimica:'chip-orange',biologia:'chip-success',historia:'chip-pink',literatura:'chip-pink',ingles:'chip-teal',filosofia:'chip-purple'};
+
+    let filtered=[...TUTORES];
+    let activeReserveTutor=null;
+
+    function renderCard(t){
+        const statusClass=t.online?'online':'offline';
+        const statusText=t.online?'Online':'Offline';
+        return `<div class="tutor-card" data-id="${t.id}">
+            <div class="tutor-top">
+                <div class="tutor-avatar" style="background:${t.color}">${t.inicial}</div>
+                <div class="tutor-head">
+                    <p class="tutor-name">${t.nombre}</p>
+                    <p class="tutor-title">${t.titulo}</p>
+                </div>
+                <span class="online-badge ${statusClass}">${statusText}</span>
+            </div>
+            <div class="tutor-rating">
+                <span class="stars">★★★★★</span>
+                <span class="rating-num">${t.rating}</span>
+                <span class="rating-count">(${t.reviews} reseñas)</span>
+            </div>
+            <div class="tutor-subjects">${t.materias.map(m=>`<span class="chip ${CHIP_CLASS[m]||'chip-purple'}">${MATERIA_LABELS[m]}</span>`).join('')}</div>
+            <p class="tutor-bio">${t.bio}</p>
+            <div class="tutor-footer">
+                <div class="tutor-price">$${t.precio}<small>por hora</small></div>
+                <div class="tutor-actions">
+                    <button class="btn-reservar" data-id="${t.id}"><i class="fas fa-calendar-plus"></i> Reservar</button>
+                    <button class="btn-ver-perfil" data-id="${t.id}" title="Ver perfil"><i class="fas fa-eye"></i></button>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    function render(){
+        const container=document.getElementById('tutoresContainer');
+        const isListView=container.classList.contains('list-view');
+        document.getElementById('resultsCount').innerHTML=`Mostrando <strong>${filtered.length}</strong> tutores`;
+        if(!filtered.length){container.innerHTML=`<div class="status-message"><i class="fas fa-user-slash"></i><h3>Sin tutores</h3><p>Intenta con otros filtros.</p></div>`;return;}
+        container.innerHTML=filtered.map(renderCard).join('');
+        if(isListView)container.querySelectorAll('.tutor-card').forEach(c=>c.classList.add('list-view'));
+        container.querySelectorAll('.btn-reservar').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();openReservation(+btn.dataset.id);}));
+        container.querySelectorAll('.btn-ver-perfil').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();openProfile(+btn.dataset.id);}));
+        container.querySelectorAll('.tutor-card').forEach(card=>card.addEventListener('click',()=>openProfile(+card.dataset.id)));
+    }
+
+    function applyFilters(){
+        const q=document.getElementById('searchInput').value.toLowerCase();
+        const nivel=document.getElementById('nivelFilter').value;
+        const materia=document.getElementById('materiaFilter').value;
+        const precio=document.getElementById('precioFilter').value;
+        const rating=parseFloat(document.getElementById('ratingFilter').value)||0;
+        filtered=TUTORES.filter(t=>{
+            const mQ=!q||t.nombre.toLowerCase().includes(q)||t.materias.some(m=>MATERIA_LABELS[m].toLowerCase().includes(q))||t.bio.toLowerCase().includes(q);
+            const mN=!nivel||t.nivel.includes(nivel);
+            const mM=!materia||t.materias.includes(materia);
+            const mR=!rating||t.rating>=rating;
+            let mP=true;
+            if(precio){const[min,max]=precio==='40+'?[40,9999]:precio.split('-').map(Number);mP=t.precio>=min&&t.precio<=max;}
+            return mQ&&mN&&mM&&mR&&mP;
+        });
+        render();
+    }
+
+    document.getElementById('searchInput').addEventListener('input',applyFilters);
+    ['nivelFilter','materiaFilter','precioFilter','ratingFilter'].forEach(id=>document.getElementById(id).addEventListener('change',applyFilters));
+    document.querySelector('.btn-limpiar-filtros').addEventListener('click',()=>{
+        document.getElementById('searchInput').value='';
+        ['nivelFilter','materiaFilter','precioFilter','ratingFilter'].forEach(id=>document.getElementById(id).value='');
+        document.querySelectorAll('input[type="checkbox"],input[type="radio"]').forEach(i=>i.checked=false);
+        applyFilters();
+    });
+
+    /* View toggle */
+    document.querySelectorAll('.view-btn').forEach(btn=>btn.addEventListener('click',()=>{
+        document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        const container=document.getElementById('tutoresContainer');
+        const isList=btn.dataset.view==='list';
+        container.classList.toggle('list-view',isList);
+        container.querySelectorAll('.tutor-card').forEach(c=>c.classList.toggle('list-view',isList));
+    }));
+
+    /* Profile modal */
+    function openProfile(id){
+        const t=TUTORES.find(x=>x.id===id);if(!t)return;
+        document.getElementById('tutorModalBody').innerHTML=`
+            <div class="tutor-profile-hero">
+                <div class="tutor-profile-avatar" style="background:${t.color}">${t.inicial}</div>
+                <div class="tutor-profile-info">
+                    <h3>${t.nombre}</h3>
+                    <div class="rating-row"><span class="stars">★★★★★</span><span class="rating-num">${t.rating}</span><span class="rating-count">(${t.reviews} reseñas)</span></div>
+                    <div class="price-tag">$${t.precio} / hora</div>
+                </div>
+            </div>
+            <div class="detail-section"><h4>Biografía</h4><p>${t.bio} Con ${t.experiencia} de experiencia docente en instituciones públicas y privadas.</p></div>
+            <div class="detail-section"><h4>Materias que enseña</h4><div class="subjects-list">${t.materias.map(m=>`<span class="chip ${CHIP_CLASS[m]||'chip-purple'}">${MATERIA_LABELS[m]}</span>`).join('')}</div></div>
+            <div class="detail-section"><h4>Disponibilidad</h4><div class="availability-calendar">${t.disponibilidad.map(d=>`<span class="avail-slot">${d}</span>`).join('')}</div></div>
+            <div class="detail-section"><h4>Idiomas</h4><div class="availability-calendar">${t.idiomas.map(i=>`<span class="chip chip-teal">${i}</span>`).join('')}</div></div>
+            <div class="detail-section"><h4>Reseñas de estudiantes</h4>
+                <div class="reviews-list">
+                    <div class="review-item"><div class="rev-header"><span class="rev-author">Estudiante verificado</span><span class="rev-stars">★★★★★</span></div><p>Excelente tutor, explica muy claro y es muy paciente. Lo recomiendo al 100%.</p></div>
+                    <div class="review-item"><div class="rev-header"><span class="rev-author">Otro estudiante</span><span class="rev-stars">★★★★★</span></div><p>Gracias a ${t.nombre.split(' ')[0]} aprobé mi examen final con muy buena nota.</p></div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-contactar"><i class="fas fa-envelope"></i> Contactar</button>
+                <button class="btn-reservar-modal" id="profileReserveBtn">Reservar clase ahora</button>
+            </div>`;
+        document.getElementById('profileReserveBtn').addEventListener('click',()=>{ closeTutorModal(); openReservation(id); });
+        document.getElementById('tutorModal').classList.add('is-visible');
+    }
+
+    function closeTutorModal(){ document.getElementById('tutorModal').classList.remove('is-visible'); }
+    document.getElementById('closeTutorModal').addEventListener('click',closeTutorModal);
+    document.getElementById('tutorModal').addEventListener('click',e=>{ if(e.target===document.getElementById('tutorModal'))closeTutorModal(); });
+
+    /* Reservation modal */
+    function openReservation(id){
+        const t=TUTORES.find(x=>x.id===id);if(!t)return;
+        activeReserveTutor=t;
+        document.getElementById('reservationTutorName').textContent=`Reservar clase con ${t.nombre}`;
+        const today=new Date().toISOString().split('T')[0];
+        document.getElementById('reservaFecha').min=today;
+        document.getElementById('reservationModal').classList.add('is-visible');
+    }
+    function closeReservation(){ document.getElementById('reservationModal').classList.remove('is-visible'); }
+    document.getElementById('closeReservationModal').addEventListener('click',closeReservation);
+    document.getElementById('cancelReservation').addEventListener('click',closeReservation);
+    document.getElementById('reservationModal').addEventListener('click',e=>{ if(e.target===document.getElementById('reservationModal'))closeReservation(); });
+    document.getElementById('reservationForm').addEventListener('submit',e=>{
+        e.preventDefault(); closeReservation();
+        alert(`¡Solicitud enviada! ${activeReserveTutor?.nombre} la confirmará en menos de 24h.`);
+    });
+
+    /* Swap form */
+    document.getElementById('swapForm').addEventListener('submit',e=>{
+        e.preventDefault(); alert('¡Intercambio publicado! Revisaremos tu solicitud en breve.'); e.target.reset();
+    });
+
+    render();
+    </script>
+    <script src="components.js"></script>
+</body>
+</html>

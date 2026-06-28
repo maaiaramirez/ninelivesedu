@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foros — Study Wawa</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#7c3aed">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .foros-main { margin-top: var(--nav-h); padding: 3rem 0; min-height: calc(100vh - var(--nav-h)); position: relative; z-index: 1; }
+        .page-header { text-align: center; margin-bottom: 3rem; }
+        .page-header p { color: var(--c-text-muted); font-size: 1.05rem; max-width: 500px; margin: 0 auto; }
+
+        /* SEARCH */
+        .search-section { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 2rem; backdrop-filter: blur(20px); }
+        .search-bar { margin-bottom: 1.5rem; }
+        .search-input-container { position: relative; display: flex; align-items: center; }
+        .search-input-container i.fa-search { position: absolute; left: 1.1rem; color: var(--c-text-dim); pointer-events: none; transition: color var(--motion-base); }
+        .search-input-container:focus-within i.fa-search { color: var(--c-purple-light); }
+        #searchInput { width: 100%; background: var(--c-surface); border: 1.5px solid var(--c-border); border-radius: 999px; padding: 0.92rem 6.5rem 0.92rem 3rem; color: var(--c-text); font-family: var(--font-body); font-size: 0.97rem; transition: border-color var(--motion-base), box-shadow var(--motion-base), background var(--motion-base); }
+        #searchInput::placeholder { color: var(--c-text-dim); }
+        #searchInput:focus { outline: none; border-color: var(--c-purple-mid); background: var(--c-surface-md); box-shadow: 0 0 0 4px rgba(139,92,246,0.18), 0 8px 30px rgba(139,92,246,0.15); }
+        .search-btn { position: absolute; right: 0.5rem; background: var(--grad-primary); color: white; border: none; padding: 0.65rem 1.4rem; border-radius: 999px; font-family: var(--font-body); font-weight: 600; font-size: 0.87rem; cursor: pointer; transition: filter var(--motion-fast), transform var(--motion-base) var(--ease-spring); }
+        .search-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .filters-row { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; }
+        .filter-group { display: flex; flex-direction: column; gap: 0.4rem; min-width: 145px; flex: 1; }
+        .filter-group label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--c-text-dim); }
+        .filter-select { background: var(--c-surface); border: 1.5px solid var(--c-border); border-radius: var(--radius-sm); padding: 0.7rem 2.5rem 0.7rem 0.9rem; color: var(--c-text); font-family: var(--font-body); font-size: 0.88rem; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239d98c4' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.85rem center; transition: border-color var(--motion-base), box-shadow var(--motion-base); }
+        .filter-select option { background: var(--c-bg-3); }
+        .filter-select:focus { outline: none; border-color: var(--c-purple-mid); box-shadow: 0 0 0 3px rgba(139,92,246,0.18); }
+        .btn-nuevo-post-top { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--grad-primary); color: white; border: none; padding: 0.72rem 1.4rem; border-radius: var(--radius-sm); font-family: var(--font-body); font-weight: 600; font-size: 0.87rem; cursor: pointer; white-space: nowrap; transition: filter var(--motion-fast), transform var(--motion-base) var(--ease-spring), box-shadow var(--motion-base); }
+        .btn-nuevo-post-top:hover { filter: brightness(1.08); transform: translateY(-2px); box-shadow: 0 8px 22px rgba(139,92,246,0.4); }
+
+        /* LAYOUT */
+        .content-layout { display: grid; grid-template-columns: 230px 1fr; gap: 1.75rem; }
+
+        /* SIDEBAR */
+        .categories-sidebar { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-lg); padding: 1.5rem; height: fit-content; position: sticky; top: calc(var(--nav-h) + 1.5rem); backdrop-filter: blur(18px); }
+        .categories-sidebar h3 { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--c-text); margin-bottom: 1.25rem; }
+        .category-section { margin-bottom: 1.5rem; }
+        .category-section h4 { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--c-text-dim); margin-bottom: 0.75rem; }
+        .category-list { display: flex; flex-direction: column; gap: 0.3rem; }
+        .category-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.65rem; border-radius: var(--radius-xs); text-decoration: none; color: var(--c-text-muted); font-size: 0.87rem; transition: background var(--motion-fast), color var(--motion-fast); cursor: pointer; }
+        .category-item:hover, .category-item.active { background: var(--c-surface-md); color: var(--c-purple-light); }
+        .category-item i { width: 16px; text-align: center; font-size: 0.85rem; color: var(--c-purple-mid); }
+        .category-item .count { margin-left: auto; font-size: 0.72rem; font-weight: 700; background: rgba(139,92,246,0.15); color: var(--c-purple-light); padding: 0.15rem 0.5rem; border-radius: 999px; }
+        .btn-nuevo-post { width: 100%; margin-top: 0.5rem; background: var(--grad-primary); color: white; border: none; padding: 0.8rem; border-radius: var(--radius-sm); font-family: var(--font-body); font-weight: 700; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: filter var(--motion-fast), transform var(--motion-base) var(--ease-spring), box-shadow var(--motion-base); }
+        .btn-nuevo-post:hover { filter: brightness(1.08); transform: translateY(-2px); box-shadow: 0 8px 22px rgba(139,92,246,0.4); }
+
+        /* POSTS SECTION */
+        .posts-section { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-lg); padding: 1.75rem; backdrop-filter: blur(18px); }
+        .posts-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.75rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--c-border); }
+        .posts-header h2 { font-family: var(--font-display); font-size: 1.2rem; font-weight: 800; color: var(--c-text); margin-bottom: 0.2rem; }
+        .results-count { font-size: 0.82rem; color: var(--c-text-dim); }
+        .view-toggle { display: flex; gap: 0.4rem; }
+        .view-btn { width: 36px; height: 36px; border: 1.5px solid var(--c-border); background: var(--c-surface); border-radius: var(--radius-xs); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--c-text-dim); font-size: 0.85rem; transition: background var(--motion-base), border-color var(--motion-base), color var(--motion-base); }
+        .view-btn.active, .view-btn:hover { border-color: var(--c-border-glow); color: var(--c-purple-light); background: rgba(139,92,246,0.1); }
+
+        #postsContainer { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.75rem; }
+        #postsContainer.grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 1.25rem; }
+
+        /* POST CARD */
+        .post-card { background: var(--c-surface-md); border: 1px solid var(--c-border); border-radius: var(--radius-md); padding: 1.35rem 1.5rem; cursor: pointer; transition: transform var(--motion-slow) var(--ease-spring), border-color var(--motion-base), box-shadow var(--motion-slow); position: relative; overflow: hidden; }
+        .post-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(139,92,246,0.05) 0%, rgba(236,72,153,0.03) 100%); opacity: 0; transition: opacity var(--motion-base); }
+        .post-card:hover { transform: translateY(-4px); border-color: var(--c-border-glow); box-shadow: 0 20px 44px rgba(0,0,0,0.38); }
+        .post-card:hover::before { opacity: 1; }
+
+        .post-top { display: flex; align-items: flex-start; gap: 0.85rem; margin-bottom: 0.85rem; }
+        .post-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 0.95rem; font-weight: 800; color: white; flex-shrink: 0; }
+        .post-head { flex: 1; min-width: 0; }
+        .post-author { font-size: 0.85rem; font-weight: 600; color: var(--c-text); }
+        .post-date { font-size: 0.75rem; color: var(--c-text-dim); }
+
+        .post-title { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--c-text); margin-bottom: 0.5rem; letter-spacing: -0.01em; line-height: 1.35; }
+        .post-excerpt { font-size: 0.85rem; color: var(--c-text-muted); line-height: 1.55; margin-bottom: 0.85rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .post-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.85rem; }
+        .post-tag { font-size: 0.72rem; font-weight: 600; padding: 0.18rem 0.6rem; border-radius: 999px; background: var(--c-surface); border: 1px solid var(--c-border); color: var(--c-text-dim); }
+
+        .post-footer { display: flex; justify-content: space-between; align-items: center; }
+        .post-stats { display: flex; gap: 1.1rem; }
+        .post-stat { display: flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; color: var(--c-text-dim); }
+        .post-stat i { font-size: 0.75rem; }
+        .post-stat.upvoted { color: var(--c-purple-light); }
+        .tipo-badge { padding: 0.22rem 0.7rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700; }
+        .tipo-pregunta { background: rgba(249,115,22,0.15); color: #fdba74; }
+        .tipo-debate { background: rgba(139,92,246,0.15); color: var(--c-purple-light); }
+        .tipo-recurso { background: rgba(34,197,94,0.15); color: #4ade80; }
+        .tipo-anuncio { background: rgba(6,182,212,0.15); color: #67e8f9; }
+
+        .vote-btn { background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 0.3rem; font-size: 0.8rem; color: var(--c-text-dim); padding: 0.25rem 0.5rem; border-radius: var(--radius-xs); transition: color var(--motion-fast), background var(--motion-fast); }
+        .vote-btn:hover { color: var(--c-purple-light); background: rgba(139,92,246,0.1); }
+
+        /* POST DETAIL MODAL */
+        .post-modal { max-width: 680px; max-height: 90vh; overflow-y: auto; padding: 0; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 2rem; border-bottom: 1px solid var(--c-border); }
+        .modal-header h2 { font-family: var(--font-display); font-size: 1.2rem; font-weight: 800; color: var(--c-text); flex: 1; padding-right: 1rem; }
+        .close-modal { background: none; border: none; color: var(--c-text-muted); font-size: 1.4rem; cursor: pointer; flex-shrink: 0; transition: color var(--motion-fast), transform var(--motion-base) var(--ease-spring); }
+        .close-modal:hover { color: var(--c-purple-light); transform: rotate(90deg); }
+        .modal-body-inner { padding: 1.75rem 2rem; }
+        .post-detail-meta { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+        .post-detail-content { font-size: 0.93rem; color: var(--c-text-muted); line-height: 1.75; margin-bottom: 1.5rem; }
+        .detail-section-title { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--c-text-dim); margin-bottom: 0.85rem; }
+        .reply-list { display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 1.5rem; }
+        .reply-item { padding: 0.85rem 1rem; background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-sm); }
+        .reply-header { display: flex; justify-content: space-between; margin-bottom: 0.4rem; }
+        .reply-author { font-size: 0.85rem; font-weight: 600; color: var(--c-text); }
+        .reply-date { font-size: 0.75rem; color: var(--c-text-dim); }
+        .reply-item p { font-size: 0.87rem; color: var(--c-text-muted); line-height: 1.6; }
+        .reply-form { display: flex; flex-direction: column; gap: 0.85rem; }
+        .reply-form label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--c-text-dim); }
+        .reply-form textarea { width: 100%; background: var(--c-surface); border: 1.5px solid var(--c-border); border-radius: var(--radius-sm); padding: 0.8rem 1rem; color: var(--c-text); font-family: var(--font-body); font-size: 0.9rem; resize: vertical; transition: border-color var(--motion-base), box-shadow var(--motion-base); }
+        .reply-form textarea::placeholder { color: var(--c-text-dim); }
+        .reply-form textarea:focus { outline: none; border-color: var(--c-purple-mid); box-shadow: 0 0 0 3px rgba(139,92,246,0.2); }
+        .btn-reply { align-self: flex-end; background: var(--grad-primary); color: white; border: none; padding: 0.72rem 1.6rem; border-radius: var(--radius-sm); font-family: var(--font-body); font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: filter var(--motion-fast), transform var(--motion-base) var(--ease-spring); }
+        .btn-reply:hover { filter: brightness(1.1); transform: translateY(-2px); }
+
+        /* NEW POST MODAL */
+        .new-post-modal { max-width: 560px; padding: 0; }
+        .form-group { margin-bottom: 1.1rem; }
+        .form-group label { display: block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--c-text-muted); margin-bottom: 0.5rem; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; background: var(--c-surface); border: 1.5px solid var(--c-border); border-radius: var(--radius-sm); padding: 0.8rem 1rem; color: var(--c-text); font-family: var(--font-body); font-size: 0.9rem; transition: border-color var(--motion-base), box-shadow var(--motion-base); resize: vertical; }
+        .form-group input::placeholder, .form-group textarea::placeholder { color: var(--c-text-dim); }
+        .form-group select option { background: var(--c-bg-3); }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--c-purple-mid); box-shadow: 0 0 0 3px rgba(139,92,246,0.2); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .form-actions { display: flex; gap: 0.85rem; justify-content: flex-end; padding-top: 0.5rem; }
+        .btn-cancel { background: transparent; color: var(--c-text-muted); border: 1.5px solid var(--c-border); padding: 0.72rem 1.4rem; border-radius: var(--radius-sm); font-family: var(--font-body); font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: border-color var(--motion-base), color var(--motion-base); }
+        .btn-cancel:hover { border-color: var(--c-text-dim); color: var(--c-text); }
+        .btn-submit { background: var(--grad-primary); color: white; border: none; padding: 0.72rem 1.6rem; border-radius: var(--radius-sm); font-family: var(--font-body); font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: filter var(--motion-fast), transform var(--motion-base) var(--ease-spring); }
+        .btn-submit:hover { filter: brightness(1.1); transform: translateY(-2px); }
+
+        @media (max-width: 900px) { .content-layout { grid-template-columns: 1fr; } .categories-sidebar { position: static; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); gap: 1rem; align-items: start; } .categories-sidebar h3 { grid-column: 1/-1; margin-bottom: 0; } .btn-nuevo-post { grid-column: 1/-1; } }
+        @media (max-width: 600px) { .filters-row { flex-direction: column; } .filter-group { min-width: auto; width: 100%; } #postsContainer.grid-view { grid-template-columns: 1fr; } .form-row { grid-template-columns: 1fr; } }
+    </style>
+    <link rel="stylesheet" href="components.css">
+</head>
+<body>
+    <canvas id="network-canvas"></canvas>
+
+    <header class="header" id="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo">
+                    <img src="logo.png" alt="Study Wawa" class="logo-img">
+                    <span class="logo-text">Study Wawa</span>
+                </a>
+                <nav class="nav">
+                    <ul class="nav-list">
+                        <li><a href="index.html" class="nav-link">Inicio</a></li>
+                        <li><a href="apuntes.html" class="nav-link">Apuntes</a></li>
+                        <li><a href="tutores.html" class="nav-link">Tutores</a></li>
+                        <li><a href="foros.html" class="nav-link active">Foros</a></li>
+                        <li><a href="index.html#contacto" class="nav-link">Contacto</a></li>
+                    </ul>
+                </nav>
+                <div class="header-buttons">
+                    <button class="btn-tutor">Unirse como tutor</button>
+                    <button class="btn-login">Registro / Iniciar Sesión</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="foros-main">
+        <div class="container">
+            <div class="page-header reveal">
+                <p class="section-eyebrow">Comunidad Study Wawa</p>
+                <h1 class="section-title">Comunidad de Estudio</h1>
+                <p>Conecta con otros estudiantes, resuelve dudas y comparte conocimiento</p>
+            </div>
+
+            <div class="search-section reveal reveal-delay-1">
+                <div class="search-bar">
+                    <div class="search-input-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Buscar en foros por título, contenido o palabras clave...">
+                        <button class="search-btn">Buscar</button>
+                    </div>
+                </div>
+                <div class="filters-row">
+                    <div class="filter-group">
+                        <label for="nivelFilter">Nivel</label>
+                        <select id="nivelFilter" class="filter-select">
+                            <option value="">Todos los niveles</option>
+                            <option value="primaria">Primaria</option>
+                            <option value="secundaria">Secundaria</option>
+                            <option value="bachillerato">Bachillerato</option>
+                            <option value="universidad">Universidad</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="materiaFilter">Materia</label>
+                        <select id="materiaFilter" class="filter-select">
+                            <option value="">Todas las materias</option>
+                            <option value="matematicas">Matemáticas</option>
+                            <option value="fisica">Física</option>
+                            <option value="quimica">Química</option>
+                            <option value="biologia">Biología</option>
+                            <option value="historia">Historia</option>
+                            <option value="literatura">Literatura</option>
+                            <option value="ingles">Inglés</option>
+                            <option value="filosofia">Filosofía</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="tipoFilter">Tipo de Post</label>
+                        <select id="tipoFilter" class="filter-select">
+                            <option value="">Todos los tipos</option>
+                            <option value="pregunta">Pregunta</option>
+                            <option value="debate">Debate</option>
+                            <option value="recurso">Recurso</option>
+                            <option value="anuncio">Anuncio</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="ordenFilter">Ordenar por</label>
+                        <select id="ordenFilter" class="filter-select">
+                            <option value="reciente">Más recientes</option>
+                            <option value="popular">Más populares</option>
+                            <option value="respuestas">Más respuestas</option>
+                            <option value="votos">Más votados</option>
+                        </select>
+                    </div>
+                    <button class="btn-nuevo-post-top" id="openNewPostBtn"><i class="fas fa-plus"></i> Nuevo Post</button>
+                </div>
+            </div>
+
+            <div class="content-layout">
+                <aside class="categories-sidebar reveal">
+                    <h3>Categorías</h3>
+                    <div class="category-section">
+                        <h4>Por Nivel</h4>
+                        <div class="category-list">
+                            <a class="category-item" data-nivel="primaria"><i class="fas fa-graduation-cap"></i><span>Primaria</span><span class="count">45</span></a>
+                            <a class="category-item" data-nivel="secundaria"><i class="fas fa-book"></i><span>Secundaria</span><span class="count">128</span></a>
+                            <a class="category-item" data-nivel="bachillerato"><i class="fas fa-university"></i><span>Bachillerato</span><span class="count">89</span></a>
+                            <a class="category-item" data-nivel="universidad"><i class="fas fa-mortar-board"></i><span>Universidad</span><span class="count">156</span></a>
+                        </div>
+                    </div>
+                    <div class="category-section">
+                        <h4>Por Materia</h4>
+                        <div class="category-list">
+                            <a class="category-item" data-materia="matematicas"><i class="fas fa-calculator"></i><span>Matemáticas</span><span class="count">67</span></a>
+                            <a class="category-item" data-materia="fisica"><i class="fas fa-atom"></i><span>Física</span><span class="count">34</span></a>
+                            <a class="category-item" data-materia="quimica"><i class="fas fa-flask"></i><span>Química</span><span class="count">28</span></a>
+                            <a class="category-item" data-materia="biologia"><i class="fas fa-microscope"></i><span>Biología</span><span class="count">42</span></a>
+                            <a class="category-item" data-materia="historia"><i class="fas fa-landmark"></i><span>Historia</span><span class="count">23</span></a>
+                            <a class="category-item" data-materia="literatura"><i class="fas fa-book-open"></i><span>Literatura</span><span class="count">31</span></a>
+                        </div>
+                    </div>
+                    <button class="btn-nuevo-post" id="openNewPostBtn2"><i class="fas fa-plus"></i> Nuevo Post</button>
+                </aside>
+
+                <section class="posts-section reveal reveal-delay-1">
+                    <div class="posts-header">
+                        <div>
+                            <h2>Discusiones Recientes</h2>
+                            <span id="resultsCount" class="results-count">Mostrando 0 posts</span>
+                        </div>
+                        <div class="view-toggle">
+                            <button class="view-btn active" data-view="list"><i class="fas fa-list"></i></button>
+                            <button class="view-btn" data-view="grid"><i class="fas fa-th"></i></button>
+                        </div>
+                    </div>
+                    <div id="postsContainer"></div>
+                    <div class="pagination">
+                        <button class="page-btn" disabled><i class="fas fa-chevron-left"></i></button>
+                        <span class="page-numbers">
+                            <button class="page-number active">1</button>
+                            <button class="page-number">2</button>
+                            <button class="page-number">3</button>
+                        </span>
+                        <button class="page-btn"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- POST DETAIL MODAL -->
+    <div class="modal-overlay" id="postModal">
+        <div class="modal-card post-modal">
+            <div class="modal-header">
+                <h2 id="postModalTitle">Post</h2>
+                <button class="close-modal" id="closePostModal">&times;</button>
+            </div>
+            <div class="modal-body-inner" id="postModalBody"></div>
+        </div>
+    </div>
+
+    <!-- NEW POST MODAL -->
+    <div class="modal-overlay" id="newPostModal">
+        <div class="modal-card new-post-modal">
+            <div class="modal-header">
+                <h2>Crear Nuevo Post</h2>
+                <button class="close-modal" id="closeNewPostModal">&times;</button>
+            </div>
+            <div class="modal-body-inner">
+                <form id="newPostForm">
+                    <div class="form-group"><label for="postTitulo">Título</label><input type="text" id="postTitulo" placeholder="¿Cuál es tu pregunta o tema?" required></div>
+                    <div class="form-row">
+                        <div class="form-group"><label for="postMateria">Materia</label><select id="postMateria" required><option value="">Selecciona</option><option value="matematicas">Matemáticas</option><option value="fisica">Física</option><option value="quimica">Química</option><option value="biologia">Biología</option><option value="historia">Historia</option><option value="literatura">Literatura</option><option value="ingles">Inglés</option><option value="filosofia">Filosofía</option></select></div>
+                        <div class="form-group"><label for="postNivel">Nivel</label><select id="postNivel" required><option value="">Selecciona</option><option value="primaria">Primaria</option><option value="secundaria">Secundaria</option><option value="bachillerato">Bachillerato</option><option value="universidad">Universidad</option></select></div>
+                    </div>
+                    <div class="form-group"><label for="postTipo">Tipo</label><select id="postTipo"><option value="pregunta">Pregunta</option><option value="debate">Debate</option><option value="recurso">Recurso</option><option value="anuncio">Anuncio</option></select></div>
+                    <div class="form-group"><label for="postContenido">Contenido</label><textarea id="postContenido" rows="4" placeholder="Describe tu pregunta o aporte con detalle..." required></textarea></div>
+                    <div class="form-group"><label for="postTags">Tags <span style="font-weight:400;text-transform:none;letter-spacing:0">(separados por coma)</span></label><input type="text" id="postTags" placeholder="Ej: derivadas, integrales, límites"></div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" id="cancelNewPost">Cancelar</button>
+                        <button type="submit" class="btn-submit">Publicar Post</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+    /* CANVAS */
+    (function(){
+        const cv=document.getElementById('network-canvas'),ctx=cv.getContext('2d');
+        const mob=window.matchMedia('(hover:none) and (pointer:coarse)').matches;
+        let W,H,pts=[],mouse={x:-9999,y:-9999},raf,last=0;
+        const C=['rgba(139,92,246,','rgba(236,72,153,','rgba(249,115,22,','rgba(167,139,250,'];
+        const N=mob?35:85,MD=mob?110:150;
+        function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
+        function init(){pts=Array.from({length:N},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4,r:1.5+Math.random(),a:.2+Math.random()*.4,c:C[Math.floor(Math.random()*C.length)]}));}
+        function tick(now){const d=now-last;if(d<14){raf=requestAnimationFrame(tick);return;}last=now-(d%14);ctx.clearRect(0,0,W,H);
+        pts.forEach(p=>{if(!mob){const dx=p.x-mouse.x,dy=p.y-mouse.y,dist=Math.hypot(dx,dy);if(dist<160&&dist>0){const f=(1-dist/160)*.4;p.vx+=(dx/dist)*f*.07;p.vy+=(dy/dist)*f*.07;}}p.vx*=.996;p.vy*=.996;p.x+=p.vx;p.y+=p.vy;if(p.x<-10)p.x=W+10;else if(p.x>W+10)p.x=-10;if(p.y<-10)p.y=H+10;else if(p.y>H+10)p.y=-10;});
+        for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const a=pts[i],b=pts[j],dx=a.x-b.x,dy=a.y-b.y,sq=dx*dx+dy*dy;if(sq<MD*MD){ctx.beginPath();ctx.strokeStyle=a.c+(1-Math.sqrt(sq)/MD)*.2+')';ctx.lineWidth=.6;ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}
+        pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.c+p.a+')';ctx.fill();});raf=requestAnimationFrame(tick);}
+        let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{resize();init();},150);});
+        if(!mob)window.addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;},{passive:true});
+        document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAnimationFrame(raf);else{last=performance.now();raf=requestAnimationFrame(tick);}});
+        resize();init();raf=requestAnimationFrame(tick);
+    })();
+
+    window.addEventListener('scroll',()=>document.getElementById('header').classList.toggle('scrolled',scrollY>60),{passive:true});
+    document.querySelectorAll('.reveal').forEach(el=>new IntersectionObserver((en,obs)=>{en.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:0.1,rootMargin:'0px 0px -30px 0px'}).observe(el));
+
+    /* DATA */
+    const AVATAR_COLORS=['linear-gradient(135deg,#7c3aed,#ec4899)','linear-gradient(135deg,#f97316,#ec4899)','linear-gradient(135deg,#06b6d4,#7c3aed)','linear-gradient(135deg,#10b981,#06b6d4)','linear-gradient(135deg,#ec4899,#f97316)','linear-gradient(135deg,#8b5cf6,#06b6d4)'];
+    const MATERIA_LABELS={matematicas:'Matemáticas',fisica:'Física',quimica:'Química',biologia:'Biología',historia:'Historia',literatura:'Literatura',ingles:'Inglés',filosofia:'Filosofía'};
+    const CHIP_CLASS={matematicas:'chip-purple',fisica:'chip-teal',quimica:'chip-orange',biologia:'chip-success',historia:'chip-pink',literatura:'chip-pink',ingles:'chip-teal',filosofia:'chip-purple'};
+
+    let POSTS=[
+        {id:1,titulo:'¿Cómo se aplica la regla de la cadena en funciones compuestas?',contenido:'Estoy teniendo problemas para entender cuándo y cómo aplicar la regla de la cadena. ¿Alguien puede explicarlo con un ejemplo paso a paso? Intento derivar f(g(x)) pero no entiendo bien el proceso.',autor:'Sofía R.',fecha:'hace 2 horas',materia:'matematicas',nivel:'bachillerato',tipo:'pregunta',tags:['derivadas','regla cadena','cálculo'],votos:24,respuestas:8,vistas:142,color:0},
+        {id:2,titulo:'Debate: ¿La física cuántica contradice al determinismo?',contenido:'En clase surgió este debate filosófico fascinante. La mecánica cuántica con el principio de incertidumbre de Heisenberg parece indicar que el universo no es determinista. ¿Qué piensan? ¿Puede haber libre albedrío?',autor:'Carlos M.',fecha:'hace 4 horas',materia:'fisica',nivel:'universidad',tipo:'debate',tags:['cuántica','filosofia','determinismo'],votos:47,respuestas:15,vistas:320,color:1},
+        {id:3,titulo:'Recurso: Guía visual de reacciones orgánicas más importantes',contenido:'Les comparto esta guía que armé con las 20 reacciones orgánicas más frecuentes en el bachillerato. Incluye mecanismo, condiciones y ejemplos. Espero que les sea útil para el examen.',autor:'Ana K.',fecha:'hace 6 horas',materia:'quimica',nivel:'bachillerato',tipo:'recurso',tags:['orgánica','reacciones','guía'],votos:38,respuestas:5,vistas:254,color:2},
+        {id:4,titulo:'¿Alguien entendió la mitosis vs meiosis? Tengo examen mañana',contenido:'El profe explicó rápido y no entendí las diferencias clave entre mitosis y meiosis. ¿En qué se diferencian en número de divisiones, células hija y material genético?',autor:'Lucas T.',fecha:'hace 8 horas',materia:'biologia',nivel:'secundaria',tipo:'pregunta',tags:['mitosis','meiosis','biología celular'],votos:19,respuestas:12,vistas:198,color:3},
+        {id:5,titulo:'Las verdaderas causas de la Primera Guerra Mundial — análisis',contenido:'Más allá del asesinato de Francisco Fernando, ¿cuáles fueron las causas estructurales de la WWI? El imperialismo, el sistema de alianzas y el militarismo europeo. Un análisis que va más allá del libro de texto.',autor:'Marta L.',fecha:'hace 1 día',materia:'historia',nivel:'bachillerato',tipo:'debate',tags:['primera guerra','causas','imperialismo'],votos:31,respuestas:9,vistas:267,color:4},
+        {id:6,titulo:'Realismo mágico: diferencias entre García Márquez y Rulfo',contenido:'Para un trabajo de la facultad necesito comparar el realismo mágico en Cien años de soledad vs Pedro Páramo. ¿Cuáles son las diferencias de estilo, uso del tiempo narrativo y recursos literarios?',autor:'Roberto D.',fecha:'hace 1 día',materia:'literatura',nivel:'universidad',tipo:'pregunta',tags:['realismo mágico','García Márquez','Rulfo'],votos:22,respuestas:6,vistas:189,color:5},
+        {id:7,titulo:'Anuncio: Nuevo grupo de estudio de inglés B2 — ¡Únanse!',contenido:'Estamos armando un grupo de estudio para preparar el examen B2 de inglés. Nos reunimos los martes y jueves a las 19h por videollamada. Practicamos speaking, writing y grammar. ¡Todos bienvenidos!',autor:'Emma W.',fecha:'hace 2 días',materia:'ingles',nivel:'bachillerato',tipo:'anuncio',tags:['B2','inglés','grupo de estudio'],votos:15,respuestas:22,vistas:310,color:0},
+        {id:8,titulo:'¿El utilitarismo de Bentham resuelve el dilema del tranvía?',contenido:'Estamos estudiando ética utilitarista y me quedé pensando: ¿el cálculo hedonista de Bentham realmente justifica sacrificar a uno por salvar a cinco? ¿O hay límites morales que el utilitarismo no puede cruzar?',autor:'Javier M.',fecha:'hace 3 días',materia:'filosofia',nivel:'universidad',tipo:'debate',tags:['utilitarismo','ética','dilema moral'],votos:44,respuestas:18,vistas:412,color:1},
+    ];
+
+    let filtered=[...POSTS];
+
+    function tipoClass(t){return `tipo-${t}`;}
+    function renderCard(p){
+        return `<div class="post-card" data-id="${p.id}">
+            <div class="post-top">
+                <div class="post-avatar" style="background:${AVATAR_COLORS[p.color]}">${p.autor[0]}</div>
+                <div class="post-head"><span class="post-author">${p.autor}</span><span class="post-date"> · ${p.fecha}</span></div>
+                <span class="tipo-badge ${tipoClass(p.tipo)}">${p.tipo.charAt(0).toUpperCase()+p.tipo.slice(1)}</span>
+            </div>
+            <h3 class="post-title">${p.titulo}</h3>
+            <p class="post-excerpt">${p.contenido}</p>
+            <div class="post-tags">${p.tags.map(t=>`<span class="post-tag">#${t}</span>`).join('')}<span class="chip ${CHIP_CLASS[p.materia]||'chip-purple'}" style="font-size:0.72rem;padding:0.18rem 0.6rem">${MATERIA_LABELS[p.materia]}</span></div>
+            <div class="post-footer">
+                <div class="post-stats">
+                    <button class="vote-btn" data-id="${p.id}"><i class="fas fa-arrow-up"></i> ${p.votos}</button>
+                    <span class="post-stat"><i class="fas fa-comment"></i> ${p.respuestas}</span>
+                    <span class="post-stat"><i class="fas fa-eye"></i> ${p.vistas}</span>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    function render(){
+        const c=document.getElementById('postsContainer');
+        document.getElementById('resultsCount').textContent=`Mostrando ${filtered.length} posts`;
+        if(!filtered.length){c.innerHTML=`<div class="status-message"><i class="fas fa-comments"></i><h3>Sin resultados</h3><p>Intenta con otros filtros.</p></div>`;return;}
+        c.innerHTML=filtered.map(renderCard).join('');
+        c.querySelectorAll('.post-card').forEach(card=>card.addEventListener('click',e=>{if(e.target.classList.contains('vote-btn')||e.target.closest('.vote-btn'))return;openPost(+card.dataset.id);}));
+        c.querySelectorAll('.vote-btn').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();const id=+btn.dataset.id;const p=POSTS.find(x=>x.id===id);if(p){p.votos++;render();}}));
+    }
+
+    function applyFilters(){
+        const q=document.getElementById('searchInput').value.toLowerCase();
+        const nivel=document.getElementById('nivelFilter').value;
+        const materia=document.getElementById('materiaFilter').value;
+        const tipo=document.getElementById('tipoFilter').value;
+        const orden=document.getElementById('ordenFilter').value;
+        filtered=POSTS.filter(p=>{
+            const mQ=!q||p.titulo.toLowerCase().includes(q)||p.contenido.toLowerCase().includes(q)||p.tags.some(t=>t.toLowerCase().includes(q))||p.autor.toLowerCase().includes(q);
+            const mN=!nivel||p.nivel===nivel;
+            const mM=!materia||p.materia===materia;
+            const mT=!tipo||p.tipo===tipo;
+            return mQ&&mN&&mM&&mT;
+        });
+        if(orden==='popular')filtered.sort((a,b)=>b.vistas-a.vistas);
+        else if(orden==='respuestas')filtered.sort((a,b)=>b.respuestas-a.respuestas);
+        else if(orden==='votos')filtered.sort((a,b)=>b.votos-a.votos);
+        render();
+    }
+
+    document.getElementById('searchInput').addEventListener('input',applyFilters);
+    ['nivelFilter','materiaFilter','tipoFilter','ordenFilter'].forEach(id=>document.getElementById(id).addEventListener('change',applyFilters));
+
+    document.querySelectorAll('.category-item').forEach(item=>item.addEventListener('click',e=>{
+        e.preventDefault();
+        document.querySelectorAll('.category-item').forEach(i=>i.classList.remove('active'));
+        item.classList.add('active');
+        if(item.dataset.nivel){document.getElementById('nivelFilter').value=item.dataset.nivel;}
+        if(item.dataset.materia){document.getElementById('materiaFilter').value=item.dataset.materia;}
+        applyFilters();
+    }));
+
+    document.querySelectorAll('.view-btn').forEach(btn=>btn.addEventListener('click',()=>{
+        document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('postsContainer').classList.toggle('grid-view',btn.dataset.view==='grid');
+    }));
+
+    /* Post detail */
+    function openPost(id){
+        const p=POSTS.find(x=>x.id===id);if(!p)return;
+        document.getElementById('postModalTitle').textContent=p.titulo;
+        document.getElementById('postModalBody').innerHTML=`
+            <div class="post-detail-meta">
+                <div class="post-avatar" style="background:${AVATAR_COLORS[p.color]};width:36px;height:36px;font-size:0.85rem">${p.autor[0]}</div>
+                <span style="font-weight:600;color:var(--c-text)">${p.autor}</span>
+                <span style="color:var(--c-text-dim);font-size:0.82rem">${p.fecha}</span>
+                <span class="tipo-badge ${tipoClass(p.tipo)}">${p.tipo.charAt(0).toUpperCase()+p.tipo.slice(1)}</span>
+                <span class="chip ${CHIP_CLASS[p.materia]||'chip-purple'}">${MATERIA_LABELS[p.materia]}</span>
+            </div>
+            <p class="post-detail-content">${p.contenido}</p>
+            <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.5rem">${p.tags.map(t=>`<span class="post-tag">#${t}</span>`).join('')}</div>
+            <div style="display:flex;gap:1.5rem;margin-bottom:1.5rem">
+                <span style="font-size:0.85rem;color:var(--c-text-muted)"><i class="fas fa-arrow-up" style="color:var(--c-purple-light)"></i> ${p.votos} votos</span>
+                <span style="font-size:0.85rem;color:var(--c-text-muted)"><i class="fas fa-comment" style="color:var(--c-purple-light)"></i> ${p.respuestas} respuestas</span>
+                <span style="font-size:0.85rem;color:var(--c-text-muted)"><i class="fas fa-eye" style="color:var(--c-purple-light)"></i> ${p.vistas} vistas</span>
+            </div>
+            <p class="detail-section-title">Respuestas (${p.respuestas})</p>
+            <div class="reply-list">
+                <div class="reply-item"><div class="reply-header"><span class="reply-author">Estudiante verificado</span><span class="reply-date">hace 1 hora</span></div><p>Muy buena pregunta. En mi experiencia, lo clave es recordar que la derivada de la función exterior se multiplica por la derivada de la función interior.</p></div>
+                <div class="reply-item"><div class="reply-header"><span class="reply-author">Tutor María G.</span><span class="reply-date">hace 2 horas</span></div><p>Excelente punto. Si quieres profundizar, tengo apuntes completos sobre el tema en la biblioteca. También puedo dar una sesión 1:1 para explicarlo en detalle.</p></div>
+            </div>
+            <p class="detail-section-title">Tu respuesta</p>
+            <div class="reply-form">
+                <label>Escribe tu respuesta</label>
+                <textarea rows="3" placeholder="Comparte tu conocimiento o experiencia..."></textarea>
+                <button class="btn-reply">Publicar respuesta</button>
+            </div>`;
+        document.getElementById('postModalBody').querySelector('.btn-reply').addEventListener('click',function(){
+            const ta=document.getElementById('postModalBody').querySelector('textarea');
+            if(!ta.value.trim())return;
+            p.respuestas++;ta.value='';
+            alert('¡Respuesta publicada!');closePostModal();
+        });
+        document.getElementById('postModal').classList.add('is-visible');
+    }
+    function closePostModal(){document.getElementById('postModal').classList.remove('is-visible');}
+    document.getElementById('closePostModal').addEventListener('click',closePostModal);
+    document.getElementById('postModal').addEventListener('click',e=>{if(e.target===document.getElementById('postModal'))closePostModal();});
+
+    /* New post */
+    function openNewPost(){document.getElementById('newPostModal').classList.add('is-visible');}
+    function closeNewPost(){document.getElementById('newPostModal').classList.remove('is-visible');}
+    document.getElementById('openNewPostBtn').addEventListener('click',openNewPost);
+    document.getElementById('openNewPostBtn2').addEventListener('click',openNewPost);
+    document.getElementById('closeNewPostModal').addEventListener('click',closeNewPost);
+    document.getElementById('cancelNewPost').addEventListener('click',closeNewPost);
+    document.getElementById('newPostModal').addEventListener('click',e=>{if(e.target===document.getElementById('newPostModal'))closeNewPost();});
+    document.getElementById('newPostForm').addEventListener('submit',e=>{
+        e.preventDefault();
+        const nuevo={
+            id:POSTS.length+1,
+            titulo:document.getElementById('postTitulo').value,
+            contenido:document.getElementById('postContenido').value,
+            autor:'Tú',fecha:'ahora mismo',
+            materia:document.getElementById('postMateria').value,
+            nivel:document.getElementById('postNivel').value,
+            tipo:document.getElementById('postTipo').value,
+            tags:document.getElementById('postTags').value.split(',').map(t=>t.trim()).filter(Boolean),
+            votos:0,respuestas:0,vistas:0,color:Math.floor(Math.random()*AVATAR_COLORS.length)
+        };
+        POSTS.unshift(nuevo);filtered=[...POSTS];
+        e.target.reset();closeNewPost();render();
+    });
+
+    render();
+    </script>
+    <script src="components.js"></script>
+</body>
+</html>

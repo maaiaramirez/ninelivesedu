@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apuntes — Study Wawa</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#7c3aed">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* ─────────────────────────────────────────
+           APUNTES PAGE SPECIFIC STYLES
+        ───────────────────────────────────────── */
+        .apuntes-main {
+            margin-top: var(--nav-h);
+            padding: 3rem 0;
+            min-height: calc(100vh - var(--nav-h));
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Page header */
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .page-header p {
+            color: var(--c-text-muted);
+            font-size: 1.05rem;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* ─── SEARCH SECTION ─── */
+        .search-section {
+            background: var(--c-surface);
+            border: 1px solid var(--c-border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .search-bar { margin-bottom: 1.5rem; }
+
+        .search-input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .search-input-container i.fa-search {
+            position: absolute;
+            left: 1.1rem;
+            color: var(--c-text-dim);
+            font-size: 1rem;
+            pointer-events: none;
+            transition: color var(--motion-base);
+        }
+        .search-input-container:focus-within i.fa-search {
+            color: var(--c-purple-light);
+        }
+
+        #searchInput {
+            width: 100%;
+            background: var(--c-surface);
+            border: 1.5px solid var(--c-border);
+            border-radius: 999px;
+            padding: 0.92rem 6.5rem 0.92rem 3rem;
+            color: var(--c-text);
+            font-family: var(--font-body);
+            font-size: 0.97rem;
+            transition: border-color var(--motion-base), box-shadow var(--motion-base), background var(--motion-base);
+        }
+        #searchInput::placeholder { color: var(--c-text-dim); }
+        #searchInput:focus {
+            outline: none;
+            border-color: var(--c-purple-mid);
+            background: var(--c-surface-md);
+            box-shadow: 0 0 0 4px rgba(139,92,246,0.18), 0 8px 30px rgba(139,92,246,0.15);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 0.5rem;
+            background: var(--grad-primary);
+            color: white;
+            border: none;
+            padding: 0.65rem 1.4rem;
+            border-radius: 999px;
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.87rem;
+            cursor: pointer;
+            transition: filter var(--motion-fast), transform var(--motion-base) var(--ease-spring);
+        }
+        .search-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+        /* Filters row */
+        .filters-row {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            min-width: 145px;
+            flex: 1;
+        }
+        .filter-group label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--c-text-dim);
+        }
+
+        .filter-select {
+            background: var(--c-surface);
+            border: 1.5px solid var(--c-border);
+            border-radius: var(--radius-sm);
+            padding: 0.7rem 0.9rem;
+            color: var(--c-text);
+            font-family: var(--font-body);
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: border-color var(--motion-base), box-shadow var(--motion-base);
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239d98c4' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.85rem center;
+            padding-right: 2.5rem;
+        }
+        .filter-select option { background: var(--c-bg-3); }
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--c-purple-mid);
+            box-shadow: 0 0 0 3px rgba(139,92,246,0.18);
+        }
+
+        .btn-subir-apuntes {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--grad-warm);
+            color: white;
+            border: none;
+            padding: 0.72rem 1.4rem;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.87rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: filter var(--motion-fast), transform var(--motion-base) var(--ease-spring), box-shadow var(--motion-base);
+        }
+        .btn-subir-apuntes:hover {
+            filter: brightness(1.06);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(249,115,22,0.4);
+        }
+
+        /* ─── CONTENT LAYOUT ─── */
+        .content-layout {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 1.75rem;
+        }
+
+        /* ─── SIDEBAR ─── */
+        .filters-sidebar {
+            background: var(--c-surface);
+            border: 1px solid var(--c-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            height: fit-content;
+            position: sticky;
+            top: calc(var(--nav-h) + 1.5rem);
+            backdrop-filter: blur(18px);
+        }
+        .filters-sidebar h3 {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--c-text);
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.01em;
+        }
+        .filter-section { margin-bottom: 1.75rem; }
+        .filter-section:last-of-type { margin-bottom: 1.25rem; }
+        .filter-section h4 {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--c-text-dim);
+            margin-bottom: 0.85rem;
+        }
+        .checkbox-group, .rating-filter, .date-filter {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .checkbox-group label, .rating-filter label, .date-filter label {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.87rem;
+            color: var(--c-text-muted);
+            cursor: pointer;
+            padding: 0.3rem 0.4rem;
+            border-radius: var(--radius-xs);
+            transition: color var(--motion-fast), background var(--motion-fast);
+        }
+        .checkbox-group label:hover, .rating-filter label:hover, .date-filter label:hover {
+            color: var(--c-text);
+            background: var(--c-surface-md);
+        }
+        .checkbox-group input[type="checkbox"],
+        .rating-filter input[type="radio"],
+        .date-filter input[type="radio"] {
+            accent-color: var(--c-purple-mid);
+        }
+
+        .btn-limpiar-filtros {
+            width: 100%;
+            background: transparent;
+            color: var(--c-purple-light);
+            border: 1.5px solid var(--c-border-glow);
+            padding: 0.7rem;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.87rem;
+            cursor: pointer;
+            transition: background var(--motion-base), color var(--motion-base), transform var(--motion-base) var(--ease-spring);
+        }
+        .btn-limpiar-filtros:hover {
+            background: rgba(139,92,246,0.15);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        /* ─── APUNTES GRID ─── */
+        .apuntes-grid {
+            background: var(--c-surface);
+            border: 1px solid var(--c-border);
+            border-radius: var(--radius-lg);
+            padding: 1.75rem;
+            backdrop-filter: blur(18px);
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.75rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid var(--c-border);
+        }
+        .results-header span {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--c-text-muted);
+        }
+        .results-header strong { color: var(--c-text); }
+
+        .view-toggle { display: flex; gap: 0.4rem; }
+        .view-btn {
+            width: 36px; height: 36px;
+            border: 1.5px solid var(--c-border);
+            background: var(--c-surface);
+            border-radius: var(--radius-xs);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--c-text-dim);
+            font-size: 0.85rem;
+            transition: background var(--motion-base), border-color var(--motion-base), color var(--motion-base);
+        }
+        .view-btn.active, .view-btn:hover {
+            border-color: var(--c-border-glow);
+            color: var(--c-purple-light);
+            background: rgba(139,92,246,0.1);
+        }
+
+        /* APUNTES CONTAINER — GRID */
+        #apuntesContainer {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 1.75rem;
+        }
+        #apuntesContainer.list-view {
+            grid-template-columns: 1fr;
+        }
+
+        /* ─── APUNTE CARD ─── */
+        .apunte-card {
+            background: var(--c-surface-md);
+            border: 1px solid var(--c-border);
+            border-radius: var(--radius-md);
+            padding: 1.4rem;
+            cursor: pointer;
+            transition: transform var(--motion-slow) var(--ease-spring),
+                        border-color var(--motion-base),
+                        box-shadow var(--motion-slow),
+                        background var(--motion-base);
+            position: relative;
+            overflow: hidden;
+        }
+        .apunte-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(139,92,246,0.06) 0%, rgba(236,72,153,0.04) 100%);
+            opacity: 0;
+            transition: opacity var(--motion-base);
+        }
+        .apunte-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--c-border-glow);
+            box-shadow: 0 20px 45px rgba(0,0,0,0.4), 0 0 0 1px rgba(139,92,246,0.12);
+        }
+        .apunte-card:hover::before { opacity: 1; }
+
+        /* List view */
+        .apunte-card.list-view {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+        .apunte-card.list-view .apunte-header { margin-bottom: 0; flex-shrink: 0; }
+        .apunte-card.list-view .apunte-body { flex: 1; min-width: 0; }
+        .apunte-card.list-view .apunte-footer { flex-shrink: 0; }
+
+        .apunte-header {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            margin-bottom: 0.85rem;
+        }
+        .apunte-icon {
+            width: 46px; height: 46px;
+            border-radius: var(--radius-sm);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            color: white;
+            flex-shrink: 0;
+            transition: transform var(--motion-base) var(--ease-spring);
+        }
+        .apunte-card:hover .apunte-icon { transform: scale(1.1) rotate(-5deg); }
+
+        .apunte-info h3 {
+            font-family: var(--font-display);
+            font-size: 0.97rem;
+            font-weight: 700;
+            color: var(--c-text);
+            margin-bottom: 0.2rem;
+            letter-spacing: -0.01em;
+            line-height: 1.3;
+        }
+        .apunte-info .apunte-author {
+            font-size: 0.78rem;
+            color: var(--c-text-dim);
+        }
+
+        .apunte-meta {
+            display: flex;
+            gap: 0.65rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.85rem;
+        }
+
+        .apunte-description {
+            color: var(--c-text-muted);
+            font-size: 0.85rem;
+            line-height: 1.55;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .apunte-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .apunte-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .apunte-rating .stars { color: #fbbf24; font-size: 0.8rem; }
+        .apunte-rating .count { font-size: 0.78rem; color: var(--c-text-dim); }
+
+        .btn-descargar {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: var(--grad-primary);
+            color: white;
+            border: none;
+            padding: 0.48rem 1rem;
+            border-radius: 999px;
+            font-family: var(--font-body);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: filter var(--motion-fast), transform var(--motion-base) var(--ease-spring), box-shadow var(--motion-base);
+            flex-shrink: 0;
+        }
+        .btn-descargar:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(139,92,246,0.4);
+        }
+
+        /* ─── UPLOAD MODAL ─── */
+        .upload-modal {
+            max-width: 580px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 0;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--c-border);
+        }
+        .modal-header h2 {
+            font-family: var(--font-display);
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--c-text);
+        }
+        .close-modal {
+            background: none; border: none;
+            color: var(--c-text-muted); font-size: 1.4rem;
+            cursor: pointer;
+            transition: color var(--motion-fast), transform var(--motion-base) var(--ease-spring);
+        }
+        .close-modal:hover { color: var(--c-purple-light); transform: rotate(90deg); }
+        .upload-modal .modal-body { padding: 1.75rem 2rem; }
+
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--c-text-muted);
+            margin-bottom: 0.5rem;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            background: var(--c-surface);
+            border: 1.5px solid var(--c-border);
+            border-radius: var(--radius-sm);
+            padding: 0.8rem 1rem;
+            color: var(--c-text);
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            transition: border-color var(--motion-base), box-shadow var(--motion-base);
+            resize: vertical;
+        }
+        .form-group input::placeholder, .form-group textarea::placeholder { color: var(--c-text-dim); }
+        .form-group select option { background: var(--c-bg-3); }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--c-purple-mid);
+            box-shadow: 0 0 0 3px rgba(139,92,246,0.2);
+        }
+
+        .file-upload { position: relative; }
+        .file-upload input[type="file"] {
+            position: absolute; opacity: 0;
+            width: 100%; height: 100%; cursor: pointer;
+        }
+        .file-upload-area {
+            border: 2px dashed var(--c-border);
+            border-radius: var(--radius-md);
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            transition: border-color var(--motion-base), background var(--motion-base);
+        }
+        .file-upload:hover .file-upload-area {
+            border-color: var(--c-border-glow);
+            background: var(--c-surface);
+        }
+        .file-upload-area i { font-size: 2rem; color: var(--c-purple-light); margin-bottom: 0.75rem; display: block; }
+        .file-upload-area p { font-weight: 600; color: var(--c-text); margin-bottom: 0.4rem; font-size: 0.92rem; }
+        .file-types { font-size: 0.8rem; color: var(--c-text-dim); }
+
+        .form-actions {
+            display: flex;
+            gap: 0.85rem;
+            justify-content: flex-end;
+            padding-top: 0.5rem;
+        }
+        .btn-cancel {
+            background: transparent;
+            color: var(--c-text-muted);
+            border: 1.5px solid var(--c-border);
+            padding: 0.72rem 1.4rem;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: border-color var(--motion-base), color var(--motion-base);
+        }
+        .btn-cancel:hover { border-color: var(--c-text-dim); color: var(--c-text); }
+        .btn-submit {
+            background: var(--grad-primary);
+            color: white;
+            border: none;
+            padding: 0.72rem 1.6rem;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: filter var(--motion-fast), transform var(--motion-base) var(--ease-spring);
+        }
+        .btn-submit:hover { filter: brightness(1.1); transform: translateY(-2px); }
+
+        /* Active nav indicator */
+        .nav-link.active { color: var(--c-text); background: var(--c-surface-md); }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 900px) {
+            .content-layout { grid-template-columns: 1fr; }
+            .filters-sidebar {
+                position: static;
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 1rem;
+                align-items: start;
+            }
+            .filters-sidebar h3 { grid-column: 1 / -1; margin-bottom: 0; }
+            .btn-limpiar-filtros { grid-column: 1 / -1; }
+        }
+        @media (max-width: 600px) {
+            .filters-row { flex-direction: column; }
+            .filter-group { min-width: auto; width: 100%; }
+            #apuntesContainer { grid-template-columns: 1fr; }
+            .results-header { flex-direction: column; gap: 0.75rem; align-items: flex-start; }
+        }
+    </style>
+    <link rel="stylesheet" href="components.css">
+</head>
+<body>
+
+    <!-- CANVAS -->
+    <canvas id="network-canvas"></canvas>
+
+    <!-- HEADER -->
+    <header class="header" id="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo">
+                    <img src="logo.png" alt="Study Wawa" class="logo-img">
+                    <span class="logo-text">Study Wawa</span>
+                </a>
+                <nav class="nav">
+                    <ul class="nav-list">
+                        <li><a href="index.html" class="nav-link">Inicio</a></li>
+                        <li><a href="apuntes.html" class="nav-link active">Apuntes</a></li>
+                        <li><a href="tutores.html" class="nav-link">Tutores</a></li>
+                        <li><a href="foros.html" class="nav-link">Foros</a></li>
+                        <li><a href="index.html#contacto" class="nav-link">Contacto</a></li>
+                    </ul>
+                </nav>
+                <div class="header-buttons">
+                    <button class="btn-tutor">Unirse como tutor</button>
+                    <button class="btn-login">Registro / Iniciar Sesión</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="apuntes-main">
+        <div class="container">
+
+            <!-- Page header -->
+            <div class="page-header reveal">
+                <p class="section-eyebrow">Recursos educativos</p>
+                <h1 class="section-title">Biblioteca de Apuntes</h1>
+                <p>Encuentra los mejores apuntes organizados por materia y nivel educativo</p>
+            </div>
+
+            <!-- Search + filters -->
+            <div class="search-section reveal reveal-delay-1">
+                <div class="search-bar">
+                    <div class="search-input-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Buscar apuntes por título, materia o palabra clave...">
+                        <button class="search-btn">Buscar</button>
+                    </div>
+                </div>
+                <div class="filters-row">
+                    <div class="filter-group">
+                        <label for="nivelFilter">Nivel</label>
+                        <select id="nivelFilter" class="filter-select">
+                            <option value="">Todos los niveles</option>
+                            <option value="primaria">Primaria</option>
+                            <option value="secundaria">Secundaria</option>
+                            <option value="bachillerato">Bachillerato</option>
+                            <option value="universidad">Universidad</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="materiaFilter">Materia</label>
+                        <select id="materiaFilter" class="filter-select">
+                            <option value="">Todas las materias</option>
+                            <option value="matematicas">Matemáticas</option>
+                            <option value="fisica">Física</option>
+                            <option value="quimica">Química</option>
+                            <option value="biologia">Biología</option>
+                            <option value="historia">Historia</option>
+                            <option value="literatura">Literatura</option>
+                            <option value="ingles">Inglés</option>
+                            <option value="filosofia">Filosofía</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="ordenFilter">Ordenar por</label>
+                        <select id="ordenFilter" class="filter-select">
+                            <option value="fecha">Más recientes</option>
+                            <option value="popularidad">Más populares</option>
+                            <option value="titulo">Título A-Z</option>
+                            <option value="autor">Autor</option>
+                        </select>
+                    </div>
+                    <button class="btn-subir-apuntes" id="openUploadModal">
+                        <i class="fas fa-upload"></i>
+                        Subir Apuntes
+                    </button>
+                </div>
+            </div>
+
+            <!-- Layout -->
+            <div class="content-layout">
+
+                <!-- Sidebar filters -->
+                <aside class="filters-sidebar reveal">
+                    <h3>Filtros</h3>
+                    <div class="filter-section">
+                        <h4>Tipo de Archivo</h4>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" value="pdf"> PDF</label>
+                            <label><input type="checkbox" value="doc"> Word</label>
+                            <label><input type="checkbox" value="ppt"> PowerPoint</label>
+                            <label><input type="checkbox" value="jpg"> Imágenes</label>
+                        </div>
+                    </div>
+                    <div class="filter-section">
+                        <h4>Calificación</h4>
+                        <div class="rating-filter">
+                            <label><input type="radio" name="rating" value="5"> ⭐⭐⭐⭐⭐ 5 estrellas</label>
+                            <label><input type="radio" name="rating" value="4"> ⭐⭐⭐⭐ 4+ estrellas</label>
+                            <label><input type="radio" name="rating" value="3"> ⭐⭐⭐ 3+ estrellas</label>
+                        </div>
+                    </div>
+                    <div class="filter-section">
+                        <h4>Fecha</h4>
+                        <div class="date-filter">
+                            <label><input type="radio" name="date" value="week"> Última semana</label>
+                            <label><input type="radio" name="date" value="month"> Último mes</label>
+                            <label><input type="radio" name="date" value="year"> Último año</label>
+                        </div>
+                    </div>
+                    <button class="btn-limpiar-filtros">Limpiar Filtros</button>
+                </aside>
+
+                <!-- Apuntes grid -->
+                <section class="apuntes-grid reveal reveal-delay-1">
+                    <div class="results-header">
+                        <span id="resultsCount">Mostrando <strong>12</strong> apuntes</span>
+                        <div class="view-toggle">
+                            <button class="view-btn active" data-view="grid" title="Vista en cuadrícula">
+                                <i class="fas fa-th"></i>
+                            </button>
+                            <button class="view-btn" data-view="list" title="Vista en lista">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="apuntesContainer"></div>
+
+                    <div class="pagination">
+                        <button class="page-btn" disabled><i class="fas fa-chevron-left"></i></button>
+                        <span class="page-numbers">
+                            <button class="page-number active">1</button>
+                            <button class="page-number">2</button>
+                            <button class="page-number">3</button>
+                        </span>
+                        <button class="page-btn"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- UPLOAD MODAL -->
+    <div class="modal-overlay" id="uploadModal">
+        <div class="modal-card upload-modal">
+            <div class="modal-header">
+                <h2>Subir Nuevos Apuntes</h2>
+                <button class="close-modal" id="closeUploadModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="uploadForm">
+                    <div class="form-group">
+                        <label for="apunteTitulo">Título del Apunte</label>
+                        <input type="text" id="apunteTitulo" placeholder="Ej: Álgebra Lineal — Espacios Vectoriales" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="apunteAutor">Autor / Tutor <span style="font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></label>
+                        <input type="text" id="apunteAutor" placeholder="Nombre de quien comparte el contenido">
+                    </div>
+                    <div class="form-group">
+                        <label for="apunteMateria">Materia</label>
+                        <select id="apunteMateria" required>
+                            <option value="">Selecciona una materia</option>
+                            <option value="matematicas">Matemáticas</option>
+                            <option value="fisica">Física</option>
+                            <option value="quimica">Química</option>
+                            <option value="biologia">Biología</option>
+                            <option value="historia">Historia</option>
+                            <option value="literatura">Literatura</option>
+                            <option value="ingles">Inglés</option>
+                            <option value="filosofia">Filosofía</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="apunteNivel">Nivel Educativo</label>
+                        <select id="apunteNivel" required>
+                            <option value="">Selecciona un nivel</option>
+                            <option value="primaria">Primaria</option>
+                            <option value="secundaria">Secundaria</option>
+                            <option value="bachillerato">Bachillerato</option>
+                            <option value="universidad">Universidad</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="apunteDescripcion">Descripción</label>
+                        <textarea id="apunteDescripcion" rows="3" placeholder="Describe brevemente el contenido del apunte..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Archivo</label>
+                        <div class="file-upload">
+                            <input type="file" id="apunteArchivo" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png" required>
+                            <div class="file-upload-area">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Arrastra tu archivo aquí o haz clic para seleccionar</p>
+                                <span class="file-types">PDF, Word, PowerPoint, Imágenes (máx. 20 MB)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" id="cancelUpload">Cancelar</button>
+                        <button type="submit" class="btn-submit">Subir Apunte</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+    /* ─────────────────────────────────────────
+       CANVAS (lightweight version for sub-pages)
+    ───────────────────────────────────────── */
+    (function(){
+        const canvas = document.getElementById('network-canvas');
+        const ctx = canvas.getContext('2d');
+        const mobile = window.matchMedia('(hover:none) and (pointer:coarse)').matches;
+        const COUNT = mobile ? 35 : 80;
+        const MAX_D = mobile ? 110 : 150;
+        let W, H, pts = [], mouse = { x:-9999, y:-9999 }, raf, last = 0;
+        const COLORS = ['rgba(139,92,246,','rgba(236,72,153,','rgba(249,115,22,','rgba(167,139,250,'];
+
+        function resize(){ W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+        function init(){ pts = Array.from({length:COUNT}, () => ({
+            x:Math.random()*W, y:Math.random()*H,
+            vx:(Math.random()-.5)*.4, vy:(Math.random()-.5)*.4,
+            r: 1.5+Math.random()*1, a:.2+Math.random()*.4,
+            c: COLORS[Math.floor(Math.random()*COLORS.length)]
+        })); }
+
+        function tick(now){
+            const d = now - last;
+            if(d < 14){ raf = requestAnimationFrame(tick); return; }
+            last = now - (d % 14);
+            ctx.clearRect(0,0,W,H);
+
+            pts.forEach(p => {
+                if(!mobile){ const dx=p.x-mouse.x, dy=p.y-mouse.y, dist=Math.hypot(dx,dy);
+                    if(dist<160 && dist>0){ const f=(1-dist/160)*.4; p.vx+=(dx/dist)*f*.07; p.vy+=(dy/dist)*f*.07; } }
+                p.vx *= .996; p.vy *= .996;
+                p.x += p.vx; p.y += p.vy;
+                if(p.x<-10)p.x=W+10; else if(p.x>W+10)p.x=-10;
+                if(p.y<-10)p.y=H+10; else if(p.y>H+10)p.y=-10;
+            });
+
+            for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++){
+                const a=pts[i],b=pts[j],dx=a.x-b.x,dy=a.y-b.y,sq=dx*dx+dy*dy;
+                if(sq<MAX_D*MAX_D){
+                    ctx.beginPath(); ctx.strokeStyle=a.c+(1-Math.sqrt(sq)/MAX_D)*.2+')';
+                    ctx.lineWidth=.6; ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+                }
+            }
+            pts.forEach(p=>{ ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle=p.c+p.a+')'; ctx.fill(); });
+            raf = requestAnimationFrame(tick);
+        }
+
+        let rt; window.addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(()=>{ resize(); init(); },150); });
+        if(!mobile) window.addEventListener('mousemove',e=>{ mouse.x=e.clientX; mouse.y=e.clientY; },{passive:true});
+        document.addEventListener('visibilitychange',()=>{ if(document.hidden) cancelAnimationFrame(raf); else{ last=performance.now(); raf=requestAnimationFrame(tick); } });
+        resize(); init(); raf = requestAnimationFrame(tick);
+    })();
+
+    /* ─────────────────────────────────────────
+       HEADER SCROLL
+    ───────────────────────────────────────── */
+    window.addEventListener('scroll', () => {
+        document.getElementById('header').classList.toggle('scrolled', scrollY > 60);
+    }, { passive: true });
+
+    /* ─────────────────────────────────────────
+       SCROLL REVEAL
+    ───────────────────────────────────────── */
+    new IntersectionObserver(entries => {
+        entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); } });
+    }, { threshold: 0.1 }).observe && document.querySelectorAll('.reveal').forEach(el => {
+        new IntersectionObserver((entries, obs) => {
+            entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); } });
+        }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' }).observe(el);
+    });
+
+    /* ─────────────────────────────────────────
+       UPLOAD MODAL
+    ───────────────────────────────────────── */
+    const uploadModal = document.getElementById('uploadModal');
+    const openUpload = () => { uploadModal.classList.add('is-visible'); };
+    const closeUpload = () => { uploadModal.classList.remove('is-visible'); };
+    document.getElementById('openUploadModal').addEventListener('click', openUpload);
+    document.getElementById('closeUploadModal').addEventListener('click', closeUpload);
+    document.getElementById('cancelUpload').addEventListener('click', closeUpload);
+    uploadModal.addEventListener('click', e => { if(e.target === uploadModal) closeUpload(); });
+    document.getElementById('uploadForm').addEventListener('submit', e => {
+        e.preventDefault();
+        closeUpload();
+        alert('¡Apunte enviado para revisión! Estará disponible en breve.');
+    });
+
+    /* ─────────────────────────────────────────
+       VIEW TOGGLE
+    ───────────────────────────────────────── */
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const container = document.getElementById('apuntesContainer');
+            const isListView = btn.dataset.view === 'list';
+            container.classList.toggle('list-view', isListView);
+            container.querySelectorAll('.apunte-card').forEach(c => c.classList.toggle('list-view', isListView));
+        });
+    });
+
+    /* ─────────────────────────────────────────
+       APUNTES DATA & RENDER
+    ───────────────────────────────────────── */
+    const ICON_COLORS = [
+        'linear-gradient(135deg,#7c3aed,#ec4899)',
+        'linear-gradient(135deg,#f97316,#ec4899)',
+        'linear-gradient(135deg,#06b6d4,#7c3aed)',
+        'linear-gradient(135deg,#10b981,#06b6d4)',
+        'linear-gradient(135deg,#ec4899,#f97316)',
+        'linear-gradient(135deg,#8b5cf6,#06b6d4)',
+    ];
+    const FILE_ICONS = { pdf:'fa-file-pdf', doc:'fa-file-word', ppt:'fa-file-powerpoint', img:'fa-file-image' };
+    const MATERIA_CHIPS = {
+        matematicas:'chip-purple', fisica:'chip-teal', quimica:'chip-orange',
+        biologia:'chip-success', historia:'chip-pink', literatura:'chip-pink',
+        ingles:'chip-teal', filosofia:'chip-purple',
+    };
+
+    const APUNTES = [
+        { id:1, titulo:'Cálculo Diferencial — Derivadas e Integrales', autor:'Dra. Sofía Vera', materia:'matematicas', nivel:'universidad', tipo:'pdf', descripcion:'Resumen completo de derivadas, reglas de derivación y aplicaciones con ejercicios resueltos paso a paso.', rating:4.9, reviews:124, fecha:'2026-05-10', icono:0 },
+        { id:2, titulo:'Leyes de Newton y Mecánica Clásica', autor:'Prof. Carlos Ruiz', materia:'fisica', nivel:'bachillerato', tipo:'pdf', descripcion:'Teoría, fórmulas y ejercicios de las tres leyes de Newton con aplicaciones reales y problemas tipo examen.', rating:4.8, reviews:89, fecha:'2026-05-08', icono:1 },
+        { id:3, titulo:'Tabla Periódica y Configuración Electrónica', autor:'Lic. Ana Medina', materia:'quimica', nivel:'secundaria', tipo:'ppt', descripcion:'Presentación visual sobre la tabla periódica, tendencias periódicas y configuración electrónica de los elementos.', rating:4.7, reviews:67, fecha:'2026-04-28', icono:2 },
+        { id:4, titulo:'Genética Mendeliana y Leyes de la Herencia', autor:'Biól. Lucas Torres', materia:'biologia', nivel:'bachillerato', tipo:'doc', descripcion:'Conceptos de dominancia, recesividad, cuadros de Punnett y resolución de problemas genéticos.', rating:4.9, reviews:103, fecha:'2026-05-01', icono:3 },
+        { id:5, titulo:'Revolución Francesa: Causas y Consecuencias', autor:'Prof. Marta López', materia:'historia', nivel:'secundaria', tipo:'pdf', descripcion:'Análisis histórico detallado de los factores políticos, económicos y sociales que desencadenaron la Revolución.', rating:4.6, reviews:55, fecha:'2026-04-15', icono:4 },
+        { id:6, titulo:'El Realismo Literario en Hispanoamérica', autor:'Lic. Roberto Díaz', materia:'literatura', nivel:'universidad', tipo:'pdf', descripcion:'Estudio comparativo de las principales obras del realismo mágico con análisis de estilo y contexto histórico.', rating:4.5, reviews:41, fecha:'2026-03-22', icono:5 },
+        { id:7, titulo:'Present Perfect vs Simple Past — Grammar', autor:'Teacher Emma Watson', materia:'ingles', nivel:'bachillerato', tipo:'doc', descripcion:'Guía clara y práctica para entender cuándo usar cada tiempo verbal con ejercicios interactivos.', rating:4.8, reviews:78, fecha:'2026-05-05', icono:0 },
+        { id:8, titulo:'Filosofía Griega: Sócrates, Platón y Aristóteles', autor:'Dr. Javier Muñoz', materia:'filosofia', nivel:'universidad', tipo:'pdf', descripcion:'Comparativa del pensamiento filosófico de los tres grandes maestros de la antigua Grecia.', rating:4.7, reviews:62, fecha:'2026-04-20', icono:1 },
+        { id:9, titulo:'Álgebra Lineal — Matrices y Determinantes', autor:'Ing. Paula Reyes', materia:'matematicas', nivel:'universidad', tipo:'pdf', descripcion:'Operaciones con matrices, cálculo de determinantes, sistemas de ecuaciones y aplicaciones en ingeniería.', rating:4.9, reviews:91, fecha:'2026-05-12', icono:2 },
+        { id:10, titulo:'Termodinámica — Leyes y Ciclos de Carnot', autor:'Dr. Miguel Ríos', materia:'fisica', nivel:'universidad', tipo:'ppt', descripcion:'Las cuatro leyes de la termodinámica con ciclos termodinámicos y aplicaciones en motores de calor.', rating:4.6, reviews:48, fecha:'2026-04-05', icono:3 },
+        { id:11, titulo:'Reacciones Orgánicas — Sustitución y Adición', autor:'Quím. Isabel Flores', materia:'quimica', nivel:'universidad', tipo:'doc', descripcion:'Mecanismos de reacción orgánica, grupos funcionales y nomenclatura IUPAC con ejercicios prácticos.', rating:4.8, reviews:72, fecha:'2026-04-30', icono:4 },
+        { id:12, titulo:'Ecosistemas y Cadenas Alimenticias', autor:'Prof. Andrés Castillo', materia:'biologia', nivel:'secundaria', tipo:'img', descripcion:'Infografía completa sobre niveles tróficos, flujo de energía y equilibrio ecológico en distintos biomas.', rating:4.5, reviews:38, fecha:'2026-03-18', icono:5 },
+    ];
+
+    const MATERIA_LABELS = {
+        matematicas:'Matemáticas', fisica:'Física', quimica:'Química', biologia:'Biología',
+        historia:'Historia', literatura:'Literatura', ingles:'Inglés', filosofia:'Filosofía'
+    };
+    const NIVEL_LABELS = {
+        primaria:'Primaria', secundaria:'Secundaria', bachillerato:'Bachillerato', universidad:'Universidad'
+    };
+    const TIPO_ICONS = { pdf:'fa-file-pdf', doc:'fa-file-word', ppt:'fa-file-powerpoint', img:'fa-file-image' };
+
+    function renderCard(a) {
+        const chipClass = MATERIA_CHIPS[a.materia] || 'chip-purple';
+        return `
+        <div class="apunte-card" data-id="${a.id}">
+            <div class="apunte-header">
+                <div class="apunte-icon" style="background:${ICON_COLORS[a.icono]}">
+                    <i class="fas ${TIPO_ICONS[a.tipo] || 'fa-file'}"></i>
+                </div>
+                <div class="apunte-info">
+                    <h3>${a.titulo}</h3>
+                    <span class="apunte-author">${a.autor}</span>
+                </div>
+            </div>
+            <div class="apunte-meta">
+                <span class="chip ${chipClass}">${MATERIA_LABELS[a.materia]}</span>
+                <span class="chip chip-purple">${NIVEL_LABELS[a.nivel]}</span>
+            </div>
+            <p class="apunte-description">${a.descripcion}</p>
+            <div class="apunte-footer">
+                <div class="apunte-rating">
+                    <span class="stars">★★★★★</span>
+                    <span class="count">${a.rating} (${a.reviews})</span>
+                </div>
+                <button class="btn-descargar"><i class="fas fa-download"></i> Descargar</button>
+            </div>
+        </div>`;
+    }
+
+    let filtered = [...APUNTES];
+
+    function applyFilters() {
+        const q = document.getElementById('searchInput').value.toLowerCase();
+        const nivel = document.getElementById('nivelFilter').value;
+        const materia = document.getElementById('materiaFilter').value;
+        const orden = document.getElementById('ordenFilter').value;
+
+        filtered = APUNTES.filter(a => {
+            const matchQ = !q || a.titulo.toLowerCase().includes(q) || MATERIA_LABELS[a.materia].toLowerCase().includes(q) || a.descripcion.toLowerCase().includes(q);
+            const matchN = !nivel || a.nivel === nivel;
+            const matchM = !materia || a.materia === materia;
+            return matchQ && matchN && matchM;
+        });
+
+        if (orden === 'popularidad') filtered.sort((a,b) => b.reviews - a.reviews);
+        else if (orden === 'titulo') filtered.sort((a,b) => a.titulo.localeCompare(b.titulo));
+        else if (orden === 'autor') filtered.sort((a,b) => a.autor.localeCompare(b.autor));
+        else filtered.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+
+        render();
+    }
+
+    function render() {
+        const container = document.getElementById('apuntesContainer');
+        const isListView = container.classList.contains('list-view');
+        document.getElementById('resultsCount').innerHTML = `Mostrando <strong>${filtered.length}</strong> apuntes`;
+
+        if (!filtered.length) {
+            container.innerHTML = `<div class="status-message"><i class="fas fa-search"></i><h3>Sin resultados</h3><p>Intenta con otros filtros o palabras clave.</p></div>`;
+            return;
+        }
+        container.innerHTML = filtered.map(a => renderCard(a)).join('');
+        if (isListView) container.querySelectorAll('.apunte-card').forEach(c => c.classList.add('list-view'));
+    }
+
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    document.getElementById('nivelFilter').addEventListener('change', applyFilters);
+    document.getElementById('materiaFilter').addEventListener('change', applyFilters);
+    document.getElementById('ordenFilter').addEventListener('change', applyFilters);
+    document.querySelector('.btn-limpiar-filtros').addEventListener('click', () => {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('nivelFilter').value = '';
+        document.getElementById('materiaFilter').value = '';
+        document.getElementById('ordenFilter').value = 'fecha';
+        document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+        applyFilters();
+    });
+
+    render();
+    </script>
+    <script src="components.js"></script>
+</body>
+</html>
