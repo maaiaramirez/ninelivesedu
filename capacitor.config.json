@@ -1,0 +1,10 @@
+{
+  "appId": "com.ninelivesedu.app",
+  "appName": "Nine Lives Edu",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}
+

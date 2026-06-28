@@ -1,0 +1,29 @@
+{
+  "name": "nine-lives-edu",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "sync-www": "node -e \"require('child_process').spawn(process.platform==='win32'?'powershell.exe':'bash',[process.platform==='win32'?'-File':'scripts/sync-www.sh',process.platform==='win32'?'scripts/sync-www.ps1':'','codigos pagina','www'],{stdio:'inherit'})\"",
+    "cap:copy": "npm run sync-www && npx cap copy android",
+    "cap:open": "npx cap open android"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^5.1.0",
+    "morgan": "^1.10.1",
+    "multer": "^2.0.2",
+    "sql.js": "^1.13.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
