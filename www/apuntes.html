@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apuntes - Nine Lives Edu</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#667eea">
+    <link rel="stylesheet" href="apuntes.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header fijo -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <img src="logo.png" alt="Nine Lives Edu" class="logo-img">
+                    <span class="logo-text">Nine Lives Edu</span>
+                </div>
+                
+                <nav class="nav">
+                    <ul class="nav-list">
+                        <li><a href="index.html" class="nav-link">Inicio</a></li>
+                        <li><a href="apuntes.html" class="nav-link active">Apuntes</a></li>
+                        <li><a href="tutores.html" class="nav-link">Tutores</a></li>
+                        <li><a href="foros.html" class="nav-link">Foros</a></li>
+                        <li><a href="index.html#contacto" class="nav-link">Contacto</a></li>
+                    </ul>
+                </nav>
+                
+                <div class="header-buttons">
+                    <button class="btn-tutor">Unirse como tutor</button>
+                    <button class="btn-login">Registro/Iniciar Sesión</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sección principal de apuntes -->
+    <main class="apuntes-main">
+        <div class="container">
+            <!-- Header de la página -->
+            <div class="page-header">
+                <h1>Biblioteca de Apuntes</h1>
+                <p>Encuentra los mejores apuntes organizados por materia y nivel educativo</p>
+            </div>
+
+            <!-- Barra de búsqueda y filtros -->
+            <div class="search-section">
+                <div class="search-bar">
+                    <div class="search-input-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Buscar apuntes por título, materia o palabra clave...">
+                        <button class="search-btn">Buscar</button>
+                    </div>
+                </div>
+
+                <div class="filters-row">
+                    <div class="filter-group">
+                        <label for="nivelFilter">Nivel Educativo:</label>
+                        <select id="nivelFilter">
+                            <option value="">Todos los niveles</option>
+                            <option value="primaria">Primaria</option>
+                            <option value="secundaria">Secundaria</option>
+                            <option value="bachillerato">Bachillerato</option>
+                            <option value="universidad">Universidad</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="materiaFilter">Materia:</label>
+                        <select id="materiaFilter">
+                            <option value="">Todas las materias</option>
+                            <option value="matematicas">Matemáticas</option>
+                            <option value="fisica">Física</option>
+                            <option value="quimica">Química</option>
+                            <option value="biologia">Biología</option>
+                            <option value="historia">Historia</option>
+                            <option value="literatura">Literatura</option>
+                            <option value="ingles">Inglés</option>
+                            <option value="filosofia">Filosofía</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="ordenFilter">Ordenar por:</label>
+                        <select id="ordenFilter">
+                            <option value="fecha">Más recientes</option>
+                            <option value="popularidad">Más populares</option>
+                            <option value="titulo">Título A-Z</option>
+                            <option value="autor">Autor</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-subir-apuntes">
+                        <i class="fas fa-upload"></i>
+                        Subir Apuntes
+                    </button>
+                </div>
+            </div>
+
+            <!-- Contenido principal -->
+            <div class="content-layout">
+                <!-- Panel de filtros laterales -->
+                <aside class="filters-sidebar">
+                    <h3>Filtros Adicionales</h3>
+                    
+                    <div class="filter-section">
+                        <h4>Tipo de Archivo</h4>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" value="pdf"> PDF</label>
+                            <label><input type="checkbox" value="doc"> Word</label>
+                            <label><input type="checkbox" value="ppt"> PowerPoint</label>
+                            <label><input type="checkbox" value="jpg"> Imágenes</label>
+                        </div>
+                    </div>
+
+                    <div class="filter-section">
+                        <h4>Calificación</h4>
+                        <div class="rating-filter">
+                            <label><input type="radio" name="rating" value="5"> ⭐⭐⭐⭐⭐ (5 estrellas)</label>
+                            <label><input type="radio" name="rating" value="4"> ⭐⭐⭐⭐ (4+ estrellas)</label>
+                            <label><input type="radio" name="rating" value="3"> ⭐⭐⭐ (3+ estrellas)</label>
+                        </div>
+                    </div>
+
+                    <div class="filter-section">
+                        <h4>Fecha de Publicación</h4>
+                        <div class="date-filter">
+                            <label><input type="radio" name="date" value="week"> Última semana</label>
+                            <label><input type="radio" name="date" value="month"> Último mes</label>
+                            <label><input type="radio" name="date" value="year"> Último año</label>
+                        </div>
+                    </div>
+
+                    <button class="btn-limpiar-filtros">Limpiar Filtros</button>
+                </aside>
+
+                <!-- Lista de apuntes -->
+                <section class="apuntes-grid">
+                    <div class="results-header">
+                        <span id="resultsCount">Mostrando 12 apuntes</span>
+                        <div class="view-toggle">
+                            <button class="view-btn active" data-view="grid">
+                                <i class="fas fa-th"></i>
+                            </button>
+                            <button class="view-btn" data-view="list">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="apuntes-container" id="apuntesContainer">
+                        <!-- Los apuntes se cargarán dinámicamente -->
+                    </div>
+
+                    <!-- Paginación -->
+                    <div class="pagination">
+                        <button class="page-btn" disabled>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span class="page-numbers">
+                            <button class="page-number active">1</button>
+                            <button class="page-number">2</button>
+                            <button class="page-number">3</button>
+                        </span>
+                        <button class="page-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal para subir apuntes -->
+    <div class="modal-overlay" id="uploadModal">
+        <div class="modal-card upload-modal">
+            <div class="modal-header">
+                <h2>Subir Nuevos Apuntes</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="uploadForm">
+                    <div class="form-group">
+                        <label for="apunteTitulo">Título del Apunte</label>
+                        <input type="text" id="apunteTitulo" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="apunteAutor">Autor / Tutor (opcional)</label>
+                        <input type="text" id="apunteAutor" placeholder="Nombre de quien comparte el contenido">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="apunteMateria">Materia</label>
+                        <select id="apunteMateria" required>
+                            <option value="">Selecciona una materia</option>
+                            <option value="matematicas">Matemáticas</option>
+                            <option value="fisica">Física</option>
+                            <option value="quimica">Química</option>
+                            <option value="biologia">Biología</option>
+                            <option value="historia">Historia</option>
+                            <option value="literatura">Literatura</option>
+                            <option value="ingles">Inglés</option>
+                            <option value="filosofia">Filosofía</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="apunteNivel">Nivel Educativo</label>
+                        <select id="apunteNivel" required>
+                            <option value="">Selecciona un nivel</option>
+                            <option value="primaria">Primaria</option>
+                            <option value="secundaria">Secundaria</option>
+                            <option value="bachillerato">Bachillerato</option>
+                            <option value="universidad">Universidad</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="apunteDescripcion">Descripción</label>
+                        <textarea id="apunteDescripcion" rows="4" placeholder="Describe brevemente el contenido del apunte..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="apunteArchivo">Archivo</label>
+                        <div class="file-upload">
+                            <input type="file" id="apunteArchivo" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png" required>
+                            <div class="file-upload-area">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Arrastra tu archivo aquí o haz clic para seleccionar</p>
+                                <span class="file-types">PDF, Word, PowerPoint, Imágenes</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel">Cancelar</button>
+                        <button type="submit" class="btn-submit">Subir Apunte</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="apuntes.js"></script>
+</body>
+</html>

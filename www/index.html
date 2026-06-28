@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APP Tutorías - Encuentra apuntes y tutores al instante</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#667eea">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header fijo -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <img src="logo.png" alt="Nine Lives Edu" class="logo-img">
+                    <span class="logo-text">Nine Lives Edu</span>
+                </div>
+                
+                <nav class="nav">
+                    <ul class="nav-list">
+                        <li><a href="#inicio" class="nav-link">Inicio</a></li>
+                        <li><a href="apuntes.html" class="nav-link">Apuntes</a></li>
+                        <li><a href="tutores.html" class="nav-link">Tutores</a></li>
+                        <li><a href="foros.html" class="nav-link">Foros</a></li>
+                        <li><a href="#contacto" class="nav-link">Contacto</a></li>
+                    </ul>
+                </nav>
+                
+                <div class="header-buttons">
+                    <button class="btn-tutor">Unirse como tutor</button>
+                    <button class="btn-login">Registro/Iniciar Sesión</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sección Hero -->
+    <section class="hero" id="inicio">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title">Encuentra apuntes y tutores al instante.<br><span class="highlight">Aprende sin límites</span></h1>
+                <p class="hero-subtitle">Centraliza tus apuntes, reserva sesiones 1:1 y participa en comunidades académicas con la misma estética moderna en todos tus dispositivos.</p>
+                <div class="hero-buttons">
+                    <button class="btn-primary">Buscar apuntes</button>
+                    <button class="btn-secondary">Ofrecer tutorías</button>
+                </div>
+                <div class="hero-badges">
+                    <span class="hero-badge"><i class="fas fa-shield-alt"></i>Pagos protegidos</span>
+                    <span class="hero-badge"><i class="fas fa-video"></i>Aulas virtuales HD</span>
+                    <span class="hero-badge"><i class="fas fa-mobile"></i>App responsive</span>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="students-image">
+                    <i class="fas fa-users"></i>
+                    <i class="fas fa-video"></i>
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="hero-floating-card">
+                    <i class="fas fa-star"></i>
+                    <div>
+                        <span>+4.9/5 en reseñas</span>
+                        <p>Basado en más de 3.200 sesiones</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="metrics">
+        <div class="container metrics-grid">
+            <div class="metric-card">
+                <span class="metric-label">Estudiantes activos</span>
+                <span class="metric-value">32k+</span>
+                <span class="metric-detail">Aprendiendo cada semana</span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-label">Apuntes premium</span>
+                <span class="metric-value">4.500</span>
+                <span class="metric-detail">Curados por docentes</span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-label">Reservas completadas</span>
+                <span class="metric-value">18k</span>
+                <span class="metric-detail">Con garantía Nine Lives Edu</span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-label">Comunidades activas</span>
+                <span class="metric-value">86</span>
+                <span class="metric-detail">Foros moderados</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="platform-tiles">
+        <div class="container">
+            <h2 class="section-title">Todo tu ecosistema académico en un solo lugar</h2>
+            <div class="tiles-grid">
+                <article class="tile-card">
+                    <div class="tile-icon"><i class="fas fa-book-reader"></i></div>
+                    <h3>Biblioteca inteligente</h3>
+                    <p>Filtra apuntes por nivel, tipo de archivo y calificación. Cada recurso mantiene la misma paleta de colores y diseño consistente del dashboard principal.</p>
+                    <a href="apuntes.html">Explorar apuntes <i class="fas fa-arrow-right"></i></a>
+                </article>
+                <article class="tile-card">
+                    <div class="tile-icon"><i class="fas fa-user-graduate"></i></div>
+                    <h3>Tutores verificados</h3>
+                    <p>Perfiles con disponibilidad visual, badges de idiomas y formularios de reserva en un clic. Disfruta de formularios estilizados y sin prompts improvisados.</p>
+                    <a href="tutores.html">Conocer tutores <i class="fas fa-arrow-right"></i></a>
+                </article>
+                <article class="tile-card">
+                    <div class="tile-icon"><i class="fas fa-comments"></i></div>
+                    <h3>Foros colaborativos</h3>
+                    <p>Debates categorizados, etiquetas con chips y modales uniformes para publicar preguntas o respuestas. La estética se mantiene idéntica gracias al nuevo sistema visual.</p>
+                    <a href="foros.html">Abrir comunidad <i class="fas fa-arrow-right"></i></a>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de Beneficios -->
+    <section class="benefits">
+        <div class="container">
+            <h2 class="section-title">¿Por qué elegir Nine Lives Edu?</h2>
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-folder-open"></i>
+                    </div>
+                    <h3>Apuntes Organizados</h3>
+                    <p>Acceso rápido a apuntes organizados por nivel y materia. Encuentra exactamente lo que necesitas.</p>
+                </div>
+                
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <h3>Tutores Verificados</h3>
+                    <p>Tutores verificados disponibles en cualquier momento. Calidad garantizada en cada sesión.</p>
+                </div>
+                
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <h3>Videollamadas Integradas</h3>
+                    <p>Usa videollamadas integradas en la propia plataforma. Sin necesidad de aplicaciones externas.</p>
+                </div>
+                
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Pagos Seguros</h3>
+                    <p>Seguridad garantizada en los pagos con las mejores pasarelas de pago del mercado.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="workflow">
+        <div class="container">
+            <h2 class="section-title">Un flujo pensado para ayudarte a estudiar mejor</h2>
+            <div class="workflow-steps">
+                <div class="workflow-card">
+                    <span>01</span>
+                    <h4>Crea tu perfil</h4>
+                    <p>Configura tu nivel, materias favoritas y preferencias de color para replicar la UI en todas las páginas.</p>
+                </div>
+                <div class="workflow-card">
+                    <span>02</span>
+                    <h4>Explora recursos</h4>
+                    <p>Usa filtros avanzados, chips y tarjetas responsivas para encontrar apuntes visualmente consistentes.</p>
+                </div>
+                <div class="workflow-card">
+                    <span>03</span>
+                    <h4>Reserva sesiones</h4>
+                    <p>Formulario contextual dentro de los modales. Sin popups intrusivos, todo integrado al estilo principal.</p>
+                </div>
+                <div class="workflow-card">
+                    <span>04</span>
+                    <h4>Comparte y crece</h4>
+                    <p>Publica posts, responde dudas y sigue la estética corporativa sin preparar CSS adicional.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="trusted">
+        <div class="container">
+            <h2 class="section-title">Instituciones y comunidades que confían en Nine Lives Edu</h2>
+            <div class="trusted-logos">
+                <div class="trusted-logo">Tech Campus</div>
+                <div class="trusted-logo">Colegio Andino</div>
+                <div class="trusted-logo">Universidad Azul</div>
+                <div class="trusted-logo">STEM Latam</div>
+                <div class="trusted-logo">Academia Digital</div>
+                <div class="trusted-logo">Círculo Educativo</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de Testimonios -->
+    <section class="testimonials">
+        <div class="container">
+            <h2 class="section-title">Lo que dicen nuestros usuarios</h2>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <p>"Nine Lives Edu me ha ayudado a encontrar los mejores apuntes para mis exámenes. Los tutores son excelentes y muy pacientes."</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="author-info">
+                            <h4>María González</h4>
+                            <span>Estudiante de Medicina</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <p>"Como tutor, la plataforma me permite conectar fácilmente con estudiantes y compartir mi conocimiento de manera efectiva."</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="author-info">
+                            <h4>Carlos Ruiz</h4>
+                            <span>Tutor de Matemáticas</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <p>"Las videollamadas integradas hacen que las clases sean muy cómodas. No necesito instalar nada adicional."</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="author-info">
+                            <h4>Ana Martínez</h4>
+                            <span>Estudiante de Ingeniería</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de Llamada a la Acción -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>¿Listo para comenzar tu aprendizaje?</h2>
+                <p>Únete a miles de estudiantes y tutores que ya están aprendiendo y enseñando en Nine Lives Edu</p>
+                <button class="btn-cta">Regístrate gratis</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" id="contacto">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <img src="logo.png" alt="Nine Lives Edu" class="logo-img">
+                        <span class="logo-text">Nine Lives Edu</span>
+                    </div>
+                    <p>La plataforma de aprendizaje más completa para estudiantes y tutores.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Enlaces Rápidos</h3>
+                    <ul>
+                        <li><a href="#inicio">Inicio</a></li>
+                        <li><a href="apuntes.html">Apuntes</a></li>
+                        <li><a href="tutores.html">Tutores</a></li>
+                        <li><a href="foros.html">Foros</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Información</h3>
+                    <ul>
+                        <li><a href="#">Términos y Condiciones</a></li>
+                        <li><a href="#">Política de Privacidad</a></li>
+                        <li><a href="#">Ayuda</a></li>
+                        <li><a href="#">Contacto</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Contacto</h3>
+                    <p><i class="fas fa-envelope"></i> contacto@ninelivesedu.com</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 Nine Lives Edu. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foros - Nine Lives Edu</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#667eea">
+    <link rel="stylesheet" href="foros.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header fijo -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <img src="logo.png" alt="Nine Lives Edu" class="logo-img">
+                    <span class="logo-text">Nine Lives Edu</span>
+                </div>
+                
+                <nav class="nav">
+                    <ul class="nav-list">
+                        <li><a href="index.html" class="nav-link">Inicio</a></li>
+                        <li><a href="apuntes.html" class="nav-link">Apuntes</a></li>
+                        <li><a href="tutores.html" class="nav-link">Tutores</a></li>
+                        <li><a href="foros.html" class="nav-link active">Foros</a></li>
+                        <li><a href="index.html#contacto" class="nav-link">Contacto</a></li>
+                    </ul>
+                </nav>
+                
+                <div class="header-buttons">
+                    <button class="btn-tutor">Unirse como tutor</button>
+                    <button class="btn-login">Registro/Iniciar Sesión</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sección principal de foros -->
+    <main class="foros-main">
+        <div class="container">
+            <!-- Header de la página -->
+            <div class="page-header">
+                <h1>Comunidad de Estudio</h1>
+                <p>Conecta con otros estudiantes, resuelve dudas y comparte conocimiento</p>
+            </div>
+
+            <!-- Barra de búsqueda y filtros -->
+            <div class="search-section">
+                <div class="search-bar">
+                    <div class="search-input-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Buscar en foros por título, contenido o palabras clave...">
+                        <button class="search-btn">Buscar</button>
+                    </div>
+                </div>
+
+                <div class="filters-row">
+                    <div class="filter-group">
+                        <label for="nivelFilter">Nivel Educativo:</label>
+                        <select id="nivelFilter">
+                            <option value="">Todos los niveles</option>
+                            <option value="primaria">Primaria</option>
+                            <option value="secundaria">Secundaria</option>
+                            <option value="bachillerato">Bachillerato</option>
+                            <option value="universidad">Universidad</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="materiaFilter">Materia:</label>
+                        <select id="materiaFilter">
+                            <option value="">Todas las materias</option>
+                            <option value="matematicas">Matemáticas</option>
+                            <option value="fisica">Física</option>
+                            <option value="quimica">Química</option>
+                            <option value="biologia">Biología</option>
+                            <option value="historia">Historia</option>
+                            <option value="literatura">Literatura</option>
+                            <option value="ingles">Inglés</option>
+                            <option value="filosofia">Filosofía</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="tipoFilter">Tipo de Post:</label>
+                        <select id="tipoFilter">
+                            <option value="">Todos los tipos</option>
+                            <option value="pregunta">Pregunta</option>
+                            <option value="debate">Debate</option>
+                            <option value="recurso">Recurso</option>
+                            <option value="anuncio">Anuncio</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="ordenFilter">Ordenar por:</label>
+                        <select id="ordenFilter">
+                            <option value="reciente">Más recientes</option>
+                            <option value="popular">Más populares</option>
+                            <option value="respuestas">Más respuestas</option>
+                            <option value="votos">Más votados</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenido principal -->
+            <div class="content-layout">
+                <!-- Panel de categorías -->
+                <aside class="categories-sidebar">
+                    <h3>Categorías</h3>
+                    
+                    <div class="category-section">
+                        <h4>Por Nivel</h4>
+                        <div class="category-list">
+                            <a href="#" class="category-item" data-nivel="primaria">
+                                <i class="fas fa-graduation-cap"></i>
+                                <span>Primaria</span>
+                                <span class="count">45</span>
+                            </a>
+                            <a href="#" class="category-item" data-nivel="secundaria">
+                                <i class="fas fa-book"></i>
+                                <span>Secundaria</span>
+                                <span class="count">128</span>
+                            </a>
+                            <a href="#" class="category-item" data-nivel="bachillerato">
+                                <i class="fas fa-university"></i>
+                                <span>Bachillerato</span>
+                                <span class="count">89</span>
+                            </a>
+                            <a href="#" class="category-item" data-nivel="universidad">
+                                <i class="fas fa-mortar-board"></i>
+                                <span>Universidad</span>
+                                <span class="count">156</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="category-section">
+                        <h4>Por Materia</h4>
+                        <div class="category-list">
+                            <a href="#" class="category-item" data-materia="matematicas">
+                                <i class="fas fa-calculator"></i>
+                                <span>Matemáticas</span>
+                                <span class="count">67</span>
+                            </a>
+                            <a href="#" class="category-item" data-materia="fisica">
+                                <i class="fas fa-atom"></i>
+                                <span>Física</span>
+                                <span class="count">34</span>
+                            </a>
+                            <a href="#" class="category-item" data-materia="quimica">
+                                <i class="fas fa-flask"></i>
+                                <span>Química</span>
+                                <span class="count">28</span>
+                            </a>
+                            <a href="#" class="category-item" data-materia="biologia">
+                                <i class="fas fa-microscope"></i>
+                                <span>Biología</span>
+                                <span class="count">42</span>
+                            </a>
+                            <a href="#" class="category-item" data-materia="historia">
+                                <i class="fas fa-landmark"></i>
+                                <span>Historia</span>
+                                <span class="count">23</span>
+                            </a>
+                            <a href="#" class="category-item" data-materia="literatura">
+                                <i class="fas fa-book-open"></i>
+                                <span>Literatura</span>
+                                <span class="count">31</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <button class="btn-nuevo-post">
+                        <i class="fas fa-plus"></i>
+                        Nuevo Post
+                    </button>
+                </aside>
+
+                <!-- Lista de posts -->
+                <section class="posts-section">
+                    <div class="posts-header">
+                        <div>
+                            <h2>Discusiones Recientes</h2>
+                            <span id="resultsCount" class="results-count">Mostrando 0 posts</span>
+                        </div>
+                        <div class="view-toggle">
+                            <button class="view-btn active" data-view="list">
+                                <i class="fas fa-list"></i>
+                            </button>
+                            <button class="view-btn" data-view="grid">
+                                <i class="fas fa-th"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="posts-container" id="postsContainer">
+                        <!-- Los posts se cargarán dinámicamente -->
+                    </div>
+
+                    <!-- Paginación -->
+                    <div class="pagination">
+                        <button class="page-btn" disabled>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span class="page-numbers">
+                            <button class="page-number active">1</button>
+                            <button class="page-number">2</button>
+                            <button class="page-number">3</button>
+                        </span>
+                        <button class="page-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal para nuevo post -->
+    <div class="modal-overlay" id="newPostModal">
+        <div class="modal-card new-post-modal">
+            <div class="modal-header">
+                <h2>Crear Nuevo Post</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="newPostForm">
+                    <div class="form-group">
+                        <label for="postTitulo">Título del Post</label>
+                        <input type="text" id="postTitulo" name="postTitulo" required placeholder="Escribe un título descriptivo...">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="postNivel">Nivel Educativo</label>
+                            <select id="postNivel" name="postNivel" required>
+                                <option value="">Selecciona un nivel</option>
+                                <option value="primaria">Primaria</option>
+                                <option value="secundaria">Secundaria</option>
+                                <option value="bachillerato">Bachillerato</option>
+                                <option value="universidad">Universidad</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="postMateria">Materia</label>
+                            <select id="postMateria" name="postMateria" required>
+                                <option value="">Selecciona una materia</option>
+                                <option value="matematicas">Matemáticas</option>
+                                <option value="fisica">Física</option>
+                                <option value="quimica">Química</option>
+                                <option value="biologia">Biología</option>
+                                <option value="historia">Historia</option>
+                                <option value="literatura">Literatura</option>
+                                <option value="ingles">Inglés</option>
+                                <option value="filosofia">Filosofía</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="postTipo">Tipo de Post</label>
+                            <select id="postTipo" name="postTipo" required>
+                                <option value="">Selecciona un tipo</option>
+                                <option value="pregunta">Pregunta</option>
+                                <option value="debate">Debate</option>
+                                <option value="recurso">Recurso</option>
+                                <option value="anuncio">Anuncio</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="postContenido">Contenido</label>
+                        <textarea id="postContenido" name="postContenido" rows="6" required placeholder="Escribe tu pregunta, debate o comparte tu recurso..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="postTags">Etiquetas (opcional)</label>
+                        <input type="text" id="postTags" name="postTags" placeholder="Separadas por comas (ej: calculo, derivadas, ayuda)">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel">Cancelar</button>
+                        <button type="submit" class="btn-submit">Publicar Post</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para ver post completo -->
+    <div class="modal-overlay" id="postModal">
+        <div class="modal-card post-modal">
+            <div class="modal-header">
+                <h2 id="postModalTitle">Post</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="post-content" id="postModalContent">
+                    <!-- Contenido del post se cargará aquí -->
+                </div>
+                
+                <div class="post-responses" id="postModalResponses">
+                    <!-- Respuestas se cargarán aquí -->
+                </div>
+
+                <div class="add-response">
+                    <h4>Agregar Respuesta</h4>
+                    <textarea id="responseText" rows="3" placeholder="Escribe tu respuesta..."></textarea>
+                    <button class="btn-add-response">Enviar Respuesta</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="foros.js"></script>
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutores - Nine Lives Edu</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#667eea">
+    <link rel="stylesheet" href="tutores.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header fijo -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <img src="logo.png" alt="Nine Lives Edu" class="logo-img">
+                    <span class="logo-text">Nine Lives Edu</span>
+                </div>
+                
+                <nav class="nav">
+                    <ul class="nav-list">
+                        <li><a href="index.html" class="nav-link">Inicio</a></li>
+                        <li><a href="apuntes.html" class="nav-link">Apuntes</a></li>
+                        <li><a href="tutores.html" class="nav-link active">Tutores</a></li>
+                        <li><a href="foros.html" class="nav-link">Foros</a></li>
+                        <li><a href="index.html#contacto" class="nav-link">Contacto</a></li>
+                    </ul>
+                </nav>
+                
+                <div class="header-buttons">
+                    <button class="btn-tutor">Unirse como tutor</button>
+                    <button class="btn-login">Registro/Iniciar Sesión</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sección principal de tutores -->
+    <main class="tutores-main">
+        <div class="container">
+            <!-- Header de la página -->
+            <div class="page-header">
+                <h1>Encuentra tu Tutor Ideal</h1>
+                <p>Conecta con tutores verificados y experimentados en tu materia</p>
+            </div>
+
+            <!-- Barra de búsqueda y filtros -->
+            <div class="search-section">
+                <div class="search-bar">
+                    <div class="search-input-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Buscar tutores por nombre, materia o especialidad...">
+                        <button class="search-btn">Buscar</button>
+                    </div>
+                </div>
+
+                <div class="filters-row">
+                    <div class="filter-group">
+                        <label for="nivelFilter">Nivel Educativo:</label>
+                        <select id="nivelFilter">
+                            <option value="">Todos los niveles</option>
+                            <option value="primaria">Primaria</option>
+                            <option value="secundaria">Secundaria</option>
+                            <option value="bachillerato">Bachillerato</option>
+                            <option value="universidad">Universidad</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="materiaFilter">Materia:</label>
+                        <select id="materiaFilter">
+                            <option value="">Todas las materias</option>
+                            <option value="matematicas">Matemáticas</option>
+                            <option value="fisica">Física</option>
+                            <option value="quimica">Química</option>
+                            <option value="biologia">Biología</option>
+                            <option value="historia">Historia</option>
+                            <option value="literatura">Literatura</option>
+                            <option value="ingles">Inglés</option>
+                            <option value="filosofia">Filosofía</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="precioFilter">Precio por hora:</label>
+                        <select id="precioFilter">
+                            <option value="">Cualquier precio</option>
+                            <option value="0-15">$0 - $15</option>
+                            <option value="15-25">$15 - $25</option>
+                            <option value="25-40">$25 - $40</option>
+                            <option value="40+">$40+</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="ratingFilter">Valoración mínima:</label>
+                        <select id="ratingFilter">
+                            <option value="">Cualquier valoración</option>
+                            <option value="4.5">4.5+ estrellas</option>
+                            <option value="4.0">4.0+ estrellas</option>
+                            <option value="3.5">3.5+ estrellas</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenido principal -->
+            <section class="swap-section">
+                <div class="swap-card">
+                    <div class="swap-info">
+                        <h2>Intercambia Tutorías</h2>
+                        <p>Ofrece tus conocimientos en una materia y recibe ayuda en otra. Crea un intercambio justo y seguro dentro de Nine Lives Edu.</p>
+                        <ul>
+                            <li><i class="fas fa-exchange-alt"></i> Trueques aprobados por el equipo</li>
+                            <li><i class="fas fa-user-shield"></i> Identidad verificada</li>
+                            <li><i class="fas fa-comments"></i> Chat seguro dentro de la plataforma</li>
+                        </ul>
+                    </div>
+                    <form id="swapForm" class="swap-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="swapNombre">Tu nombre completo</label>
+                                <input type="text" id="swapNombre" name="swapNombre" placeholder="Ej: Carla Rodríguez" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="swapOfreces">Materia que ofreces</label>
+                                <select id="swapOfreces" name="swapOfreces" required>
+                                    <option value="">Selecciona una materia</option>
+                                    <option value="matematicas">Matemáticas</option>
+                                    <option value="fisica">Física</option>
+                                    <option value="quimica">Química</option>
+                                    <option value="biologia">Biología</option>
+                                    <option value="historia">Historia</option>
+                                    <option value="literatura">Literatura</option>
+                                    <option value="ingles">Inglés</option>
+                                    <option value="filosofia">Filosofía</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="swapSolicitas">Materia que necesitas</label>
+                                <select id="swapSolicitas" name="swapSolicitas" required>
+                                    <option value="">Selecciona una materia</option>
+                                    <option value="matematicas">Matemáticas</option>
+                                    <option value="fisica">Física</option>
+                                    <option value="quimica">Química</option>
+                                    <option value="biologia">Biología</option>
+                                    <option value="historia">Historia</option>
+                                    <option value="literatura">Literatura</option>
+                                    <option value="ingles">Inglés</option>
+                                    <option value="filosofia">Filosofía</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="swapDescripcion">Cuéntanos más (opcional)</label>
+                            <textarea id="swapDescripcion" name="swapDescripcion" rows="3" placeholder="Disponibilidad, objetivos de aprendizaje, nivel educativo..."></textarea>
+                        </div>
+                        <button type="submit" class="btn-swap">
+                            <i class="fas fa-handshake"></i> Publicar intercambio
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <div class="content-layout">
+                <!-- Panel de filtros laterales -->
+                <aside class="filters-sidebar">
+                    <h3>Filtros Adicionales</h3>
+                    
+                    <div class="filter-section">
+                        <h4>Disponibilidad</h4>
+                        <div class="availability-filter">
+                            <label><input type="checkbox" value="mañana"> Mañana (8:00 - 12:00)</label>
+                            <label><input type="checkbox" value="tarde"> Tarde (12:00 - 18:00)</label>
+                            <label><input type="checkbox" value="noche"> Noche (18:00 - 22:00)</label>
+                            <label><input type="checkbox" value="fines"> Fines de semana</label>
+                        </div>
+                    </div>
+
+                    <div class="filter-section">
+                        <h4>Idioma</h4>
+                        <div class="language-filter">
+                            <label><input type="checkbox" value="español"> Español</label>
+                            <label><input type="checkbox" value="ingles"> Inglés</label>
+                            <label><input type="checkbox" value="frances"> Francés</label>
+                        </div>
+                    </div>
+
+                    <div class="filter-section">
+                        <h4>Experiencia</h4>
+                        <div class="experience-filter">
+                            <label><input type="radio" name="experience" value="5+"> 5+ años</label>
+                            <label><input type="radio" name="experience" value="3-5"> 3-5 años</label>
+                            <label><input type="radio" name="experience" value="1-3"> 1-3 años</label>
+                        </div>
+                    </div>
+
+                    <button class="btn-limpiar-filtros">Limpiar Filtros</button>
+                </aside>
+
+                <!-- Lista de tutores -->
+                <section class="tutores-grid">
+                    <div class="results-header">
+                        <span id="resultsCount">Mostrando 8 tutores</span>
+                        <div class="view-toggle">
+                            <button class="view-btn active" data-view="grid">
+                                <i class="fas fa-th"></i>
+                            </button>
+                            <button class="view-btn" data-view="list">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="tutores-container" id="tutoresContainer">
+                        <!-- Los tutores se cargarán dinámicamente -->
+                    </div>
+
+                    <!-- Paginación -->
+                    <div class="pagination">
+                        <button class="page-btn" disabled>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span class="page-numbers">
+                            <button class="page-number active">1</button>
+                            <button class="page-number">2</button>
+                            <button class="page-number">3</button>
+                        </span>
+                        <button class="page-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal de perfil de tutor -->
+    <div class="modal-overlay" id="tutorModal">
+        <div class="modal-card tutor-modal">
+            <div class="modal-header">
+                <h2 id="tutorName">Perfil del Tutor</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="tutor-profile">
+                    <div class="tutor-photo">
+                        <img id="tutorPhoto" src="" alt="Foto del tutor">
+                    </div>
+                    <div class="tutor-info">
+                        <h3 id="tutorNameInfo"></h3>
+                        <div class="tutor-rating">
+                            <span id="tutorStars"></span>
+                            <span id="tutorRating"></span>
+                        </div>
+                        <p id="tutorPrice"></p>
+                    </div>
+                </div>
+
+                <div class="tutor-details">
+                    <div class="detail-section">
+                        <h4>Biografía</h4>
+                        <p id="tutorBio"></p>
+                    </div>
+
+                    <div class="detail-section">
+                        <h4>Materias que enseña</h4>
+                        <div id="tutorSubjects" class="subjects-list"></div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h4>Disponibilidad</h4>
+                        <div id="tutorAvailability" class="availability-calendar"></div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h4>Reseñas de estudiantes</h4>
+                        <div id="tutorReviews" class="reviews-list"></div>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn-reservar">Reservar Clase</button>
+                    <button class="btn-contactar">Contactar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de reserva -->
+    <div class="modal-overlay" id="reservationModal">
+        <div class="modal-card reservation-modal">
+            <div class="modal-header">
+                <h2>Solicitar clase</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="reservation-tutor" id="reservationTutorName">Reservar con tutor</p>
+                <form id="reservationForm">
+                    <div class="form-group">
+                        <label for="reservaNombre">Tu nombre completo</label>
+                        <input type="text" id="reservaNombre" required placeholder="Ej: Laura Fernández">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="reservaFecha">Fecha preferida</label>
+                            <input type="date" id="reservaFecha" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="reservaHora">Horario (hora local)</label>
+                            <input type="time" id="reservaHora" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="reservaModalidad">Modalidad</label>
+                        <select id="reservaModalidad" required>
+                            <option value="online">Online</option>
+                            <option value="presencial">Presencial</option>
+                            <option value="híbrida">Híbrida</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel">Cancelar</button>
+                        <button type="submit" class="btn-submit">Confirmar reserva</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="tutores.js"></script>
+</body>
+</html>
