@@ -1,0 +1,117 @@
+const apuntes = [
+  {
+    id: 'apunte-1',
+    titulo: 'Cálculo Diferencial e Integral',
+    materia: 'matematicas',
+    nivel: 'universidad',
+    autor: 'Dr. María González',
+    fecha: '2024-01-15',
+    descripcion: 'Apuntes completos de cálculo diferencial e integral con ejemplos prácticos y ejercicios resueltos.',
+    tipo: 'pdf',
+    rating: 4.8,
+    descargas: 1250,
+    icono: 'fas fa-calculator',
+    archivo: 'calculo.pdf'
+  },
+  {
+    id: 'apunte-2',
+    titulo: 'Física Cuántica Básica',
+    materia: 'fisica',
+    nivel: 'universidad',
+    autor: 'Prof. Carlos Ruiz',
+    fecha: '2024-01-10',
+    descripcion: 'Introducción a la física cuántica con conceptos fundamentales y aplicaciones modernas.',
+    tipo: 'pdf',
+    rating: 4.6,
+    descargas: 890,
+    icono: 'fas fa-atom',
+    archivo: 'fisica_cuantica.pdf'
+  },
+  {
+    id: 'apunte-3',
+    titulo: 'Química Orgánica - Reacciones',
+    materia: 'quimica',
+    nivel: 'bachillerato',
+    autor: 'Dra. Ana Martínez',
+    fecha: '2024-01-08',
+    descripcion: 'Guía completa de reacciones químicas orgánicas con mecanismos detallados.',
+    tipo: 'ppt',
+    rating: 4.7,
+    descargas: 1100,
+    icono: 'fas fa-flask',
+    archivo: 'quimica_organica.pptx'
+  },
+  {
+    id: 'apunte-4',
+    titulo: 'Historia del Arte Renacentista',
+    materia: 'historia',
+    nivel: 'secundaria',
+    autor: 'Prof. Luis García',
+    fecha: '2024-01-05',
+    descripcion: 'Análisis detallado del arte renacentista con imágenes y contexto histórico.',
+    tipo: 'pdf',
+    rating: 4.5,
+    descargas: 650,
+    icono: 'fas fa-palette',
+    archivo: 'arte_renacentista.pdf'
+  },
+  {
+    id: 'apunte-5',
+    titulo: 'Literatura Española del Siglo de Oro',
+    materia: 'literatura',
+    nivel: 'bachillerato',
+    autor: 'Dra. Carmen López',
+    fecha: '2024-01-03',
+    descripcion: 'Estudio completo de los autores y obras más importantes del Siglo de Oro español.',
+    tipo: 'doc',
+    rating: 4.9,
+    descargas: 780,
+    icono: 'fas fa-book',
+    archivo: 'siglo_de_oro.docx'
+  },
+  {
+    id: 'apunte-6',
+    titulo: 'Gramática Inglesa Avanzada',
+    materia: 'ingles',
+    nivel: 'universidad',
+    autor: 'Prof. John Smith',
+    fecha: '2024-01-01',
+    descripcion: 'Gramática inglesa avanzada con ejercicios prácticos y ejemplos de uso.',
+    tipo: 'pdf',
+    rating: 4.4,
+    descargas: 920,
+    icono: 'fas fa-language',
+    archivo: 'gramatica_inglesa.pdf'
+  },
+  {
+    id: 'apunte-7',
+    titulo: 'Biología Celular',
+    materia: 'biologia',
+    nivel: 'universidad',
+    autor: 'Dra. Patricia Vega',
+    fecha: '2023-12-28',
+    descripcion: 'Estructura y función de las células con diagramas detallados y explicaciones.',
+    tipo: 'pdf',
+    rating: 4.6,
+    descargas: 1050,
+    icono: 'fas fa-microscope',
+    archivo: 'biologia_celular.pdf'
+  },
+  {
+    id: 'apunte-8',
+    titulo: 'Filosofía Existencialista',
+    materia: 'filosofia',
+    nivel: 'bachillerato',
+    autor: 'Prof. Miguel Torres',
+    fecha: '2023-12-25',
+    descripcion: 'Introducción al existencialismo con análisis de los principales filósofos.',
+    tipo: 'doc',
+    rating: 4.3,
+    descargas: 420,
+    icono: 'fas fa-brain',
+    archivo: 'filosofia_existencialista.docx'
+  }
+];
+
+module.exports = { apuntes };
+
