@@ -141,19 +141,12 @@
             if (!text || send.disabled) return;
 
             // ─────────────────────────────────────────────────────
-            // URL del backend FastAPI: detecta automáticamente si
-            // estamos en local o en producción (Render).
-            //
-            // ⚠️ IMPORTANTE: una vez que despliegues tu FastAPI en
-            // Render, reemplazá la URL de abajo por la real que te
-            // dé Render, ej: 'https://ninelivesedu-backend.onrender.com/api/chat'
+            // URL del backend FastAPI: ruta relativa. Como el
+            // frontend y el backend FastAPI viven en el MISMO
+            // servicio de Render, esto apunta automáticamente al
+            // dominio correcto tanto en local como en producción.
             // ─────────────────────────────────────────────────────
-            const isLocal = window.location.hostname === 'localhost' ||
-                             window.location.hostname === '127.0.0.1';
-
-            const CHAT_API = isLocal
-                ? 'http://127.0.0.1:8000/api/chat'   // FastAPI local (uvicorn default port 8000)
-                : 'https://ninelivesedu-backend.onrender.com/api/chat'; // 👈 CAMBIAR por tu URL real de Render
+            const CHAT_API = '/api/chat';
 
             addBubble(text, 'user');
             input.value = '';
