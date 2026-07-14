@@ -135,13 +135,25 @@
             return t;
         }
 
-        // FUNCIÓN CONECTADA AL PUENTE REAL DE NODE.JS
+        // FUNCIÓN CONECTADA AL BACKEND REAL (FastAPI)
         function sendMessage() {
             const text = input.value.trim();
             if (!text || send.disabled) return;
 
-            // Apuntamos al endpoint de nuestro puente de Node (Puerto 3000)
-            const NODE_CHAT_API = 'http://127.0.0.1:3000/api/chat';
+            // ─────────────────────────────────────────────────────
+            // URL del backend FastAPI: detecta automáticamente si
+            // estamos en local o en producción (Render).
+            //
+            // ⚠️ IMPORTANTE: una vez que despliegues tu FastAPI en
+            // Render, reemplazá la URL de abajo por la real que te
+            // dé Render, ej: 'https://ninelivesedu-backend.onrender.com/api/chat'
+            // ─────────────────────────────────────────────────────
+            const isLocal = window.location.hostname === 'localhost' ||
+                             window.location.hostname === '127.0.0.1';
+
+            const CHAT_API = isLocal
+                ? 'http://127.0.0.1:8000/api/chat'   // FastAPI local (uvicorn default port 8000)
+                : 'https://ninelivesedu-backend.onrender.com/api/chat'; // 👈 CAMBIAR por tu URL real de Render
 
             addBubble(text, 'user');
             input.value = '';
@@ -154,8 +166,8 @@
             // Mostramos tus tres puntitos de carga animados
             const typing = showTyping();
 
-            // Realizamos la petición HTTP POST asincrónica hacia Node.js
-            fetch(NODE_CHAT_API, {
+            // Realizamos la petición HTTP POST asincrónica hacia FastAPI
+            fetch(CHAT_API, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -179,7 +191,7 @@
             .catch(error => {
                 console.error('Error de conexión:', error);
                 typing.remove();
-                addBubble('❌ No se pudo conectar con el servidor. Asegurate de tener encendidos los backend de Node y Python. 🐾', 'bot');
+                addBubble('❌ No se pudo conectar con el servidor. Asegurate de que el backend esté encendido. 🐾', 'bot');
             })
             .finally(() => {
                 // Desbloqueamos los controles para que el alumno pueda volver a preguntar
