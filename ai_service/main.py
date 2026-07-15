@@ -5,9 +5,19 @@ Expone el endpoint de chat (Gemini) que antes hacía de puente ai_service/node/s
 import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 import google.generativeai as genai
 
-from src.schemas import ChatRequest, ChatResponse
+# ─────────────────────────────────────────────
+# Schemas (definidos acá directamente para evitar
+# problemas de resolución de módulos en el deploy)
+# ─────────────────────────────────────────────
+class ChatRequest(BaseModel):
+    message: str
+
+
+class ChatResponse(BaseModel):
+    reply: str
 
 # ─────────────────────────────────────────────
 # Configuración
