@@ -1,22 +1,66 @@
-from fastapi import FastAPI
+"""
+Ninelives AI — Microservicio FastAPI
+Expone el endpoint de chat (Gemini) que antes hacía de puente ai_service/node/server.js.
+"""
+import os
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+import google.generativeai as genai
 
-app = FastAPI()
+from src.schemas import ChatRequest, ChatResponse
 
-# Esto permite que tu iPhone se conecte sin bloqueos
+# ─────────────────────────────────────────────
+# Configuración
+# ─────────────────────────────────────────────
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    raise RuntimeError(
+        "Falta la variable de entorno GEMINI_API_KEY. "
+        "Configurala en tu .env local o en Render (Environment)."
+    )
+
+genai.configure(api_key=GEMINI_API_KEY)
+model = genai.GenerativeModel("gemini-2.0-flash")
+
+# Instrucción de sistema para que el bot se comporte como "Wawa AI"
+SYSTEM_PROMPT = (
+    "Sos Wawa AI, el asistente de estudio de la plataforma Nine Lives Edu. "
+    "Ayudás a estudiantes a encontrar apuntes, tutores, y resolver dudas académicas. "
+    "Respondé siempre en español, de forma breve, cálida y clara."
+)
+
+app = FastAPI(title="Ninelives AI Service")
+
+# CORS: permití el dominio de tu frontend en producción y en local
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=[
+        "https://ninelivesedu-1.onrender.com",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-@app.get("/")
-def inicio():
-    return {"mensaje": "El backend de Python está vivo"}
 
-@app.post("/login")
-def login():
-    # Aquí irá tu lógica de login más adelante
-    return {"success": True, "message": "Conectado al nuevo backend"}
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+
+@app.post("/api/v1/chat", response_model=ChatResponse)
+def chat(payload: ChatRequest):
+    try:
+        response = model.generate_content(
+            [SYSTEM_PROMPT, payload.message]
+        )
+        reply_text = response.text.strip() if response.text else (
+            "No pude generar una respuesta, intentá de nuevo. 🐾"
+        )
+        return ChatResponse(reply=reply_text)
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error al generar respuesta con Gemini: {str(e)}"
+        )
