@@ -32,6 +32,42 @@ app.use('/api/tutores', tutoresRouter);
 app.use('/api/foros', forosRouter);
 app.use('/api/asistencia', asistenciaRouter);
 
+// ─────────────────────────────────────────────
+// PROXY DEL CHATBOT → microservicio FastAPI (ai_service)
+// El frontend le pide a este mismo dominio (/api/chat),
+// y acá lo reenviamos al servicio de Python real.
+// Configurá AI_SERVICE_URL en las variables de entorno de Render.
+// ─────────────────────────────────────────────
+const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8000';
+
+app.post('/api/chat', async (req, res) => {
+  try {
+    const { message } = req.body;
+    if (!message) {
+      return res.status(400).json({ success: false, error: 'El mensaje no puede estar vacío.' });
+    }
+
+    const response = await fetch(`${AI_SERVICE_URL}/api/v1/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`El servicio de IA respondió con status ${response.status}`);
+    }
+
+    const data = await response.json();
+    return res.json({ success: true, reply: data.reply });
+  } catch (error) {
+    console.error('[Proxy /api/chat] Error al conectar con ai_service:', error.message);
+    return res.status(502).json({
+      success: false,
+      error: 'No se pudo conectar con el servicio de IA. Asegurate de que esté encendido.',
+    });
+  }
+});
+
 app.use(express.static(PUBLIC_DIR));
 app.use('/uploads', express.static(UPLOADS_DIR));
 
@@ -56,4 +92,3 @@ initDatabase()
     console.error('Error al inicializar la base de datos:', error);
     process.exit(1);
   });
-
