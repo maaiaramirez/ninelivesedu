@@ -1,117 +1,73 @@
-# Nine Lives Edu (Node.js + Frontend estático)
+# Nine Lives Edu
 
-Aplicación web que conecta estudiantes con tutores, apuntes y foros colaborativos. Partiendo de la carpeta `codigos pagina`, ahora se expone un backend en Node.js/Express que sirve la misma interfaz y ofrece endpoints para alimentar a futuras apps móviles o web.
+Plataforma educativa colaborativa: apuntes, tutores, foros de estudio, asistencia de profesores en tiempo real, y un chatbot de estudio (Wawa AI).
 
-## 🚀 Puesta en marcha
+## Arquitectura
+
+Un solo servicio backend en **FastAPI (Python)**, que sirve tanto la API como el frontend estático. Sin Node.js, sin microservicios separados, sin proxies entre servicios.
+
+```
+main.py                    → arranca la app, sirve el frontend + monta las rutas de la API
+app/
+  database.py                → SQLite (stdlib sqlite3), schema y datos semilla
+  data_seed.py                 → datos de ejemplo (apuntes, tutores, posts)
+  document_processor.py        → extracción de texto de documentos (para verificación de tutores)
+  verification.py              → flujo de verificación de certificaciones (LangGraph) — pendiente de conectar
+  routers/
+    apuntes.py                   → listar, crear, descargar apuntes
+    tutores.py                   → listar tutores, reservas, intercambios
+    foros.py                     → posts, votos, respuestas
+    asistencia.py                → asistencia de profesores en vivo (Server-Sent Events) + check-in/out ESP32
+    chat.py                      → chatbot Wawa AI (OpenRouter)
+    moderacion.py                → verificación de certificaciones (desactivado por defecto, ver abajo)
+codigos pagina/             → frontend estático (HTML/CSS/JS)
+storage/
+  ninelivesedu.sqlite         → base de datos (se crea sola al arrancar)
+  uploads/                     → archivos subidos por los usuarios
+```
+
+## Cómo correrlo en local
 
 ```bash
-npm install
-npm run dev        # recarga automática con nodemon
-# o
-npm start          # servidor en modo producción
+pip install -r requirements.txt
+uvicorn main:app --reload --port 8000
 ```
 
-### 📱 Empaquetar como App (Android con Capacitor)
+Abrí `http://127.0.0.1:8000` en el navegador.
 
-Requisitos: Android Studio (SDK + build-tools), Java 17, Node.
+## Variables de entorno
 
-```bash
-# 1) Instala dependencias de Capacitor
-npm install
-npm install @capacitor/core @capacitor/cli
+| Variable | Obligatoria | Descripción |
+|---|---|---|
+| `OPENROUTER_API_KEY` | Sí | Clave de [openrouter.ai](https://openrouter.ai) (gratis, sin tarjeta) para el chatbot |
+| `OPENROUTER_MODEL` | No | Modelo a usar. Por defecto `openrouter/free` (auto-router entre modelos gratis) |
+| `ESP32_API_KEY` | No | Clave para autenticar los dispositivos ESP32 de check-in de asistencia |
+| `PIN_HASH_SECRET` | No | Secreto para hashear los PIN de profesores |
 
-# 2) Copia el frontend a /www
-npm run sync-www    # usa PowerShell/bash según tu SO
+## Despliegue en Render
 
-# 3) Inicializa/actualiza Capacitor
-npx cap init ninelivesedu com.ninelivesedu.app --web-dir=www   # ya está en repo, puedes omitir si existe
-npx cap add android                                      # ya creado si existe /android
+- **Build Command**: `pip install -r requirements.txt`
+- **Start Command**: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+- **Root Directory**: vacío (raíz del repo)
+- La versión de Python queda fijada por `runtime.txt`; si Render la ignora, usar la variable de entorno `PYTHON_VERSION` como alternativa.
 
-# 4) Copia assets al proyecto Android
-npm run cap:copy
+## Endpoints principales
 
-# 5) Abre Android Studio para generar el APK
-npm run cap:open
-# En Android Studio: Build > Build Bundle(s)/APK(s) > Build APK(s)
-```
+| Método | Ruta | Descripción |
+|---|---|---|
+| GET | `/health` | Estado del servicio |
+| GET/POST | `/api/apuntes` | Listar / crear apuntes |
+| POST | `/api/apuntes/{id}/descargas` | Sumar una descarga |
+| GET | `/api/tutores` | Listar tutores |
+| POST | `/api/tutores/{id}/reservas` | Reservar sesión con un tutor |
+| GET/POST | `/api/foros` | Listar / crear posts del foro |
+| POST | `/api/foros/{id}/vote` | Votar un post |
+| GET | `/api/asistencia/profesores-disponibles` | Profesores conectados ahora |
+| GET | `/api/asistencia/stream` | Stream en tiempo real (SSE) |
+| POST | `/api/chat` | Chatbot Wawa AI |
 
-El APK queda en `android/app/build/outputs/apk/debug/app-debug.apk` (o release si firmas).
+## Pendiente / roadmap
 
-Notas:
-- `codigos pagina` es la fuente; `www` es la salida que consume Capacitor.
-- El service worker ya cachea estáticos; offline funciona con los recursos incluidos. Las llamadas a `/api` requieren red/servidor.
-```
-
-El servidor se levanta en `http://localhost:3000` por defecto y publica tanto los archivos estáticos (`codigos pagina`) como las APIs REST bajo `/api`.
-
-## 📁 Estructura relevante
-
-```
-.
-├── codigos pagina/            # HTML, CSS, JS e imágenes originales
-├── src/
-│   ├── data/                  # Datos seed utilizados para poblar la BD
-│   ├── db/                    # Inicialización y helpers de sql.js
-│   ├── routes/                # Routers Express para cada dominio
-│   └── server.js              # Configuración principal de Express
-├── storage/ninelivesedu.sqlite   # Base de datos persistida (se crea al arrancar)
-├── package.json
-└── README.md                  # Este archivo
-```
-
-## 🧠 Endpoints principales
-
-| Recurso      | Método | Ruta                                | Descripción                                   |
-|--------------|--------|-------------------------------------|-----------------------------------------------|
-| Apuntes      | GET    | `/api/apuntes`                      | Lista todos los apuntes                       |
-|              | POST   | `/api/apuntes`                      | Crea un apunte (multipart + archivo real)     |
-|              | GET    | `/api/apuntes/:id/descargar`        | Descarga el archivo físico subido             |
-|              | POST   | `/api/apuntes/:id/descargas`        | Incrementa contador de descargas              |
-| Tutores      | GET    | `/api/tutores`                      | Lista tutores y su disponibilidad             |
-|              | POST   | `/api/tutores/:id/reservas`         | Solicita una reserva rápida                   |
-|              | POST   | `/api/tutores/intercambios`         | Registra intercambios tutoría x tutoría       |
-| Foros        | GET    | `/api/foros`                        | Lista posts de la comunidad                   |
-|              | POST   | `/api/foros`                        | Crea un post                                  |
-|              | POST   | `/api/foros/:id/vote`               | Incrementa votos                              |
-|              | POST   | `/api/foros/:id/respuestas`         | Añade una respuesta                           |
-| Asistencia   | GET    | `/api/asistencia/profesores-disponibles` | Lista profesores disponibles en tiempo real |
-|              | GET    | `/api/asistencia/stream`            | Stream SSE para actualizar disponibilidad     |
-|              | POST   | `/api/asistencia/esp32/check-in`    | Marca profesor disponible (ESP32 + PIN)       |
-|              | POST   | `/api/asistencia/esp32/check-out`   | Marca profesor no disponible                   |
-
-> Todos los endpoints leen y escriben en `storage/ninelivesedu.sqlite`, gestionada mediante `sql.js` (SQLite compilado a WebAssembly).
-
-## 🗃️ Base de datos
-
-- **Motor**: [`sql.js`](https://github.com/sql-js/sql.js) (sin dependencias nativas).
-- **Archivo**: `storage/ninelivesedu.sqlite` (se crea automáticamente al iniciar el servidor).
-- **Seed**: las colecciones definidas en `src/data` se insertan sólo la primera vez.
-- **Reset**: basta con borrar `storage/ninelivesedu.sqlite` y reiniciar el servidor para regenerarla con los datos iniciales.
-
-## 📱 Frontend (sin cambios visuales)
-
-Los HTML y estilos originales se mantienen, pero la lógica en `apuntes.js`, `tutores.js` y `foros.js` ahora consume las APIs anteriores, lo que facilita reutilizar el backend desde una app móvil (Flutter, React Native, etc.).
-
-## ✅ Próximos pasos sugeridos
-
-- Migrar de `sql.js` a un motor gestionado (SQLite nativo, Postgres, MongoDB, etc.).
-- Añadir autenticación y control de sesiones.
-- Integrar WebRTC/servicios de videollamada.
-- Conectar pasarelas de pago para cerrar el flujo de reservas.
-
-Con esto tienes un monorepo sencillo listo para iterar sobre el backend y mantener la misma experiencia visual. ¡Éxitos construyendo Nine Lives Edu! 💡
-
-## 🔐 Variables de entorno sugeridas
-
-- `ESP32_API_KEY`: clave esperada en header `x-esp32-key` para endpoints del dispositivo.
-- `PIN_HASH_SECRET`: semilla para hash SHA-256 del PIN docente.
-
-> Demo inicial: se crea `teacher-demo-1` con PIN `123456` (hasheado en DB) para pruebas locales.
-
-## 📎 Subida de archivos de apuntes
-
-- Los archivos se guardan en `storage/uploads`.
-- Se exponen públicamente por `/uploads/...`.
-- Formatos permitidos: PDF, Word, PowerPoint, PNG, JPG, WEBP.
-- Límite por archivo: 15 MB.
-
+- **Panel de moderadores**: no existe todavía interfaz ni lógica de aprobación — solo el endpoint de verificación de certificaciones (`app/routers/moderacion.py`), desactivado por defecto porque sus dependencias (`langgraph`, `unstructured`) son pesadas. Para activarlo: descomentar el import en `main.py` y las 3 líneas correspondientes en `requirements.txt`.
+- El análisis de certificaciones en `app/verification.py` es un **stub** (heurística simple, no usa IA real todavía).
+- Unificar/limpiar los datos semilla si se pasa a una base de datos persistente distinta de SQLite.
