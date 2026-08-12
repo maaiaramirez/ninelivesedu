@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nine Lives Edu — Profesores en línea ahora</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#1B0F2E">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="components.css">
+    <link rel="stylesheet" href="atlas-theme.css">
+    <style>
+        .asistencia-hero {
+            padding: 7rem 0 3rem;
+            text-align: center;
+        }
+        .asistencia-hero h1 {
+            font-family: var(--font-display);
+            font-size: 2.2rem;
+            color: var(--border-cream);
+            text-shadow: 3px 3px 0px var(--bg-deep-indigo);
+            margin-bottom: 0.75rem;
+        }
+        .asistencia-hero p {
+            color: var(--text-muted);
+            font-size: 1.3rem;
+            max-width: 560px;
+            margin: 0 auto;
+        }
+        .asistencia-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            padding: 0.5rem 1.1rem;
+            font-family: var(--font-display);
+            font-size: 0.75rem;
+            border: 3px solid var(--border-cream);
+            background: var(--bg-panel);
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.4);
+        }
+        .asistencia-status .pulse-dot {
+            width: 10px; height: 10px;
+            background: #6FBF6F;
+            box-shadow: 0 0 0 3px rgba(111,191,111,0.35);
+            animation: pulse-step 1.2s steps(4) infinite;
+        }
+        .asistencia-status.offline .pulse-dot { background: #C24E4E; box-shadow: 0 0 0 3px rgba(194,78,78,0.35); }
+        @keyframes pulse-step {
+            0%   { opacity: 1; }
+            50%  { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        .jardin-profesores {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1rem 1.5rem 5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1.75rem;
+        }
+
+        .profesor-card {
+            background: var(--bg-panel);
+            border: 3px solid var(--border-cream);
+            box-shadow: 5px 5px 0px rgba(0,0,0,0.45);
+            padding: 1.5rem;
+            position: relative;
+            text-align: center;
+        }
+        .profesor-card::before {
+            content: "";
+            position: absolute; inset: 6px;
+            border: 1px solid rgba(243,230,200,0.35);
+            pointer-events: none;
+        }
+        .profesor-flor {
+            font-size: 2.6rem;
+            color: var(--accent-pink);
+            text-shadow: 2px 2px 0 var(--bg-deep-indigo);
+            animation: bloom 0.6s steps(4) 1;
+            margin-bottom: 0.5rem;
+        }
+        .profesor-nombre {
+            font-family: var(--font-display);
+            color: var(--border-cream);
+            font-size: 1.05rem;
+            margin-bottom: 0.25rem;
+        }
+        .profesor-terminal {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+        .profesor-desde {
+            margin-top: 0.75rem;
+            font-size: 0.65rem;
+            font-family: 'Press Start 2P', var(--font-display);
+            color: var(--accent-gold);
+            letter-spacing: 0.03em;
+        }
+
+        .jardin-vacio {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-muted);
+            font-size: 1.3rem;
+        }
+        .jardin-vacio .semilla {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 1rem;
+            opacity: 0.6;
+        }
+
+        .hardware-info {
+            max-width: 780px;
+            margin: 0 auto 4rem;
+            padding: 0 1.5rem;
+        }
+        .hardware-info .pixel-panel {
+            display: flex;
+            gap: 1.25rem;
+            align-items: flex-start;
+        }
+        .hardware-info .pixel-panel i {
+            font-size: 1.8rem;
+            color: var(--accent-gold);
+            margin-top: 0.2rem;
+        }
+        .hardware-info h3 {
+            font-family: var(--font-display);
+            color: var(--border-cream);
+            font-size: 1.2rem;
+            margin-bottom: 0.4rem;
+            text-shadow: 2px 2px 0 var(--bg-deep-indigo);
+        }
+        .hardware-info p {
+            color: var(--text-muted);
+            font-size: 1.15rem;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ════════════════════════════════
+         HEADER
+    ════════════════════════════════ -->
+    <header class="header" id="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo">
+                    <img src="logo.png" alt="Nine Lives Edu" class="logo-img">
+                    <span class="logo-text">Nine Lives Edu</span>
+                </a>
+
+                <nav class="nav" aria-label="Navegación principal">
+                    <ul class="nav-list">
+                        <li><a href="index.html" class="nav-link">Inicio</a></li>
+                        <li><a href="apuntes.html" class="nav-link">Apuntes</a></li>
+                        <li><a href="tutores.html" class="nav-link">Tutores</a></li>
+                        <li><a href="foros.html" class="nav-link">Foros</a></li>
+                        <li><a href="asistencia.html" class="nav-link active">Asistencia</a></li>
+                        <li><a href="moderadores.html" class="nav-link">Moderadores</a></li>
+                    </ul>
+                </nav>
+
+                <div class="header-buttons">
+                    <button class="btn-tutor">Unirse como tutor</button>
+                    <button class="btn-login">Registro / Iniciar Sesión</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ════════════════════════════════
+         HERO DE LA SECCIÓN
+    ════════════════════════════════ -->
+    <section class="asistencia-hero">
+        <div class="container">
+            <h1>🌷 Jardín de Profesores</h1>
+            <p>Cada flor es un profesor que hizo check-in desde su terminal física en este momento. Reservá una consulta al instante mientras estén disponibles.</p>
+            <div class="asistencia-status" id="connection-status">
+                <span class="pulse-dot"></span>
+                <span id="connection-label">Conectando al jardín en vivo…</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════
+         JARDÍN DE PROFESORES DISPONIBLES
+    ════════════════════════════════ -->
+    <div class="jardin-profesores" id="jardin-profesores">
+        <div class="jardin-vacio">
+            <span class="semilla">🌱</span>
+            Todavía no hay profesores conectados desde su terminal.<br>El jardín va a florecer apenas alguien haga check-in.
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════
+         CÓMO FUNCIONA EL HARDWARE
+    ════════════════════════════════ -->
+    <div class="hardware-info">
+        <div class="pixel-panel">
+            <i class="fas fa-microchip"></i>
+            <div>
+                <h3>¿Cómo funciona esta pantalla?</h3>
+                <p>
+                    Cada profesor tiene una terminal física (ESP32) con un PIN único. Al llegar,
+                    ingresa su PIN en el dispositivo y su flor aparece acá al instante — visible
+                    para todos los estudiantes conectados, sin recargar la página. Al irse, otro
+                    check-out en el mismo dispositivo apaga su flor.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════
+         FOOTER
+    ════════════════════════════════ -->
+    <footer class="footer">
+        <div class="container footer-bottom">
+            <p>© 2026 Nine Lives Edu. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="components.js"></script>
+    <script>
+        const jardin = document.getElementById('jardin-profesores');
+        const statusEl = document.getElementById('connection-status');
+        const statusLabel = document.getElementById('connection-label');
+
+        function renderTeachers(teachers) {
+            if (!teachers || teachers.length === 0) {
+                jardin.innerHTML = `
+                    <div class="jardin-vacio">
+                        <span class="semilla">🌱</span>
+                        Todavía no hay profesores conectados desde su terminal.<br>El jardín va a florecer apenas alguien haga check-in.
+                    </div>`;
+                return;
+            }
+
+            jardin.innerHTML = teachers.map(t => {
+                const desde = t.lastSeenAt ? new Date(t.lastSeenAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) : '';
+                return `
+                    <div class="profesor-card">
+                        <div class="profesor-flor">✿</div>
+                        <div class="profesor-nombre">${t.fullName}</div>
+                        <div class="profesor-terminal"><i class="fas fa-microchip"></i> ${t.terminalId}</div>
+                        <div class="profesor-desde">DESDE ${desde}</div>
+                    </div>`;
+            }).join('');
+        }
+
+        function setStatus(online, label) {
+            statusEl.classList.toggle('offline', !online);
+            statusLabel.textContent = label;
+        }
+
+        // Carga inicial
+        fetch('/api/asistencia/profesores-disponibles')
+            .then(r => r.json())
+            .then(data => renderTeachers(data.teachers))
+            .catch(() => setStatus(false, 'No se pudo cargar el jardín. Reintentando…'));
+
+        // Tiempo real vía Server-Sent Events
+        try {
+            const stream = new EventSource('/api/asistencia/stream');
+
+            stream.addEventListener('connected', () => {
+                setStatus(true, 'Jardín en vivo — actualizando en tiempo real');
+            });
+
+            stream.addEventListener('attendance', (event) => {
+                const data = JSON.parse(event.data);
+                renderTeachers(data.teachers);
+            });
+
+            stream.onerror = () => {
+                setStatus(false, 'Conexión en vivo perdida. Mostrando último estado conocido.');
+            };
+        } catch (e) {
+            setStatus(false, 'Tiempo real no disponible en este navegador.');
+        }
+    </script>
+    <script src="atlas.js"></script>
+</body>
+</html>
