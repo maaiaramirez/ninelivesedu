@@ -1,0 +1,7 @@
+storage/*.sqlite
+storage/uploads/*
+!storage/uploads/.gitkeep
+__pycache__/
+*.pyc
+node_modules/
+.env
