@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 
 from app.database import init_database
-from app.routers import apuntes, tutores, foros, asistencia, chat
+from app.routers import apuntes, tutores, foros, asistencia, chat, auth, admin
 # from app.routers import moderacion  # activar cuando se instalen sus dependencias (ver requirements.txt)
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -28,6 +28,8 @@ app.include_router(tutores.router)
 app.include_router(foros.router)
 app.include_router(asistencia.router)
 app.include_router(chat.router)  # expone POST /api/chat
+app.include_router(auth.router)   # login/logout/sesión de administradores
+app.include_router(admin.router)  # panel de administración (oculto, sin link en el nav)
 # app.include_router(moderacion.router)  # activar junto con el import de arriba
 
 

@@ -1,9 +1,11 @@
+import uuid
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, Depends
+from pydantic import BaseModel
 
 from ..database import exec_all, exec_one, run
-from ..auth import require_moderator
+from ..auth import require_moderator, hash_password
 
 router = APIRouter(prefix="/api/admin", tags=["admin"], dependencies=[Depends(require_moderator)])
 
@@ -52,12 +54,30 @@ def rechazar_certificacion(user_id: str):
 # USUARIOS
 # ─────────────────────────────────────────
 @router.get("/usuarios")
-def listar_usuarios():
-    rows = exec_all(
-        """SELECT id, email, full_name, role, access_level, is_active,
-                  validation_status, created_at
-           FROM users ORDER BY created_at DESC"""
-    )
+def listar_usuarios(q: str = "", role: str = "", status: str = ""):
+    """Lista usuarios. Filtros opcionales:
+    - q: busca por nombre o email (coincidencia parcial)
+    - role: student | tutor | teacher | admin
+    - status: pending | approved | rejected
+    """
+    sql = """SELECT id, email, full_name, role, access_level, is_active,
+                    validation_status, created_at
+             FROM users WHERE 1=1"""
+    params = []
+
+    if q:
+        sql += " AND (full_name LIKE ? OR email LIKE ?)"
+        like = f"%{q.strip()}%"
+        params += [like, like]
+    if role:
+        sql += " AND role = ?"
+        params.append(role)
+    if status:
+        sql += " AND validation_status = ?"
+        params.append(status)
+
+    sql += " ORDER BY created_at DESC"
+    rows = exec_all(sql, tuple(params))
     return {"total": len(rows), "usuarios": rows}
 
 
@@ -106,3 +126,61 @@ def metricas():
             "SELECT COUNT(*) AS n FROM teacher_attendance WHERE is_available = 1"
         ),
     }
+
+
+# ─────────────────────────────────────────
+# CUENTAS DE ADMINISTRADOR (moderators)
+# Solo un administrador ya logueado puede ver/crear/borrar otras cuentas.
+# ─────────────────────────────────────────
+class NuevoAdminIn(BaseModel):
+    email: str
+    password: str
+    full_name: str
+
+
+@router.get("/administradores")
+def listar_administradores():
+    rows = exec_all(
+        "SELECT id, email, full_name, created_at FROM moderators ORDER BY created_at ASC"
+    )
+    return {"total": len(rows), "administradores": rows}
+
+
+@router.post("/administradores")
+def crear_administrador(body: NuevoAdminIn):
+    email = body.email.strip().lower()
+    if "@" not in email or "." not in email.split("@")[-1]:
+        raise HTTPException(400, "Ingresá un email válido.")
+    if len(body.password) < 8:
+        raise HTTPException(400, "La contraseña debe tener al menos 8 caracteres.")
+    if not body.full_name.strip():
+        raise HTTPException(400, "Ingresá un nombre.")
+
+    if exec_one("SELECT id FROM moderators WHERE email = ?", (email,)):
+        raise HTTPException(409, "Ya existe una cuenta de administrador con ese email.")
+
+    now = datetime.now(timezone.utc).isoformat()
+    new_id = str(uuid.uuid4())
+    run(
+        """INSERT INTO moderators (id, email, password_hash, full_name, created_at)
+           VALUES (?, ?, ?, ?, ?)""",
+        (new_id, email, hash_password(body.password), body.full_name.strip(), now),
+    )
+    return {"success": True, "id": new_id, "email": email}
+
+
+@router.delete("/administradores/{admin_id}")
+def eliminar_administrador(admin_id: str, actor=Depends(require_moderator)):
+    if admin_id == actor["id"]:
+        raise HTTPException(400, "No podés eliminar tu propia cuenta mientras estás conectado con ella.")
+
+    target = exec_one("SELECT id FROM moderators WHERE id = ?", (admin_id,))
+    if not target:
+        raise HTTPException(404, "Cuenta de administrador no encontrada.")
+
+    total = exec_one("SELECT COUNT(*) AS n FROM moderators")["n"]
+    if total <= 1:
+        raise HTTPException(400, "No podés eliminar la única cuenta de administrador que existe.")
+
+    run("DELETE FROM moderators WHERE id = ?", (admin_id,))
+    return {"success": True}

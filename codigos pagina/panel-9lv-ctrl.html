@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nine Lives Edu — Panel de Moderadores</title>
+    <title>Nine Lives Edu — Panel de Administración</title>
+    <meta name="robots" content="noindex, nofollow">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
@@ -130,6 +131,15 @@
         .mod-badge.rejected { background: rgba(194,78,78,0.18); color: #e39a9a; }
         .mod-badge.inactive { background: rgba(139,147,168,0.18); color: var(--muted); }
 
+        .mod-search-row { display: flex; gap: 0.6rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+        .mod-search-input, .mod-search-select {
+            background: var(--ink); border: 1px solid var(--line); color: var(--parchment);
+            padding: 0.6rem 0.8rem; font-family: var(--font-body); font-size: 0.9rem;
+            flex: 1 1 200px; min-width: 0;
+        }
+        .mod-search-input:focus, .mod-search-select:focus { outline: none; border-color: var(--amber); }
+        .mod-search-select { flex: 0 1 170px; cursor: pointer; }
+
         .mod-empty { color: var(--muted); text-align: center; padding: 3rem 1rem; }
         .mod-loading { color: var(--muted); text-align: center; padding: 2rem; font-size: 0.9rem; }
         .mod-toast {
@@ -158,7 +168,6 @@
                             <li><a href="tutores.html" class="nav-link">Tutores</a></li>
                             <li><a href="foros.html" class="nav-link">Foros</a></li>
                             <li><a href="asistencia.html" class="nav-link">Asistencia</a></li>
-                            <li><a href="moderadores.html" class="nav-link active">Moderadores</a></li>
                         </ul>
                     </nav>
                     <div class="header-buttons"></div>
@@ -169,8 +178,8 @@
         <main class="mod-main">
             <!-- ═══ LOGIN ═══ -->
             <div class="mod-login" id="mod-login">
-                <h1>Panel de moderadores</h1>
-                <p class="sub">Acceso restringido — ingresá con tu cuenta de moderador.</p>
+                <h1>Panel de administración</h1>
+                <p class="sub">Acceso restringido — ingresá con tu cuenta de administrador.</p>
                 <div class="mod-error" id="mod-login-error"></div>
                 <form id="mod-login-form">
                     <div class="mod-field">
@@ -189,7 +198,7 @@
             <div id="mod-panel">
                 <div class="mod-header-row">
                     <div>
-                        <h1>Panel de moderadores</h1>
+                        <h1>Panel de administración</h1>
                         <p class="who">Conectado como <strong id="mod-who"></strong></p>
                     </div>
                     <button class="mod-logout" id="mod-logout">Cerrar sesión</button>
@@ -199,6 +208,7 @@
                     <button class="mod-tab active" data-view="metricas">Métricas</button>
                     <button class="mod-tab" data-view="certificaciones">Certificaciones</button>
                     <button class="mod-tab" data-view="usuarios">Usuarios</button>
+                    <button class="mod-tab" data-view="administradores">Administradores</button>
                 </div>
 
                 <div class="mod-view active" id="view-metricas">
@@ -212,7 +222,34 @@
                 </div>
 
                 <div class="mod-view" id="view-usuarios">
+                    <div class="mod-search-row">
+                        <input type="text" id="user-search" class="mod-search-input" placeholder="Buscar por nombre o email…">
+                        <select id="user-role-filter" class="mod-search-select">
+                            <option value="">Todos los roles</option>
+                            <option value="student">Estudiante</option>
+                            <option value="tutor">Tutor</option>
+                            <option value="teacher">Profesor</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                        <select id="user-status-filter" class="mod-search-select">
+                            <option value="">Todos los estados</option>
+                            <option value="pending">Pendiente</option>
+                            <option value="approved">Aprobado</option>
+                            <option value="rejected">Rechazado</option>
+                        </select>
+                    </div>
                     <div id="user-list"><div class="mod-loading">Cargando…</div></div>
+                </div>
+
+                <div class="mod-view" id="view-administradores">
+                    <form id="new-admin-form" class="mod-search-row" style="align-items:flex-start; flex-wrap:wrap;">
+                        <input type="text" id="new-admin-name" class="mod-search-input" placeholder="Nombre" required style="flex:1 1 180px;">
+                        <input type="email" id="new-admin-email" class="mod-search-input" placeholder="Email" required style="flex:1 1 220px;">
+                        <input type="password" id="new-admin-password" class="mod-search-input" placeholder="Contraseña (mín. 8 caracteres)" required minlength="8" style="flex:1 1 220px;">
+                        <button type="submit" class="btn-primary" style="flex:0 0 auto;">Crear cuenta</button>
+                    </form>
+                    <div id="admin-form-error" class="mod-error"></div>
+                    <div id="admin-list"><div class="mod-loading">Cargando…</div></div>
                 </div>
             </div>
         </main>
@@ -316,6 +353,7 @@
             loadMetrics();
             loadCertificaciones();
             loadUsuarios();
+            loadAdministradores();
         }
 
         // ── Métricas ──
@@ -379,12 +417,28 @@
         }
 
         // ── Usuarios ──
+        const userSearchInput = document.getElementById('user-search');
+        const userRoleFilter = document.getElementById('user-role-filter');
+        const userStatusFilter = document.getElementById('user-status-filter');
+
+        let userSearchTimer = null;
+        userSearchInput.addEventListener('input', () => {
+            clearTimeout(userSearchTimer);
+            userSearchTimer = setTimeout(loadUsuarios, 300);
+        });
+        userRoleFilter.addEventListener('change', loadUsuarios);
+        userStatusFilter.addEventListener('change', loadUsuarios);
+
         async function loadUsuarios() {
             const box = document.getElementById('user-list');
+            const params = new URLSearchParams();
+            if (userSearchInput.value.trim()) params.set('q', userSearchInput.value.trim());
+            if (userRoleFilter.value) params.set('role', userRoleFilter.value);
+            if (userStatusFilter.value) params.set('status', userStatusFilter.value);
             try {
-                const data = await api('/api/admin/usuarios');
+                const data = await api('/api/admin/usuarios?' + params.toString());
                 if (!data.usuarios.length) {
-                    box.innerHTML = `<div class="mod-empty">No hay usuarios todavía.</div>`;
+                    box.innerHTML = `<div class="mod-empty">No se encontraron usuarios con esos filtros.</div>`;
                     return;
                 }
                 box.innerHTML = data.usuarios.map(u => `
@@ -414,6 +468,59 @@
                 showToast(`Usuario ${accion === 'activar' ? 'activado' : 'desactivado'}.`);
                 loadUsuarios();
                 loadMetrics();
+            } catch (e) {
+                showToast('Error: ' + e.message);
+            }
+        }
+
+        // ── Administradores ──
+        async function loadAdministradores() {
+            const box = document.getElementById('admin-list');
+            try {
+                const data = await api('/api/admin/administradores');
+                box.innerHTML = data.administradores.map(a => `
+                    <div class="mod-item" data-id="${a.id}">
+                        <div class="info">
+                            <strong>${a.full_name}</strong>
+                            <div class="meta">${a.email} · Creado el ${fecha(a.created_at)}</div>
+                        </div>
+                        <div class="actions">
+                            <button class="mod-btn-reject" onclick="eliminarAdmin('${a.id}')">Eliminar</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                box.innerHTML = `<div class="mod-empty">No se pudieron cargar las cuentas.</div>`;
+            }
+        }
+
+        document.getElementById('new-admin-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const errBox = document.getElementById('admin-form-error');
+            errBox.classList.remove('show');
+            const full_name = document.getElementById('new-admin-name').value.trim();
+            const email = document.getElementById('new-admin-email').value.trim();
+            const password = document.getElementById('new-admin-password').value;
+            try {
+                await api('/api/admin/administradores', {
+                    method: 'POST',
+                    body: JSON.stringify({ full_name, email, password }),
+                });
+                showToast('Cuenta de administrador creada.');
+                e.target.reset();
+                loadAdministradores();
+            } catch (err) {
+                errBox.textContent = err.message || 'No se pudo crear la cuenta.';
+                errBox.classList.add('show');
+            }
+        });
+
+        async function eliminarAdmin(id) {
+            if (!confirm('¿Eliminar esta cuenta de administrador?')) return;
+            try {
+                await api(`/api/admin/administradores/${id}`, { method: 'DELETE' });
+                showToast('Cuenta eliminada.');
+                loadAdministradores();
             } catch (e) {
                 showToast('Error: ' + e.message);
             }
