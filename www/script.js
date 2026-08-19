@@ -11,7 +11,7 @@
   al desplegar backend_ejemplo.py (sin "https://", sin barra al final).
 */
 
-const RENDER_HOST = "nine-lives-edu-backend.onrender.com"; // <-- CAMBIAR
+const RENDER_HOST = "ninelivesedu-1.onrender.com"; // 
 const AULA_ID = "A1"; // debe coincidir con el AULA_ID configurado en el .ino
 
 let socket = null;
