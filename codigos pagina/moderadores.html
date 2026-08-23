@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nine Lives Edu — Panel de Moderadores</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="components.css">
+    <link rel="stylesheet" href="atlas-theme.css">
+    <style>
+        .mod-shell { min-height: 100vh; display: flex; flex-direction: column; }
+        .mod-main { flex: 1; padding: 7rem 1.5rem 4rem; max-width: 1080px; margin: 0 auto; width: 100%; }
+
+        /* ── Login ── */
+        .mod-login {
+            max-width: 380px;
+            margin: 8vh auto;
+            padding: 2.5rem;
+            background: var(--ink-panel);
+            border: 1px solid var(--line);
+        }
+        .mod-login h1 {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            color: var(--parchment);
+            margin-bottom: 0.4rem;
+        }
+        .mod-login p.sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.75rem; }
+        .mod-field { margin-bottom: 1.1rem; }
+        .mod-field label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--amber);
+            margin-bottom: 0.4rem;
+        }
+        .mod-field input {
+            width: 100%;
+            background: var(--ink);
+            border: 1px solid var(--line);
+            color: var(--parchment);
+            padding: 0.7rem 0.85rem;
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            transition: border-color 0.3s var(--ease);
+        }
+        .mod-field input:focus { outline: none; border-color: var(--amber); }
+        .mod-error {
+            display: none;
+            background: rgba(220,90,90,0.12);
+            border: 1px solid rgba(220,90,90,0.4);
+            color: #e39a9a;
+            padding: 0.65rem 0.85rem;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+        .mod-error.show { display: block; }
+        .mod-login button { width: 100%; padding: 0.8rem; margin-top: 0.4rem; cursor: pointer; }
+
+        /* ── Panel ── */
+        #mod-panel { display: none; }
+        .mod-header-row {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
+        }
+        .mod-header-row h1 { font-family: var(--font-display); font-size: 2rem; color: var(--parchment); }
+        .mod-header-row .who { color: var(--muted); font-size: 0.9rem; }
+        .mod-logout {
+            background: transparent; border: 1px solid var(--line-strong); color: var(--muted);
+            padding: 0.5rem 1rem; font-size: 0.85rem; cursor: pointer; font-family: var(--font-body);
+            transition: all 0.3s var(--ease);
+        }
+        .mod-logout:hover { border-color: var(--amber); color: var(--amber); }
+
+        .mod-tabs { display: flex; gap: 0.5rem; margin-bottom: 2rem; border-bottom: 1px solid var(--line); }
+        .mod-tab {
+            background: none; border: none; color: var(--muted);
+            padding: 0.75rem 1.1rem; font-family: var(--font-body); font-weight: 600;
+            font-size: 0.9rem; cursor: pointer; border-bottom: 2px solid transparent;
+            transition: all 0.25s var(--ease);
+        }
+        .mod-tab.active { color: var(--amber); border-bottom-color: var(--amber); }
+
+        .mod-view { display: none; }
+        .mod-view.active { display: block; }
+
+        /* Métricas */
+        .mod-metrics-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem; margin-bottom: 1rem;
+        }
+        .mod-metric {
+            background: var(--ink-panel); border: 1px solid var(--line);
+            padding: 1.25rem; text-align: center;
+        }
+        .mod-metric .num { font-family: var(--font-display); font-size: 2rem; color: var(--parchment); }
+        .mod-metric .lbl {
+            font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em;
+            text-transform: uppercase; color: var(--amber); margin-top: 0.35rem;
+        }
+
+        /* Certificaciones / Usuarios: lista */
+        .mod-item {
+            background: var(--ink-panel); border: 1px solid var(--line);
+            padding: 1.25rem 1.5rem; margin-bottom: 0.85rem;
+            display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;
+        }
+        .mod-item .info strong { color: var(--parchment); font-family: var(--font-display); font-weight: 500; }
+        .mod-item .info .meta { color: var(--muted); font-size: 0.85rem; margin-top: 0.2rem; }
+        .mod-item .actions { display: flex; gap: 0.6rem; }
+        .mod-btn-approve, .mod-btn-reject, .mod-btn-toggle {
+            border: 1px solid var(--line-strong); background: transparent; color: var(--parchment);
+            padding: 0.5rem 0.9rem; font-size: 0.82rem; font-weight: 600; cursor: pointer;
+            font-family: var(--font-body); transition: all 0.25s var(--ease);
+        }
+        .mod-btn-approve:hover { background: #4E9E4E; border-color: #4E9E4E; color: #fff; }
+        .mod-btn-reject:hover { background: #C24E4E; border-color: #C24E4E; color: #fff; }
+        .mod-btn-toggle:hover { background: var(--amber); border-color: var(--amber); color: var(--ink); }
+
+        .mod-badge {
+            font-size: 0.68rem; font-weight: 700; padding: 0.25rem 0.6rem;
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .mod-badge.approved { background: rgba(78,158,78,0.18); color: #8fd18f; }
+        .mod-badge.pending { background: rgba(226,162,87,0.18); color: var(--amber); }
+        .mod-badge.rejected { background: rgba(194,78,78,0.18); color: #e39a9a; }
+        .mod-badge.inactive { background: rgba(139,147,168,0.18); color: var(--muted); }
+
+        .mod-empty { color: var(--muted); text-align: center; padding: 3rem 1rem; }
+        .mod-loading { color: var(--muted); text-align: center; padding: 2rem; font-size: 0.9rem; }
+
+        .mod-search {
+            width: 100%; max-width: 340px; margin-bottom: 1.25rem;
+            background: var(--ink); border: 1px solid var(--line);
+            color: var(--parchment); padding: 0.6rem 0.85rem;
+            font-family: var(--font-body); font-size: 0.9rem;
+            transition: border-color 0.3s var(--ease);
+        }
+        .mod-search:focus { outline: none; border-color: var(--amber); }
+        .mod-search::placeholder { color: var(--muted); }
+
+        .mod-settings-block {
+            max-width: 420px; background: var(--ink-panel);
+            border: 1px solid var(--line); padding: 1.75rem; margin-bottom: 1.5rem;
+        }
+        .mod-settings-block h3 {
+            font-family: var(--font-display); color: var(--parchment);
+            font-size: 1.1rem; margin-bottom: 1.1rem;
+        }
+        .mod-settings-block button { margin-top: 0.3rem; cursor: pointer; }
+        .mod-settings-ok { color: #8fd18f; font-size: 0.85rem; margin-top: 0.6rem; display: none; }
+        .mod-settings-ok.show { display: block; }
+        .mod-toast {
+            position: fixed; bottom: 1.5rem; right: 1.5rem;
+            background: var(--ink-panel); border: 1px solid var(--amber);
+            color: var(--parchment); padding: 0.85rem 1.25rem;
+            font-size: 0.9rem; transform: translateY(120%); opacity: 0;
+            transition: all 0.4s var(--ease); z-index: 200;
+        }
+        .mod-toast.show { transform: translateY(0); opacity: 1; }
+    </style>
+</head>
+<body>
+    <div class="mod-shell">
+        <header class="header" id="header">
+            <div class="container">
+                <div class="header-content">
+                    <a href="index.html" class="logo">
+                        <img src="logo.png" alt="Nine Lives Edu" class="logo-img">
+                        <span class="logo-text">Nine Lives Edu</span>
+                    </a>
+                    <nav class="nav" aria-label="Navegación principal">
+                        <ul class="nav-list">
+                            <li><a href="index.html" class="nav-link">Inicio</a></li>
+                            <li><a href="apuntes.html" class="nav-link">Apuntes</a></li>
+                            <li><a href="tutores.html" class="nav-link">Tutores</a></li>
+                            <li><a href="foros.html" class="nav-link">Foros</a></li>
+                            <li><a href="asistencia.html" class="nav-link">Asistencia</a></li>
+                        </ul>
+                    </nav>
+                    <div class="header-buttons"></div>
+                </div>
+            </div>
+        </header>
+
+        <main class="mod-main">
+            <!-- ═══ LOGIN ═══ -->
+            <div class="mod-login" id="mod-login">
+                <h1>Panel de moderadores</h1>
+                <p class="sub">Acceso restringido — ingresá con tu cuenta de moderador.</p>
+                <div class="mod-error" id="mod-login-error"></div>
+                <form id="mod-login-form">
+                    <div class="mod-field">
+                        <label for="mod-email">Email</label>
+                        <input type="email" id="mod-email" required autocomplete="username">
+                    </div>
+                    <div class="mod-field">
+                        <label for="mod-password">Contraseña</label>
+                        <input type="password" id="mod-password" required autocomplete="current-password">
+                    </div>
+                    <button type="submit" class="btn-primary">Iniciar sesión</button>
+                </form>
+            </div>
+
+            <!-- ═══ PANEL ═══ -->
+            <div id="mod-panel">
+                <div class="mod-header-row">
+                    <div>
+                        <h1>Panel de moderadores</h1>
+                        <p class="who">Conectado como <strong id="mod-who"></strong></p>
+                    </div>
+                    <button class="mod-logout" id="mod-logout">Cerrar sesión</button>
+                </div>
+
+                <div class="mod-tabs">
+                    <button class="mod-tab active" data-view="metricas">Métricas</button>
+                    <button class="mod-tab" data-view="certificaciones">Certificaciones</button>
+                    <button class="mod-tab" data-view="usuarios">Usuarios</button>
+                    <button class="mod-tab" data-view="config">Configuración</button>
+                </div>
+
+                <div class="mod-view active" id="view-metricas">
+                    <div class="mod-metrics-grid" id="metrics-grid">
+                        <div class="mod-loading">Cargando métricas…</div>
+                    </div>
+                </div>
+
+                <div class="mod-view" id="view-certificaciones">
+                    <input type="text" class="mod-search" id="cert-search" placeholder="Buscar por nombre o email…">
+                    <div id="cert-list"><div class="mod-loading">Cargando…</div></div>
+                </div>
+
+                <div class="mod-view" id="view-usuarios">
+                    <input type="text" class="mod-search" id="user-search" placeholder="Buscar por nombre, email o rol…">
+                    <div id="user-list"><div class="mod-loading">Cargando…</div></div>
+                </div>
+
+                <div class="mod-view" id="view-config">
+                    <div class="mod-settings-block">
+                        <h3>Cambiar mi contraseña</h3>
+                        <div class="mod-error" id="pw-error"></div>
+                        <div class="mod-settings-ok" id="pw-ok">Contraseña actualizada correctamente.</div>
+                        <form id="pw-form">
+                            <div class="mod-field">
+                                <label for="pw-current">Contraseña actual</label>
+                                <input type="password" id="pw-current" required>
+                            </div>
+                            <div class="mod-field">
+                                <label for="pw-new">Contraseña nueva (mínimo 8 caracteres)</label>
+                                <input type="password" id="pw-new" required minlength="8">
+                            </div>
+                            <button type="submit" class="btn-secondary">Actualizar contraseña</button>
+                        </form>
+                    </div>
+
+                    <div class="mod-settings-block">
+                        <h3>Agregar otro moderador</h3>
+                        <div class="mod-error" id="newmod-error"></div>
+                        <div class="mod-settings-ok" id="newmod-ok">Moderador creado correctamente.</div>
+                        <form id="newmod-form">
+                            <div class="mod-field">
+                                <label for="newmod-name">Nombre completo</label>
+                                <input type="text" id="newmod-name" required>
+                            </div>
+                            <div class="mod-field">
+                                <label for="newmod-email">Email</label>
+                                <input type="email" id="newmod-email" required>
+                            </div>
+                            <div class="mod-field">
+                                <label for="newmod-password">Contraseña (mínimo 8 caracteres)</label>
+                                <input type="password" id="newmod-password" required minlength="8">
+                            </div>
+                            <button type="submit" class="btn-secondary">Crear moderador</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="container footer-bottom">
+                <p>© 2026 Nine Lives Edu. Todos los derechos reservados.</p>
+            </div>
+        </footer>
+    </div>
+
+    <div class="mod-toast" id="mod-toast"></div>
+
+    <script src="atlas.js"></script>
+    <script>
+        const loginBox = document.getElementById('mod-login');
+        const panelBox = document.getElementById('mod-panel');
+        const loginForm = document.getElementById('mod-login-form');
+        const loginError = document.getElementById('mod-login-error');
+        const whoEl = document.getElementById('mod-who');
+        const toast = document.getElementById('mod-toast');
+
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2600);
+        }
+
+        function fecha(iso) {
+            if (!iso) return '';
+            try { return new Date(iso).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' }); }
+            catch { return iso; }
+        }
+
+        async function api(path, options = {}) {
+            const res = await fetch(path, {
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                ...options,
+            });
+            if (res.status === 401) {
+                showPanel(false);
+                throw new Error('No autenticado');
+            }
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data.detail || 'Error inesperado');
+            return data;
+        }
+
+        function showPanel(loggedIn) {
+            loginBox.style.display = loggedIn ? 'none' : 'block';
+            panelBox.style.display = loggedIn ? 'block' : 'none';
+        }
+
+        // ── Chequear sesión existente al cargar ──
+        (async function checkSession() {
+            try {
+                const me = await api('/api/auth/me');
+                whoEl.textContent = me.fullName;
+                showPanel(true);
+                loadAll();
+            } catch {
+                showPanel(false);
+            }
+        })();
+
+        // ── Login ──
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            loginError.classList.remove('show');
+            const email = document.getElementById('mod-email').value.trim();
+            const password = document.getElementById('mod-password').value;
+            try {
+                const data = await api('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+                whoEl.textContent = data.moderator.fullName;
+                showPanel(true);
+                loadAll();
+            } catch (err) {
+                loginError.textContent = err.message || 'No se pudo iniciar sesión.';
+                loginError.classList.add('show');
+            }
+        });
+
+        // ── Logout ──
+        document.getElementById('mod-logout').addEventListener('click', async () => {
+            await api('/api/auth/logout', { method: 'POST' }).catch(() => {});
+            showPanel(false);
+        });
+
+        // ── Tabs ──
+        document.querySelectorAll('.mod-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.mod-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.mod-view').forEach(v => v.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById('view-' + tab.dataset.view).classList.add('active');
+            });
+        });
+
+        function loadAll() {
+            loadMetrics();
+            loadCertificaciones();
+            loadUsuarios();
+        }
+
+        // ── Métricas ──
+        async function loadMetrics() {
+            const grid = document.getElementById('metrics-grid');
+            try {
+                const m = await api('/api/admin/metricas');
+                const items = [
+                    ['Apuntes', m.apuntes], ['Descargas totales', m.descargas_totales],
+                    ['Tutores', m.tutores], ['Reservas', m.reservas],
+                    ['Posts en foros', m.posts_foro], ['Respuestas en foros', m.respuestas_foro],
+                    ['Usuarios totales', m.usuarios_totales], ['Usuarios activos', m.usuarios_activos],
+                    ['Certificaciones pendientes', m.certificaciones_pendientes],
+                    ['Profesores en línea ahora', m.profesores_en_linea_ahora],
+                ];
+                grid.innerHTML = items.map(([lbl, num]) => `
+                    <div class="mod-metric"><div class="num">${num}</div><div class="lbl">${lbl}</div></div>
+                `).join('');
+            } catch (e) {
+                grid.innerHTML = `<div class="mod-empty">No se pudieron cargar las métricas.</div>`;
+            }
+        }
+
+        // ── Certificaciones ──
+        let certData = [];
+        async function loadCertificaciones() {
+            const box = document.getElementById('cert-list');
+            try {
+                const data = await api('/api/admin/certificaciones/pendientes');
+                certData = data.pendientes;
+                renderCertificaciones(certData);
+            } catch (e) {
+                box.innerHTML = `<div class="mod-empty">No se pudieron cargar las certificaciones.</div>`;
+            }
+        }
+
+        function renderCertificaciones(list) {
+            const box = document.getElementById('cert-list');
+            if (!list.length) {
+                box.innerHTML = `<div class="mod-empty">No hay certificaciones pendientes por revisar.</div>`;
+                return;
+            }
+            box.innerHTML = list.map(p => `
+                <div class="mod-item" data-id="${p.user_id}">
+                    <div class="info">
+                        <strong>${p.full_name}</strong>
+                        <div class="meta">${p.email} · Solicitado el ${fecha(p.created_at)}</div>
+                    </div>
+                    <div class="actions">
+                        <span class="mod-badge pending">Pendiente</span>
+                        <button class="mod-btn-approve" onclick="resolverCert('${p.user_id}', 'aprobar')">Aprobar</button>
+                        <button class="mod-btn-reject" onclick="resolverCert('${p.user_id}', 'rechazar')">Rechazar</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('cert-search').addEventListener('input', (e) => {
+            const q = e.target.value.trim().toLowerCase();
+            renderCertificaciones(certData.filter(p =>
+                p.full_name.toLowerCase().includes(q) || p.email.toLowerCase().includes(q)
+            ));
+        });
+
+        async function resolverCert(userId, accion) {
+            try {
+                const data = await api(`/api/admin/certificaciones/${userId}/${accion}`, { method: 'POST' });
+                showToast(data.message || 'Listo.');
+                loadCertificaciones();
+                loadMetrics();
+                loadUsuarios();
+            } catch (e) {
+                showToast('Error: ' + e.message);
+            }
+        }
+
+        // ── Usuarios ──
+        let userData = [];
+        async function loadUsuarios() {
+            const box = document.getElementById('user-list');
+            try {
+                const data = await api('/api/admin/usuarios');
+                userData = data.usuarios;
+                renderUsuarios(userData);
+            } catch (e) {
+                box.innerHTML = `<div class="mod-empty">No se pudieron cargar los usuarios.</div>`;
+            }
+        }
+
+        function renderUsuarios(list) {
+            const box = document.getElementById('user-list');
+            if (!list.length) {
+                box.innerHTML = `<div class="mod-empty">No hay usuarios todavía.</div>`;
+                return;
+            }
+            box.innerHTML = list.map(u => `
+                <div class="mod-item" data-id="${u.id}">
+                    <div class="info">
+                        <strong>${u.full_name}</strong>
+                        <div class="meta">${u.email} · ${u.role} · Registrado el ${fecha(u.created_at)}</div>
+                    </div>
+                    <div class="actions">
+                        <span class="mod-badge ${u.is_active ? 'approved' : 'inactive'}">${u.is_active ? 'Activo' : 'Inactivo'}</span>
+                        <span class="mod-badge ${u.validation_status}">${u.validation_status}</span>
+                        <button class="mod-btn-toggle" onclick="toggleUsuario('${u.id}', ${u.is_active ? 'false' : 'true'})">
+                            ${u.is_active ? 'Desactivar' : 'Activar'}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('user-search').addEventListener('input', (e) => {
+            const q = e.target.value.trim().toLowerCase();
+            renderUsuarios(userData.filter(u =>
+                u.full_name.toLowerCase().includes(q) ||
+                u.email.toLowerCase().includes(q) ||
+                u.role.toLowerCase().includes(q)
+            ));
+        });
+
+        async function toggleUsuario(userId, activar) {
+            const accion = activar === true || activar === 'true' ? 'activar' : 'desactivar';
+            try {
+                await api(`/api/admin/usuarios/${userId}/${accion}`, { method: 'POST' });
+                showToast(`Usuario ${accion === 'activar' ? 'activado' : 'desactivado'}.`);
+                loadUsuarios();
+                loadMetrics();
+            } catch (e) {
+                showToast('Error: ' + e.message);
+            }
+        }
+
+        // ── Configuración: cambiar contraseña ──
+        document.getElementById('pw-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const pwError = document.getElementById('pw-error');
+            const pwOk = document.getElementById('pw-ok');
+            pwError.classList.remove('show');
+            pwOk.classList.remove('show');
+            try {
+                await api('/api/auth/cambiar-password', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        currentPassword: document.getElementById('pw-current').value,
+                        newPassword: document.getElementById('pw-new').value,
+                    }),
+                });
+                pwOk.classList.add('show');
+                document.getElementById('pw-form').reset();
+            } catch (err) {
+                pwError.textContent = err.message;
+                pwError.classList.add('show');
+            }
+        });
+
+        // ── Configuración: crear moderador ──
+        document.getElementById('newmod-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nmError = document.getElementById('newmod-error');
+            const nmOk = document.getElementById('newmod-ok');
+            nmError.classList.remove('show');
+            nmOk.classList.remove('show');
+            try {
+                await api('/api/auth/moderadores', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        fullName: document.getElementById('newmod-name').value,
+                        email: document.getElementById('newmod-email').value,
+                        password: document.getElementById('newmod-password').value,
+                    }),
+                });
+                nmOk.classList.add('show');
+                document.getElementById('newmod-form').reset();
+            } catch (err) {
+                nmError.textContent = err.message;
+                nmError.classList.add('show');
+            }
+        });
+    </script>
+</body>
+</html>
