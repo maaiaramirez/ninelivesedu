@@ -1,14 +1,7 @@
-fastapi>=0.115.0
-uvicorn[standard]>=0.30.6
-pydantic>=2.10.0
-python-multipart==0.0.9
-requests==2.32.3
-
-# ── Panel de moderadores (verificación de certificaciones) ──────────────
-# Todavía NO están instaladas a propósito: son pesadas (unstructured trae
-# muchas dependencias) y esa función es un stub sin conectar todavía.
-# Cuando quieras activar app/routers/moderacion.py, descomentá estas 3
-# líneas y volvé a hacer deploy:
-# langgraph==0.2.28
-# unstructured==0.15.13
-# requests==2.32.3
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+sqlalchemy==2.0.35
+psycopg2-binary==2.9.9
+passlib[bcrypt]==1.7.4
+python-jose[cryptography]==3.3.0
+pydantic[email]==2.9.2
