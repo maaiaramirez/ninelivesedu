@@ -27,6 +27,7 @@ app.include_router(apuntes.router)
 app.include_router(tutores.router)
 app.include_router(foros.router)
 app.include_router(asistencia.router)
+app.include_router(asistencia.ws_router)  # expone /ws/aula/{aula_id} para el hardware
 app.include_router(chat.router)  # expone POST /api/chat
 app.include_router(auth.router)  # login/logout/me/cambiar-password de moderadores
 app.include_router(admin.router)  # certificaciones, usuarios, métricas (protegido)
