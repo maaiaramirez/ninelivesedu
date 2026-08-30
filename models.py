@@ -18,97 +18,112 @@ de acceso al hardware). Separarlas evita columnas vacias/sin sentido
 para la mayoria de los usuarios.
 """
 
-import enum
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Enum
+# models.py
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum, Text, Numeric
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-
 from database import Base
-
+import enum
 
 class RolUsuario(str, enum.Enum):
-    estudiante = "estudiante"
-    tutor = "tutor"
-    admin = "admin"
+    ALUMNO = "alumno"
+    TUTOR = "tutor"
+    ADMIN = "admin"
 
-
-class EstadoAula(str, enum.Enum):
-    INAC = "INAC"
-    DISP = "DISP"
-    OCUP = "OCUP"
-
+class EstadoTutoria(str, enum.Enum):
+    PENDIENTE = "pendiente"
+    APROBADA = "aprobada"
+    CERRADA = "cerrada"
+    CANCELADA = "cancelada"
 
 class Usuario(Base):
-    """Cualquier persona que puede loguearse: estudiante, tutor o admin."""
     __tablename__ = "usuarios"
-
     id = Column(Integer, primary_key=True, index=True)
-    nombre = Column(String(120), nullable=False)
-    email = Column(String(160), unique=True, nullable=False, index=True)
-    password_hash = Column(String(255), nullable=False)  # nunca se guarda la contraseña en texto plano
-    rol = Column(Enum(RolUsuario), default=RolUsuario.estudiante, nullable=False)
-    fecha_registro = Column(DateTime(timezone=True), server_default=func.now())
+    email = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
+    nombre = Column(String, nullable=False)
+    rol = Column(Enum(RolUsuario), default=RolUsuario.ALUMNO, nullable=False)
+    kyc_verificado = Column(Boolean, default=False)  # relevante para tutores
+    activo = Column(Boolean, default=True)
+    creado_en = Column(DateTime(timezone=True), server_default=func.now())
 
-    # Relacion 1 a 1: si este usuario es tutor, aca esta el resto de sus datos.
-    tutor = relationship("Tutor", back_populates="usuario", uselist=False)
+    tutorias_dictadas = relationship("Tutoria", back_populates="tutor", foreign_keys="Tutoria.tutor_id")
+    inscripciones = relationship("Inscripcion", back_populates="alumno")
+    apuntes_subidos = relationship("Apunte", back_populates="autor")
 
-
-class Tutor(Base):
-    """
-    Datos adicionales de un Usuario con rol='tutor'. El campo clave es
-    codigo_acceso: es EL MISMO codigo que el tutor tipea en el teclado
-    del terminal fisico (ver el aviso de sincronizacion en el README).
-    """
-    __tablename__ = "tutores"
-
+class Tutoria(Base):
+    __tablename__ = "tutorias"
     id = Column(Integer, primary_key=True, index=True)
-    usuario_id = Column(Integer, ForeignKey("usuarios.id"), unique=True, nullable=False)
-    especialidad = Column(String(120), nullable=True)          # "Matematica", "Programacion", etc
-    codigo_acceso = Column(String(20), unique=True, nullable=False)
+    tutor_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    materia = Column(String, nullable=False)
+    descripcion = Column(Text)
+    cupo_maximo = Column(Integer, nullable=False)
+    fecha_hora = Column(DateTime(timezone=True), nullable=False)
+    estado = Column(Enum(EstadoTutoria), default=EstadoTutoria.PENDIENTE)
+    pin_acceso = Column(String(6), nullable=True, unique=True)  # se genera al cerrar inscripción
+    pin_usado = Column(Boolean, default=False)
+    creado_en = Column(DateTime(timezone=True), server_default=func.now())
 
-    usuario = relationship("Usuario", back_populates="tutor")
-    historial = relationship("HistorialEstado", back_populates="tutor")
+    tutor = relationship("Usuario", back_populates="tutorias_dictadas", foreign_keys=[tutor_id])
+    inscripciones = relationship("Inscripcion", back_populates="tutoria")
 
-    @property
-    def nombre(self):
-        """Atajo para no tener que navegar tutor.usuario.nombre en cada schema."""
-        return self.usuario.nombre if self.usuario else None
-
-
-class Aula(Base):
-    """Una fila por cada aula/terminal fisico instalado. Guarda el estado ACTUAL."""
-    __tablename__ = "aulas"
-
+class Inscripcion(Base):
+    __tablename__ = "inscripciones"
     id = Column(Integer, primary_key=True, index=True)
-    # Identificador legible que coincide con AULA_ID en el firmware (.ino), ej "A1".
-    identificador = Column(String(20), unique=True, nullable=False, index=True)
-    nombre = Column(String(120), nullable=False)                 # "Aula de Matematica"
-    estado_actual = Column(Enum(EstadoAula), default=EstadoAula.INAC, nullable=False)
-    tutor_actual_id = Column(Integer, ForeignKey("tutores.id"), nullable=True)
+    tutoria_id = Column(Integer, ForeignKey("tutorias.id"), nullable=False)
+    alumno_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    estado = Column(Enum(EstadoTutoria), default=EstadoTutoria.PENDIENTE)
+    creado_en = Column(DateTime(timezone=True), server_default=func.now())
 
-    tutor_actual = relationship("Tutor")
-    historial = relationship(
-        "HistorialEstado",
-        back_populates="aula",
-        order_by="desc(HistorialEstado.timestamp)",
-    )
+    tutoria = relationship("Tutoria", back_populates="inscripciones")
+    alumno = relationship("Usuario", back_populates="inscripciones")
 
-
-class HistorialEstado(Base):
-    """
-    Una fila por cada cambio de estado que ocurrio en el tiempo. Nunca se
-    actualiza ni se borra una fila existente: siempre se agrega una fila
-    nueva. Asi queda un historial completo e inalterado.
-    """
-    __tablename__ = "historial_estados"
-
+class Apunte(Base):
+    __tablename__ = "apuntes"
     id = Column(Integer, primary_key=True, index=True)
-    aula_id = Column(Integer, ForeignKey("aulas.id"), nullable=False, index=True)
-    tutor_id = Column(Integer, ForeignKey("tutores.id"), nullable=True)
+    autor_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    titulo = Column(String, nullable=False)
+    materia = Column(String, nullable=False)
+    descripcion = Column(Text)
+    precio = Column(Numeric(10, 2), default=0)  # 0 = gratis/intercambio
+    archivo_url = Column(String, nullable=False)  # referencia a storage, no el binario
+    disponible = Column(Boolean, default=True)
+    creado_en = Column(DateTime(timezone=True), server_default=func.now())
 
-    estado = Column(Enum(EstadoAula), nullable=False)
-    codigo_usado = Column(String(20), nullable=True)  # el codigo tipeado, o "sync"/"forzado_desde_panel"
-    timestamp = Column(DateTime(timezone=True), server_default=func.now(), index=True)
+    autor = relationship("Usuario", back_populates="apuntes_subidos")
+    transacciones = relationship("Transaccion", back_populates="apunte")
 
-    aula = relationship("Aula", back_populates="historial")
-    tutor = relationship("Tutor", back_populates="historial")
+class EstadoTransaccion(str, enum.Enum):
+    PENDIENTE = "pendiente"
+    COMPLETADA = "completada"
+    FALLIDA = "fallida"
+
+class Transaccion(Base):
+    __tablename__ = "transacciones"
+    id = Column(Integer, primary_key=True, index=True)
+    apunte_id = Column(Integer, ForeignKey("apuntes.id"), nullable=False)
+    comprador_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    monto = Column(Numeric(10, 2), nullable=False)
+    estado = Column(Enum(EstadoTransaccion), default=EstadoTransaccion.PENDIENTE)
+    referencia_pago = Column(String, nullable=True)  # id de MercadoPago/Stripe
+    creado_en = Column(DateTime(timezone=True), server_default=func.now())
+
+    apunte = relationship("Apunte", back_populates="transacciones")
+
+class Comentario(Base):
+    __tablename__ = "comentarios"
+    id = Column(Integer, primary_key=True, index=True)
+    foro_id = Column(Integer, ForeignKey("foros.id"), nullable=False)
+    autor_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    contenido = Column(Text, nullable=False)
+    fue_filtrado = Column(Boolean, default=False)
+    oculto_por_mod = Column(Boolean, default=False)
+    creado_en = Column(DateTime(timezone=True), server_default=func.now())
+
+class Foro(Base):
+    __tablename__ = "foros"
+    id = Column(Integer, primary_key=True, index=True)
+    titulo = Column(String, nullable=False)
+    materia = Column(String)
+    creado_por = Column(Integer, ForeignKey("usuarios.id"))
+    creado_en = Column(DateTime(timezone=True), server_default=func.now())
