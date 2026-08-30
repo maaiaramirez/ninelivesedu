@@ -84,3 +84,20 @@ def obtener_usuario_actual(
         raise credenciales_invalidas
 
     return usuario
+  def requiere_rol(*roles: "models.RolUsuario"):
+    """
+    Dependencia parametrizable para restringir un endpoint a ciertos roles:
+        @router.post("/tutorias")
+        def crear_tutoria(usuario: models.Usuario = Depends(requiere_rol(models.RolUsuario.TUTOR, models.RolUsuario.ADMIN))):
+            ...
+    Reusa obtener_usuario_actual (así ya valida el token) y encima
+    chequea que el rol del usuario esté en la lista permitida.
+    """
+    def verificador(usuario: models.Usuario = Depends(obtener_usuario_actual)) -> models.Usuario:
+        if usuario.rol not in roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No tenés permisos para realizar esta acción",
+            )
+        return usuario
+    return verificador
