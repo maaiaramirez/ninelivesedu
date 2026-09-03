@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS teacher_profiles (
     user_id TEXT PRIMARY KEY,
     credential_document_path TEXT,
     credential_document_status TEXT DEFAULT 'pending',
+    materia_interes TEXT,
     unique_pin_ciphertext TEXT UNIQUE,
     pin_issued_at TEXT,
     hardware_terminal_alias TEXT,
