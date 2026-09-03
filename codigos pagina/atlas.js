@@ -113,12 +113,104 @@
         values.forEach(v => io.observe(v));
     }
 
+    /* ── 5. Postularse como tutor (con subida de título) ─ */
+    function initTutorApplication() {
+        const btns = document.querySelectorAll('.btn-tutor');
+        if (!btns.length) return;
+
+        btns.forEach(oldBtn => {
+            // Si la página ya tenía un listener viejo pegado a este botón
+            // (ej. el modal de mentira de index.html), lo saco clonando el
+            // nodo, y engancho acá el flujo real.
+            const btn = oldBtn.cloneNode(true);
+            oldBtn.replaceWith(btn);
+            btn.addEventListener('click', openTutorModal);
+        });
+    }
+
+    function openTutorModal() {
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.innerHTML = `
+            <div class="modal-card">
+                <button class="modal-close" type="button">&times;</button>
+                <div class="modal-header-simple">
+                    <h2>Unirse como tutor</h2>
+                    <p>Subí tu título o certificación — un moderador la revisa antes de activar tu perfil.</p>
+                </div>
+                <form class="modal-form" id="tutorApplyForm">
+                    <input type="text" id="taName" placeholder="Nombre completo" required>
+                    <input type="email" id="taEmail" placeholder="Correo electrónico" required>
+                    <select id="taMateria" required>
+                        <option value="">Especialidad principal</option>
+                        <option>Matemáticas</option><option>Física</option>
+                        <option>Química</option><option>Biología</option>
+                        <option>Historia</option><option>Literatura</option>
+                        <option>Inglés</option><option>Filosofía</option>
+                    </select>
+                    <label style="font-size:0.85rem; color:var(--muted, #999); text-align:left;">
+                        Título o certificación (PDF, Word o imagen — máx. 8 MB)
+                        <input type="file" id="taFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required
+                               style="display:block; margin-top:0.4rem; width:100%; color:inherit;">
+                    </label>
+                    <button type="submit" class="secondary" id="taSubmit">Enviar solicitud</button>
+                    <small id="taMsg" class="form-error is-hidden"></small>
+                </form>
+            </div>`;
+        document.body.appendChild(overlay);
+        requestAnimationFrame(() => overlay.classList.add('is-visible'));
+
+        const close = () => {
+            overlay.classList.remove('is-visible');
+            setTimeout(() => overlay.remove(), 400);
+        };
+        overlay.querySelector('.modal-close').addEventListener('click', close);
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+
+        const form = overlay.querySelector('#tutorApplyForm');
+        const msg = overlay.querySelector('#taMsg');
+        const submitBtn = overlay.querySelector('#taSubmit');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            msg.classList.add('is-hidden');
+
+            const fileInput = overlay.querySelector('#taFile');
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('nombreCompleto', overlay.querySelector('#taName').value.trim());
+            formData.append('email', overlay.querySelector('#taEmail').value.trim());
+            formData.append('materia', overlay.querySelector('#taMateria').value);
+            formData.append('titulo', file);
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Enviando…';
+
+            try {
+                const res = await fetch('/api/tutores/postularse', { method: 'POST', body: formData });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.detail || 'No se pudo enviar la solicitud.');
+
+                form.innerHTML = `<p style="color:#8fd18f; text-align:center; padding:1rem 0;">${data.message}</p>`;
+                setTimeout(close, 3200);
+            } catch (err) {
+                msg.textContent = err.message;
+                msg.classList.remove('is-hidden');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Enviar solicitud';
+            }
+        });
+    }
+
     /* ── INIT ───────────────────────────────────────────── */
     function init() {
         injectGlobalBackground();
         injectHeroScene();
         initScrollReveal();
         animateCounters();
+        initTutorApplication();
     }
 
     if (document.readyState === 'loading') {

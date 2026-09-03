@@ -426,7 +426,11 @@
                 <div class="mod-item" data-id="${p.user_id}">
                     <div class="info">
                         <strong>${p.full_name}</strong>
-                        <div class="meta">${p.email} · Solicitado el ${fecha(p.created_at)}</div>
+                        <div class="meta">
+                            ${p.email} · Solicitado el ${fecha(p.created_at)}
+                            ${p.materia_interes ? ' · Materia: ' + p.materia_interes : ''}
+                            ${p.credential_document_path ? ` · <a href="${p.credential_document_path}" target="_blank" style="color: var(--amber);">Ver título/documento</a>` : ''}
+                        </div>
                     </div>
                     <div class="actions">
                         <span class="mod-badge pending">Pendiente</span>
