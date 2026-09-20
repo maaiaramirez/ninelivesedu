@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nine Lives Edu — Mi cuenta</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="components.css">
+    <link rel="stylesheet" href="atlas-theme.css">
+    <style>
+        .mc-main { min-height: 80vh; padding: 7rem 1.5rem 4rem; max-width: 900px; margin: 0 auto; }
+        .mc-header { margin-bottom: 2rem; }
+        .mc-header h1 { font-family: var(--font-display); font-size: 2rem; color: var(--parchment); }
+        .mc-header p { color: var(--muted); margin-top: 0.3rem; }
+        .mc-logout {
+            background: transparent; border: 1px solid var(--line-strong); color: var(--muted);
+            padding: 0.5rem 1rem; font-size: 0.85rem; cursor: pointer; font-family: var(--font-body);
+            float: right; transition: all 0.3s var(--ease);
+        }
+        .mc-logout:hover { border-color: var(--amber); color: var(--amber); }
+
+        .mc-item {
+            background: var(--ink-panel); border: 1px solid var(--line);
+            padding: 1.25rem 1.5rem; margin-bottom: 0.85rem;
+        }
+        .mc-item strong { color: var(--parchment); font-family: var(--font-display); font-weight: 500; }
+        .mc-item .meta { color: var(--muted); font-size: 0.88rem; margin-top: 0.3rem; }
+
+        .mc-badge {
+            font-size: 0.68rem; font-weight: 700; padding: 0.25rem 0.6rem;
+            text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; margin-top: 0.5rem;
+        }
+        .mc-badge.pending, .mc-badge.abierta { background: rgba(226,162,87,0.18); color: var(--amber); }
+        .mc-badge.confirmed, .mc-badge.cerrada { background: rgba(78,158,78,0.18); color: #8fd18f; }
+        .mc-badge.rejected { background: rgba(194,78,78,0.18); color: #e39a9a; }
+
+        .mc-pin {
+            margin-top: 0.85rem; padding: 0.85rem 1rem; background: var(--ink);
+            border: 1px dashed var(--amber); text-align: center;
+        }
+        .mc-pin .label { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+        .mc-pin .pin { font-family: var(--font-display); font-size: 1.6rem; color: var(--amber); letter-spacing: 0.1em; }
+
+        .mc-alumno-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.6rem 0; border-top: 1px solid var(--line);
+        }
+        .mc-alumno-row:first-of-type { border-top: none; margin-top: 0.5rem; }
+        .mc-btn {
+            border: 1px solid var(--line-strong); background: transparent; color: var(--parchment);
+            padding: 0.4rem 0.8rem; font-size: 0.8rem; cursor: pointer; font-family: var(--font-body);
+            margin-left: 0.4rem;
+        }
+        .mc-btn.approve:hover { background: #4E9E4E; border-color: #4E9E4E; color: #fff; }
+        .mc-btn.reject:hover { background: #C24E4E; border-color: #C24E4E; color: #fff; }
+        .mc-btn.cerrar { margin-top: 0.75rem; }
+        .mc-btn.cerrar:hover { background: var(--amber); border-color: var(--amber); color: var(--ink); }
+
+        .mc-empty { color: var(--muted); text-align: center; padding: 3rem 1rem; }
+        .mc-loading { color: var(--muted); text-align: center; padding: 2rem; }
+        .mc-guest { text-align: center; padding: 4rem 1rem; }
+        .mc-guest h2 { font-family: var(--font-display); color: var(--parchment); margin-bottom: 1rem; }
+
+        /* ── Modal de encuesta de satisfacción (disparado por SSE) ── */
+        .mc-modal-overlay {
+            position: fixed; inset: 0; background: rgba(10,10,10,0.75);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 999; padding: 1.5rem;
+        }
+        .mc-modal {
+            background: var(--ink-panel); border: 1px solid var(--line-strong);
+            max-width: 420px; width: 100%; padding: 1.75rem;
+        }
+        .mc-modal h3 { font-family: var(--font-display); color: var(--parchment); margin-bottom: 0.35rem; }
+        .mc-modal p.sub { color: var(--muted); font-size: 0.88rem; margin-bottom: 1.1rem; }
+        .mc-estrellas { display: flex; gap: 0.4rem; margin-bottom: 1.1rem; font-size: 1.6rem; }
+        .mc-estrellas span { cursor: pointer; color: var(--line-strong); transition: color 0.15s; }
+        .mc-estrellas span.activa { color: var(--amber); }
+        .mc-modal textarea {
+            width: 100%; background: var(--ink); border: 1px solid var(--line);
+            color: var(--parchment); padding: 0.6rem; font-family: var(--font-body);
+            resize: vertical; min-height: 70px; margin-bottom: 1.1rem;
+        }
+        .mc-modal-actions { display: flex; justify-content: flex-end; gap: 0.6rem; }
+    </style>
+</head>
+<body>
+    <header class="header" id="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo">
+                    <img src="logo.png" alt="Nine Lives Edu" class="logo-img">
+                    <span class="logo-text">Nine Lives Edu</span>
+                </a>
+                <nav class="nav" aria-label="Navegación principal">
+                    <ul class="nav-list">
+                        <li><a href="index.html" class="nav-link">Inicio</a></li>
+                        <li><a href="apuntes.html" class="nav-link">Apuntes</a></li>
+                        <li><a href="tutores.html" class="nav-link">Tutores</a></li>
+                        <li><a href="foros.html" class="nav-link">Foros</a></li>
+                        <li><a href="asistencia.html" class="nav-link">Asistencia</a></li>
+                        <li><a href="mi-cuenta.html" class="nav-link active">Mi cuenta</a></li>
+                    </ul>
+                </nav>
+                <div class="header-buttons"></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="mc-main" id="mc-main">
+        <div class="mc-loading">Cargando…</div>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-bottom">
+            <p>© 2026 Nine Lives Edu. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="atlas.js"></script>
+    <script>
+        const main = document.getElementById('mc-main');
+
+        function fecha(iso) {
+            if (!iso) return '';
+            try { return new Date(iso).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' }); }
+            catch { return iso; }
+        }
+
+        async function api(path, options = {}) {
+            const res = await fetch(path, { credentials: 'include', headers: { 'Content-Type': 'application/json' }, ...options });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data.detail || 'Error inesperado');
+            return data;
+        }
+
+        const ESTADO_LABEL = { pending: 'Pendiente', confirmed: 'Confirmada', rejected: 'Rechazada', abierta: 'Abierta', cerrada: 'Cerrada' };
+
+        async function init() {
+            let user;
+            try {
+                user = await api('/api/usuarios/me');
+            } catch {
+                main.innerHTML = `
+                    <div class="mc-guest">
+                        <h2>Necesitás iniciar sesión</h2>
+                        <p style="color:var(--muted); margin-bottom:1.5rem;">Esta sección es para alumnos y tutores con cuenta.</p>
+                        <button class="btn-primary" onclick="location.href='index.html'">Volver al inicio</button>
+                    </div>`;
+                return;
+            }
+
+            if (user.role === 'student') {
+                renderAlumno(user);
+                iniciarEscuchaEncuestas();
+            } else if (user.role === 'teacher') renderTutor(user);
+            else {
+                main.innerHTML = `<div class="mc-empty">Tu cuenta (${user.role}) no tiene una vista acá. Los moderadores usan <a href="moderadores.html" style="color:var(--amber);">/moderadores.html</a>.</div>`;
+            }
+        }
+
+        // ── SSE: dispara el modal de encuesta apenas el tutor hace check-out ──
+        function iniciarEscuchaEncuestas() {
+            if (!window.EventSource) return; // navegador viejo: la encuesta simplemente no aparece en vivo
+            const stream = new EventSource('/api/asistencia/stream/alumno');
+            stream.addEventListener('encuesta', (event) => {
+                const data = JSON.parse(event.data);
+                mostrarModalEncuesta(data);
+            });
+            // Si se corta, el navegador reintenta solo; no hace falta manejarlo a mano.
+        }
+
+        function mostrarModalEncuesta({ sesionId, tutorNombre, materia }) {
+            // Evita apilar el mismo modal dos veces si llega el evento repetido
+            if (document.getElementById('mc-encuesta-overlay')) return;
+
+            let puntaje = 0;
+            const overlay = document.createElement('div');
+            overlay.id = 'mc-encuesta-overlay';
+            overlay.className = 'mc-modal-overlay';
+            overlay.innerHTML = `
+                <div class="mc-modal">
+                    <h3>¿Cómo estuvo tu tutoría?</h3>
+                    <p class="sub">${tutorNombre || 'Tu tutor'}${materia ? ' — ' + materia : ''}</p>
+                    <div class="mc-estrellas" id="mc-estrellas">
+                        ${[1, 2, 3, 4, 5].map(n => `<span data-n="${n}">★</span>`).join('')}
+                    </div>
+                    <textarea id="mc-comentario" maxlength="500" placeholder="Comentario (opcional)"></textarea>
+                    <div class="mc-modal-actions">
+                        <button class="mc-btn" id="mc-encuesta-cerrar">Ahora no</button>
+                        <button class="mc-btn approve" id="mc-encuesta-enviar">Enviar</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(overlay);
+
+            const estrellas = overlay.querySelectorAll('#mc-estrellas span');
+            estrellas.forEach(el => el.addEventListener('click', () => {
+                puntaje = Number(el.dataset.n);
+                estrellas.forEach(e => e.classList.toggle('activa', Number(e.dataset.n) <= puntaje));
+            }));
+
+            overlay.querySelector('#mc-encuesta-cerrar').onclick = () => overlay.remove();
+
+            overlay.querySelector('#mc-encuesta-enviar').onclick = async () => {
+                if (!puntaje) { alert('Elegí un puntaje de 1 a 5 estrellas.'); return; }
+                try {
+                    await api('/api/asistencia/encuestas', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            sesionId,
+                            puntaje,
+                            comentario: overlay.querySelector('#mc-comentario').value || null,
+                        }),
+                    });
+                    overlay.remove();
+                } catch (e) {
+                    alert('No se pudo enviar la encuesta: ' + e.message);
+                }
+            };
+        }
+
+        function header(user, subtitulo) {
+            return `
+                <div class="mc-header">
+                    <button class="mc-logout" onclick="cerrarSesion()">Cerrar sesión</button>
+                    <h1>Hola, ${user.fullName.split(' ')[0]}</h1>
+                    <p>${subtitulo}</p>
+                </div>`;
+        }
+
+        async function cerrarSesion() {
+            await api('/api/usuarios/logout', { method: 'POST' }).catch(() => {});
+            location.href = 'index.html';
+        }
+
+        // ── VISTA ALUMNO ──
+        async function renderAlumno(user) {
+            let data;
+            try {
+                data = await api('/api/tutores/mis-reservas/alumno');
+            } catch (e) {
+                main.innerHTML = header(user, 'Tus tutorías reservadas.') + `<div class="mc-empty">No se pudieron cargar tus reservas.</div>`;
+                return;
+            }
+
+            const lista = data.reservas.length
+                ? data.reservas.map(r => `
+                    <div class="mc-item">
+                        <strong>${r.tutor_nombre}</strong> — ${r.materia}
+                        <div class="meta">${fecha(r.fecha)} · ${r.modalidad}</div>
+                        <span class="mc-badge ${r.estado_reserva}">${ESTADO_LABEL[r.estado_reserva]}</span>
+                        <span class="mc-badge ${r.estado_sesion}">Cupo ${ESTADO_LABEL[r.estado_sesion]}</span>
+                        ${r.pin_alumno ? `
+                            <div class="mc-pin">
+                                <div class="label">Tu PIN de asistencia (terminal físico)</div>
+                                <div class="pin">${r.pin_alumno}</div>
+                            </div>` : ''}
+                        ${r.pin_hardware ? `
+                            <div class="mc-pin">
+                                <div class="label">PIN para el hardware de esta sesión</div>
+                                <div class="pin">${r.pin_hardware}</div>
+                            </div>` : ''}
+                    </div>`).join('')
+                : `<div class="mc-empty">Todavía no reservaste ninguna tutoría. <a href="tutores.html" style="color:var(--amber);">Buscar tutores</a>.</div>`;
+
+            main.innerHTML = header(user, 'Tus tutorías reservadas — acá aparece el PIN de hardware cuando se llena el cupo.') + lista;
+        }
+
+        // ── VISTA TUTOR ──
+        async function renderTutor(user) {
+            let data;
+            try {
+                data = await api('/api/tutores/mis-sesiones/tutor');
+            } catch (e) {
+                main.innerHTML = header(user, 'Tus sesiones de tutoría.') + `<div class="mc-empty">No se pudieron cargar tus sesiones.</div>`;
+                return;
+            }
+
+            if (data.aviso) {
+                main.innerHTML = header(user, 'Tus sesiones de tutoría.') + `<div class="mc-empty">${data.aviso}</div>`;
+                return;
+            }
+
+            const lista = data.sesiones.length
+                ? data.sesiones.map(s => `
+                    <div class="mc-item">
+                        <strong>${fecha(s.fecha)}</strong> — ${s.modalidad}
+                        <span class="mc-badge ${s.estado}">${ESTADO_LABEL[s.estado]} · cupo ${s.cupo_maximo}</span>
+                        ${s.alumnos.map(a => `
+                            <div class="mc-alumno-row">
+                                <span>${a.estudiante} — <span class="mc-badge ${a.estado}" style="margin-top:0;">${ESTADO_LABEL[a.estado]}</span></span>
+                                ${a.estado === 'pending' ? `
+                                    <span>
+                                        <button class="mc-btn approve" onclick="aprobar('${a.id}')">Aprobar</button>
+                                        <button class="mc-btn reject" onclick="rechazar('${a.id}')">Rechazar</button>
+                                    </span>` : ''}
+                            </div>`).join('')}
+                        ${s.pin_hardware
+                            ? `<div class="mc-pin"><div class="label">PIN de hardware</div><div class="pin">${s.pin_hardware}</div></div>`
+                            : s.estado === 'abierta' ? `<button class="mc-btn cerrar" onclick="cerrarSesion_('${s.id}')">Cerrar inscripción y generar PIN</button>` : ''}
+                    </div>`).join('')
+                : `<div class="mc-empty">Todavía no tenés sesiones de tutoría.</div>`;
+
+            main.innerHTML = header(user, 'Aprobá alumnos — cuando se llena el cupo, se genera el PIN de hardware solo.') + lista;
+        }
+
+        async function aprobar(reservaId) {
+            try {
+                const data = await api(`/api/tutores/reservas/${reservaId}/aprobar`, { method: 'POST' });
+                if (data.cupoLleno) alert('¡Cupo lleno! PIN generado: ' + data.pin);
+                init();
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        async function rechazar(reservaId) {
+            try {
+                await api(`/api/tutores/reservas/${reservaId}/rechazar`, { method: 'POST' });
+                init();
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        async function cerrarSesion_(sesionId) {
+            try {
+                const data = await api(`/api/tutores/sesiones/${sesionId}/cerrar`, { method: 'POST' });
+                alert('PIN generado: ' + data.pin);
+                init();
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        init();
+    </script>
+</body>
+</html>
