@@ -519,8 +519,9 @@
                 method:'POST',headers:{'Content-Type':'application/json'},
                 body:JSON.stringify({autor,texto})
             });
-            if(!res.ok)throw new Error();
-            const nueva=await res.json();
+            const data=await res.json().catch(()=>({}));
+            if(!res.ok)throw new Error(data.detail||'No se pudo enviar la respuesta. Intenta de nuevo.');
+            const nueva=data;
             const p=posts.find(x=>x.id===activePostId);
             if(p){
                 p.responses=p.responses||[];
@@ -533,7 +534,7 @@
             }
             alert('¡Respuesta publicada!');
         }catch(e){
-            alert('No se pudo enviar la respuesta. Intenta de nuevo.');
+            alert(e.message||'No se pudo enviar la respuesta. Intenta de nuevo.');
         }
     }
 
@@ -581,15 +582,16 @@
         if(!payload.titulo||!payload.contenido){alert('Completa el título y el contenido.');return;}
         try{
             const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-            if(!res.ok)throw new Error();
-            const nuevo=await res.json();
+            const data=await res.json().catch(()=>({}));
+            if(!res.ok)throw new Error(data.detail||'No se pudo publicar el post. Intenta de nuevo.');
+            const nuevo=data;
             posts.unshift(nuevo);
             applyFilters();
             e.target.reset();
             closeNewPost();
             alert('¡Post publicado correctamente!');
         }catch(err){
-            alert('No se pudo publicar el post. Intenta de nuevo.');
+            alert(err.message||'No se pudo publicar el post. Intenta de nuevo.');
         }
     });
 
