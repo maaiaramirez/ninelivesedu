@@ -7,6 +7,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from ..database import exec_all, exec_one, run
+from ..content_moderation import exigir_contenido_apropiado
 
 router = APIRouter(prefix="/api/foros", tags=["foros"])
 
@@ -60,6 +61,8 @@ class PostIn(BaseModel):
 
 @router.post("", status_code=201)
 def crear_post(body: PostIn):
+    exigir_contenido_apropiado(f"{body.titulo}\n\n{body.contenido}")
+
     post_id = f"post-{uuid.uuid4()}"
     fecha = date.today().isoformat()
     tags = body.tags or []
@@ -96,6 +99,8 @@ def agregar_respuesta(post_id: str, body: RespuestaIn):
     post = exec_one("SELECT id FROM posts WHERE id = ?", (post_id,))
     if not post:
         raise HTTPException(404, "Post no encontrado")
+
+    exigir_contenido_apropiado(body.texto)
 
     respuesta_id = f"resp-{uuid.uuid4()}"
     fecha = date.today().isoformat()
