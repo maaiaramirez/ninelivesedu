@@ -4,13 +4,18 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#f8f9fa",
-  "theme_color": "#667eea",
+  "background_color": "#0E1626",
+  "theme_color": "#0E1626",
   "description": "Apuntes, tutores y foros en una sola app.",
   "icons": [
     {
-      "src": "logo.png",
-      "sizes": "256x256",
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
       "type": "image/png"
     }
   ]
