@@ -182,7 +182,51 @@ def mis_sesiones_tutor(user=Depends(require_role("teacher"))):
             "SELECT id, estudiante, estado FROM reservas WHERE sesion_id = ? ORDER BY created_at ASC",
             (s["id"],),
         )
-    return {"sesiones": sesiones}
+    return {"sesiones": sesiones, "cupoDefault": tutor["cupo_maximo"]}
+
+
+class SesionIn(BaseModel):
+    fecha: str
+    modalidad: str = "online"
+    cupoMaximo: int | None = None
+
+
+@router.post("/mis-sesiones", status_code=201)
+def crear_sesion_como_tutor(body: SesionIn, user=Depends(require_role("teacher"))):
+    """Antes solo se podía crear una tutoria_sesiones "por accidente", como
+    efecto secundario de que un alumno reservara para una fecha nueva
+    (ver crear_reserva). Este endpoint deja que el TUTOR la publique de
+    entrada — así puede ofrecer una fecha/modalidad ANTES de tener ningún
+    alumno anotado, y el check-in-tutor del terminal la va a encontrar
+    igual (busca por tutor_id + fecha, sin importar quién la creó)."""
+    tutor = exec_one("SELECT * FROM tutores WHERE user_id = ?", (user["id"],))
+    if not tutor:
+        raise HTTPException(404, "Todavía no tenés un perfil de tutor vinculado en el marketplace.")
+
+    if body.cupoMaximo is not None and body.cupoMaximo < 1:
+        raise HTTPException(400, "El cupo máximo tiene que ser al menos 1.")
+
+    ya_existe = exec_one(
+        """SELECT id FROM tutoria_sesiones
+           WHERE tutor_id = ? AND fecha = ? AND modalidad = ? AND estado = 'abierta'""",
+        (tutor["id"], body.fecha, body.modalidad),
+    )
+    if ya_existe:
+        raise HTTPException(409, "Ya tenés una tutoría abierta en esa fecha y modalidad.")
+
+    cupo = body.cupoMaximo if body.cupoMaximo is not None else tutor["cupo_maximo"]
+    sesion_id = f"sesion-{uuid.uuid4()}"
+    now = datetime.now(timezone.utc).isoformat()
+    run(
+        """INSERT INTO tutoria_sesiones (id, tutor_id, fecha, modalidad, cupo_maximo, estado, created_at)
+           VALUES (?, ?, ?, ?, ?, 'abierta', ?)""",
+        (sesion_id, tutor["id"], body.fecha, body.modalidad, cupo, now),
+    )
+
+    return {
+        "message": "Tutoría creada. Ya está visible para que los alumnos reserven.",
+        "sesion": {"id": sesion_id, "fecha": body.fecha, "modalidad": body.modalidad, "cupoMaximo": cupo},
+    }
 
 
 def _verificar_dueno_de_sesion(sesion_id: str, user: dict):
