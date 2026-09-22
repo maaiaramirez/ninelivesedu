@@ -153,10 +153,53 @@ CREATE TABLE IF NOT EXISTS reservas (
     fecha TEXT NOT NULL,
     modalidad TEXT DEFAULT 'online',
     estado TEXT NOT NULL DEFAULT 'pending' CHECK (estado IN ('pending','confirmed','rejected')),
+    pin_alumno TEXT UNIQUE,
     created_at TEXT NOT NULL,
     FOREIGN KEY (tutor_id) REFERENCES tutores(id),
     FOREIGN KEY (sesion_id) REFERENCES tutoria_sesiones(id),
     FOREIGN KEY (student_user_id) REFERENCES users(id)
+);
+
+-- Máquina de estados de la asistencia FÍSICA de la sesión (terminal ESP32):
+-- bloqueada -> activa (check-in del tutor) -> completada (check-out del tutor).
+-- Es independiente del estado de INSCRIPCIÓN (tutoria_sesiones.estado), que
+-- sigue rigiendo cupo de reservas/PIN de hardware compartido como antes.
+CREATE TABLE IF NOT EXISTS asistencia_fisica (
+    sesion_id TEXT PRIMARY KEY,
+    estado TEXT NOT NULL DEFAULT 'bloqueada' CHECK (estado IN ('bloqueada','activa','completada')),
+    tutor_checkin_at TEXT,
+    tutor_checkout_at TEXT,
+    FOREIGN KEY (sesion_id) REFERENCES tutoria_sesiones(id)
+);
+
+-- Registro de presencia física de cada alumno en una sesión. El UNIQUE
+-- evita doble check-in y, junto al COUNT(*) por sesion_id, es la fuente
+-- de verdad del aforo en tiempo real.
+CREATE TABLE IF NOT EXISTS asistencia_alumnos (
+    id TEXT PRIMARY KEY,
+    sesion_id TEXT NOT NULL,
+    student_user_id TEXT NOT NULL,
+    reserva_id TEXT NOT NULL,
+    checkin_at TEXT NOT NULL,
+    encuesta_completada INTEGER NOT NULL DEFAULT 0,
+    UNIQUE (sesion_id, student_user_id),
+    FOREIGN KEY (sesion_id) REFERENCES tutoria_sesiones(id),
+    FOREIGN KEY (student_user_id) REFERENCES users(id),
+    FOREIGN KEY (reserva_id) REFERENCES reservas(id)
+);
+
+CREATE TABLE IF NOT EXISTS encuestas_satisfaccion (
+    id TEXT PRIMARY KEY,
+    sesion_id TEXT NOT NULL,
+    student_user_id TEXT NOT NULL,
+    tutor_id TEXT NOT NULL,
+    puntaje INTEGER NOT NULL CHECK (puntaje BETWEEN 1 AND 5),
+    comentario TEXT,
+    created_at TEXT NOT NULL,
+    UNIQUE (sesion_id, student_user_id),
+    FOREIGN KEY (sesion_id) REFERENCES tutoria_sesiones(id),
+    FOREIGN KEY (student_user_id) REFERENCES users(id),
+    FOREIGN KEY (tutor_id) REFERENCES tutores(id)
 );
 
 CREATE TABLE IF NOT EXISTS swap_requests (
@@ -233,6 +276,9 @@ def _migrar_columnas_faltantes():
             ("ai_confidence", "REAL"),
             ("ai_reason", "TEXT"),
             ("ai_reviewed_at", "TEXT"),
+        ],
+        "reservas": [
+            ("pin_alumno", "TEXT"),
         ],
     }
     with get_conn() as conn:
