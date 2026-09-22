@@ -148,6 +148,7 @@
                 <form class="modal-form" id="tutorApplyForm">
                     <input type="text" id="taName" placeholder="Nombre completo" required>
                     <input type="email" id="taEmail" placeholder="Correo electrónico" required>
+                    <input type="password" id="taPassword" placeholder="Contraseña (mínimo 8 caracteres)" minlength="8" required>
                     <select id="taMateria" required>
                         <option value="">Especialidad principal</option>
                         <option>Matemáticas</option><option>Física</option>
@@ -189,6 +190,7 @@
             const formData = new FormData();
             formData.append('nombreCompleto', overlay.querySelector('#taName').value.trim());
             formData.append('email', overlay.querySelector('#taEmail').value.trim());
+            formData.append('password', overlay.querySelector('#taPassword').value);
             formData.append('materia', overlay.querySelector('#taMateria').value);
             formData.append('titulo', file);
 
@@ -198,7 +200,22 @@
             try {
                 const res = await fetch('/api/tutores/postularse', { method: 'POST', body: formData });
                 const data = await res.json().catch(() => ({}));
-                if (!res.ok) throw new Error(data.detail || 'No se pudo enviar la solicitud.');
+                if (!res.ok) {
+                    // data.detail puede ser un string (HTTPException nuestra) o,
+                    // si FastAPI rechaza el formulario antes de llegar a nuestro
+                    // código (422 de validación), una LISTA de errores por campo.
+                    // Sin este chequeo, un array ahí terminaba mostrando
+                    // "[object Object]" en vez de decir qué faltaba.
+                    let mensaje = 'No se pudo enviar la solicitud.';
+                    if (typeof data.detail === 'string') {
+                        mensaje = data.detail;
+                    } else if (Array.isArray(data.detail) && data.detail.length) {
+                        mensaje = data.detail
+                            .map(e => e.msg || `${(e.loc || []).join('.')}: dato inválido`)
+                            .join(' / ');
+                    }
+                    throw new Error(mensaje);
+                }
 
                 form.innerHTML = `<p style="color:#8fd18f; text-align:center; padding:1rem 0;">${data.message}</p>`;
                 setTimeout(close, 3200);
