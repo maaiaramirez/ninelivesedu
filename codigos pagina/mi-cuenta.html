@@ -351,7 +351,11 @@
         async function aprobar(reservaId) {
             try {
                 const data = await api(`/api/tutores/reservas/${reservaId}/aprobar`, { method: 'POST' });
-                if (data.cupoLleno) alert('¡Cupo lleno! PIN generado: ' + data.pin);
+                // alert() se queda fijo en pantalla (a diferencia de un toast que
+                // se autodestruye) -- el profesor necesita tiempo para anotar
+                // el PIN del alumno, no solo un vistazo de medio segundo.
+                if (data.pinAlumno) alert(`PIN del alumno: ${data.pinAlumno}`);
+                if (data.cupoLleno) alert('¡Cupo lleno! PIN de hardware: ' + data.pin);
                 init();
             } catch (e) { alert('Error: ' + e.message); }
         }
