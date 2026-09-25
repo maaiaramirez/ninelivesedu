@@ -1,18 +1,15 @@
 """
-Base de datos: SQLite local por defecto, o Turso (libSQL remoto) en
-producción si están seteadas TURSO_DATABASE_URL y TURSO_AUTH_TOKEN.
+Base de datos. Por defecto usa SQLite local (módulo estándar sqlite3, sin
+dependencias externas) -- útil para desarrollo local. Si está configurada
+la variable de entorno TURSO_DATABASE_URL, usa en cambio Turso (libSQL)
+como base remota persistente, que es lo que corre en producción: el disco
+del plan gratis de Render es efímero (se borra en cada deploy y cada vez
+que el servicio se duerme por inactividad), así que sin una base externa
+como Turso, todo lo que se crea en la app desaparece solo.
 
-Por qué: en el plan free de Render el sistema de archivos no persiste —
-se reinicia con cada redeploy y cada vez que el servicio "duerme" por
-inactividad (15 min sin tráfico), así que un archivo SQLite local pierde
-todos los datos constantemente. Turso resuelve esto sirviendo la misma
-base por HTTP desde un servicio externo que sí persiste, sin cambiar el
-SQL de ninguna consulta del proyecto (libSQL es un fork de SQLite,
-compatible a nivel de sintaxis).
-
-Sin esas dos variables de entorno, se sigue usando el archivo local
-de siempre — así el desarrollo y las pruebas no dependen de tener una
-cuenta de Turso.
+TODA la app (routers incluidos) sigue llamando exec_one/exec_all/run
+exactamente igual que antes -- este archivo es el único que sabe si por
+detrás hay un archivo .sqlite local o una base Turso remota.
 """
 import sqlite3
 import hashlib
@@ -25,10 +22,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DB_FILE = BASE_DIR / "storage" / "ninelivesedu.sqlite"
 DB_FILE.parent.mkdir(parents=True, exist_ok=True)
 
+PIN_HASH_SECRET = os.environ.get("PIN_HASH_SECRET", "nine-lives-edu-pin-secret")
+
 TURSO_DATABASE_URL = os.environ.get("TURSO_DATABASE_URL")
 TURSO_AUTH_TOKEN = os.environ.get("TURSO_AUTH_TOKEN")
 
-PIN_HASH_SECRET = os.environ.get("PIN_HASH_SECRET", "nine-lives-edu-pin-secret")
+_turso_client = None
+if TURSO_DATABASE_URL:
+    import libsql_client
+    # libsql_client habla HTTP (más simple y más robusto en un servicio web
+    # de un solo proceso que websockets persistentes) -- la URL que da Turso
+    # viene como "libsql://...", que esta librería traduciría a "wss://" por
+    # defecto; se fuerza "https://" en su lugar a propósito.
+    _turso_http_url = TURSO_DATABASE_URL.replace("libsql://", "https://", 1)
+    _turso_client = libsql_client.create_client_sync(
+        url=_turso_http_url, auth_token=TURSO_AUTH_TOKEN
+    )
 
 
 def hash_pin(pin: str) -> str:
@@ -37,11 +46,9 @@ def hash_pin(pin: str) -> str:
 
 @contextmanager
 def get_conn():
-    if TURSO_DATABASE_URL:
-        import libsql  # se importa acá, no arriba, para no exigir el paquete cuando no se usa Turso
-        conn = libsql.connect(database=TURSO_DATABASE_URL, auth_token=TURSO_AUTH_TOKEN or "")
-    else:
-        conn = sqlite3.connect(DB_FILE)
+    """Solo se usa en el modo SQLite local (sin Turso configurado)."""
+    conn = sqlite3.connect(DB_FILE)
+    conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     try:
         yield conn
@@ -51,11 +58,12 @@ def get_conn():
 
 
 def exec_all(sql, params=()):
+    if _turso_client:
+        rs = _turso_client.execute(sql, list(params))
+        return [r.asdict() for r in rs.rows]
     with get_conn() as conn:
-        cursor = conn.execute(sql, params)
-        columnas = [col[0] for col in cursor.description] if cursor.description else []
-        filas = cursor.fetchall()
-        return [dict(zip(columnas, fila)) for fila in filas]
+        rows = conn.execute(sql, params).fetchall()
+        return [dict(r) for r in rows]
 
 
 def exec_one(sql, params=()):
@@ -64,8 +72,26 @@ def exec_one(sql, params=()):
 
 
 def run(sql, params=()):
+    if _turso_client:
+        _turso_client.execute(sql, list(params))
+        return
     with get_conn() as conn:
         conn.execute(sql, params)
+
+
+def _statements_del_schema(sql_multiple):
+    """Turso/libsql_client ejecuta UNA sentencia por vez (a diferencia de
+    sqlite3.executescript, que corre un script completo de un saque) --
+    separa el SCHEMA en sentencias individuales para poder mandarlas todas
+    juntas con _turso_client.batch()."""
+    statements = []
+    for chunk in sql_multiple.split(";"):
+        sin_comentarios = "\n".join(
+            linea for linea in chunk.splitlines() if not linea.strip().startswith("--")
+        ).strip()
+        if sin_comentarios:
+            statements.append(sin_comentarios)
+    return statements
 
 
 SCHEMA = """
@@ -173,10 +199,53 @@ CREATE TABLE IF NOT EXISTS reservas (
     fecha TEXT NOT NULL,
     modalidad TEXT DEFAULT 'online',
     estado TEXT NOT NULL DEFAULT 'pending' CHECK (estado IN ('pending','confirmed','rejected')),
+    pin_alumno TEXT UNIQUE,
     created_at TEXT NOT NULL,
     FOREIGN KEY (tutor_id) REFERENCES tutores(id),
     FOREIGN KEY (sesion_id) REFERENCES tutoria_sesiones(id),
     FOREIGN KEY (student_user_id) REFERENCES users(id)
+);
+
+-- Máquina de estados de la asistencia FÍSICA de la sesión (terminal ESP32):
+-- bloqueada -> activa (check-in del tutor) -> completada (check-out del tutor).
+-- Es independiente del estado de INSCRIPCIÓN (tutoria_sesiones.estado), que
+-- sigue rigiendo cupo de reservas/PIN de hardware compartido como antes.
+CREATE TABLE IF NOT EXISTS asistencia_fisica (
+    sesion_id TEXT PRIMARY KEY,
+    estado TEXT NOT NULL DEFAULT 'bloqueada' CHECK (estado IN ('bloqueada','activa','completada')),
+    tutor_checkin_at TEXT,
+    tutor_checkout_at TEXT,
+    FOREIGN KEY (sesion_id) REFERENCES tutoria_sesiones(id)
+);
+
+-- Registro de presencia física de cada alumno en una sesión. El UNIQUE
+-- evita doble check-in y, junto al COUNT(*) por sesion_id, es la fuente
+-- de verdad del aforo en tiempo real.
+CREATE TABLE IF NOT EXISTS asistencia_alumnos (
+    id TEXT PRIMARY KEY,
+    sesion_id TEXT NOT NULL,
+    student_user_id TEXT NOT NULL,
+    reserva_id TEXT NOT NULL,
+    checkin_at TEXT NOT NULL,
+    encuesta_completada INTEGER NOT NULL DEFAULT 0,
+    UNIQUE (sesion_id, student_user_id),
+    FOREIGN KEY (sesion_id) REFERENCES tutoria_sesiones(id),
+    FOREIGN KEY (student_user_id) REFERENCES users(id),
+    FOREIGN KEY (reserva_id) REFERENCES reservas(id)
+);
+
+CREATE TABLE IF NOT EXISTS encuestas_satisfaccion (
+    id TEXT PRIMARY KEY,
+    sesion_id TEXT NOT NULL,
+    student_user_id TEXT NOT NULL,
+    tutor_id TEXT NOT NULL,
+    puntaje INTEGER NOT NULL CHECK (puntaje BETWEEN 1 AND 5),
+    comentario TEXT,
+    created_at TEXT NOT NULL,
+    UNIQUE (sesion_id, student_user_id),
+    FOREIGN KEY (sesion_id) REFERENCES tutoria_sesiones(id),
+    FOREIGN KEY (student_user_id) REFERENCES users(id),
+    FOREIGN KEY (tutor_id) REFERENCES tutores(id)
 );
 
 CREATE TABLE IF NOT EXISTS swap_requests (
@@ -232,8 +301,11 @@ CREATE TABLE IF NOT EXISTS moderator_sessions (
 
 
 def init_database():
-    with get_conn() as conn:
-        conn.executescript(SCHEMA)
+    if _turso_client:
+        _turso_client.batch(_statements_del_schema(SCHEMA))
+    else:
+        with get_conn() as conn:
+            conn.executescript(SCHEMA)
 
     _migrar_columnas_faltantes()
     seed_teacher_demo()
@@ -244,11 +316,9 @@ def init_database():
 
 def _migrar_columnas_faltantes():
     """SQLite no agrega columnas nuevas a una tabla que ya existe solo con
-    CREATE TABLE IF NOT EXISTS — si la base viene de antes de que existieran
-    estas columnas, hay que sumarlas a mano. ALTER TABLE ADD COLUMN falla si
-    la columna ya está, así que lo ignoramos: SQLite lanza
-    sqlite3.OperationalError para esto, pero libSQL/Turso lanza ValueError
-    con el mismo motivo — hay que atrapar los dos."""
+    CREATE TABLE IF NOT EXISTS — si el archivo .sqlite viene de antes de
+    que existieran estas columnas, hay que sumarlas a mano. ALTER TABLE
+    ADD COLUMN falla si la columna ya está, así que lo ignoramos."""
     columnas_nuevas = {
         "teacher_profiles": [
             ("ai_is_valid", "INTEGER"),
@@ -256,14 +326,16 @@ def _migrar_columnas_faltantes():
             ("ai_reason", "TEXT"),
             ("ai_reviewed_at", "TEXT"),
         ],
+        "reservas": [
+            ("pin_alumno", "TEXT"),
+        ],
     }
-    with get_conn() as conn:
-        for tabla, columnas in columnas_nuevas.items():
-            for nombre, tipo in columnas:
-                try:
-                    conn.execute(f"ALTER TABLE {tabla} ADD COLUMN {nombre} {tipo}")
-                except (sqlite3.OperationalError, ValueError):
-                    pass  # ya existía
+    for tabla, columnas in columnas_nuevas.items():
+        for nombre, tipo in columnas:
+            try:
+                run(f"ALTER TABLE {tabla} ADD COLUMN {nombre} {tipo}")
+            except Exception:
+                pass  # ya existía (sqlite3.OperationalError en local, LibsqlError en Turso)
 
 
 def seed_moderator():
