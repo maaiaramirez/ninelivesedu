@@ -9,7 +9,7 @@ from ..database import exec_one, run
 from ..auth import hash_password, verify_password
 from ..rate_limit import check_login_rate_limit, reset_login_rate_limit
 from ..user_auth import (
-    create_user_session, delete_user_session, require_user, require_role,
+    create_user_session, delete_user_session, require_user,
     USER_SESSION_COOKIE,
 )
 
@@ -94,15 +94,4 @@ def me(user=Depends(require_user)):
     return {"id": user["id"], "email": user["email"], "fullName": user["full_name"], "role": user["role"]}
 
 
-# ─────────────────────────────────────────────
-# EJEMPLOS de rutas protegidas por rol (patrón a reusar en el resto
-# de los endpoints reales cuando lleguemos a las otras partes)
-# ─────────────────────────────────────────────
-@router.get("/panel/alumno")
-def panel_alumno(user=Depends(require_role("student"))):
-    return {"mensaje": f"Bienvenido, {user['full_name']}. Esta vista es solo para alumnos."}
 
-
-@router.get("/panel/tutor")
-def panel_tutor(user=Depends(require_role("teacher"))):
-    return {"mensaje": f"Bienvenido, {user['full_name']}. Esta vista es solo para tutores."}

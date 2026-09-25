@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException, Response, Request, Depends
 from pydantic import BaseModel
 import os
-import uuid
 from datetime import datetime, timezone
 
 from ..database import exec_one, run
@@ -90,26 +89,3 @@ def cambiar_password(body: CambiarPasswordIn, request: Request, moderator=Depend
     )
 
     return {"success": True, "message": "Contraseña actualizada. Se cerraron todas tus otras sesiones activas."}
-
-
-class NuevoModeradorIn(BaseModel):
-    email: str
-    password: str
-    fullName: str
-
-
-@router.post("/moderadores")
-def crear_moderador(body: NuevoModeradorIn, moderator=Depends(require_moderator)):
-    """Solo un moderador ya logueado puede dar de alta a otro."""
-    email = body.email.strip().lower()
-    if exec_one("SELECT id FROM moderators WHERE email = ?", (email,)):
-        raise HTTPException(409, "Ya existe un moderador con ese email.")
-    if len(body.password) < 8:
-        raise HTTPException(400, "La contraseña debe tener al menos 8 caracteres.")
-
-    now = datetime.now(timezone.utc).isoformat()
-    run(
-        "INSERT INTO moderators (id, email, password_hash, full_name, created_at) VALUES (?, ?, ?, ?, ?)",
-        (str(uuid.uuid4()), email, hash_password(body.password), body.fullName.strip(), now),
-    )
-    return {"success": True, "message": f"Moderador {body.fullName} creado."}

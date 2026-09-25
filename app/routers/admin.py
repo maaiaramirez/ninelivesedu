@@ -7,10 +7,9 @@ from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
-from ..database import exec_all, exec_one, run, hash_pin
+from ..database import exec_all, exec_one, run
 from ..auth import require_moderator, hash_password
 from ..ai_verification import analizar_documento, tipo_soportado
-import random
 
 router = APIRouter(prefix="/api/admin", tags=["admin"], dependencies=[Depends(require_moderator)])
 
@@ -93,18 +92,6 @@ def descargar_documento_certificacion(user_id: str):
     return FileResponse(absolute_path)
 
 
-def _generar_pin_docente_unico() -> str:
-    for _ in range(10):
-        candidato = f"{random.randint(0, 999999):06d}"
-        choque = exec_one(
-            "SELECT user_id FROM teacher_profiles WHERE unique_pin_ciphertext = ?",
-            (hash_pin(candidato),),
-        )
-        if not choque:
-            return candidato
-    raise HTTPException(500, "No se pudo generar un PIN único para el profesor.")
-
-
 @router.post("/certificaciones/{user_id}/aprobar")
 def aprobar_certificacion(user_id: str):
     user = exec_one("SELECT * FROM users WHERE id = ?", (user_id,))
@@ -127,50 +114,7 @@ def aprobar_certificacion(user_id: str):
             (tutor_id, user_id, user["full_name"], (perfil["materia_interes"] if perfil else "general") or "general"),
         )
 
-    # PIN personal para el terminal físico (check-in-tutor / check-out-tutor
-    # en asistencia.py). Se genera UNA sola vez acá, en la aprobación — de ahí
-    # en más solo se guarda su hash (unique_pin_ciphertext), así que este es
-    # el único momento en que el backend conoce el PIN en texto plano. Si el
-    # profesor ya tenía uno asignado (por ej. una re-aprobación), no se pisa
-    # — para eso está /regenerar-pin más abajo, explícito.
-    ya_tiene_pin = exec_one(
-        "SELECT unique_pin_ciphertext FROM teacher_profiles WHERE user_id = ?", (user_id,)
-    )
-    pin_generado = None
-    if ya_tiene_pin and not ya_tiene_pin["unique_pin_ciphertext"]:
-        pin_generado = _generar_pin_docente_unico()
-        run(
-            "UPDATE teacher_profiles SET unique_pin_ciphertext = ?, pin_issued_at = ? WHERE user_id = ?",
-            (hash_pin(pin_generado), now, user_id),
-        )
-
-    mensaje = f"{user['full_name']} fue aprobado/a y ya tiene su ficha de tutor activa."
-    if pin_generado:
-        mensaje += f" Su PIN para el terminal físico es {pin_generado} — comunicáselo, no se puede volver a mostrar."
-
-    return {"success": True, "message": mensaje, "pinDocente": pin_generado}
-
-
-@router.post("/usuarios/{user_id}/regenerar-pin-docente")
-def regenerar_pin_docente(user_id: str):
-    """Para cuando el PIN generado en la aprobación se perdió, se anotó mal,
-    o hay que rotarlo por seguridad. Pisa el que tenía (si tenía) con uno
-    nuevo — el viejo deja de servir para el terminal apenas se guarda este."""
-    perfil = exec_one("SELECT * FROM teacher_profiles WHERE user_id = ?", (user_id,))
-    if not perfil:
-        raise HTTPException(404, "Este usuario no tiene un perfil de profesor.")
-
-    pin_generado = _generar_pin_docente_unico()
-    now = datetime.now(timezone.utc).isoformat()
-    run(
-        "UPDATE teacher_profiles SET unique_pin_ciphertext = ?, pin_issued_at = ? WHERE user_id = ?",
-        (hash_pin(pin_generado), now, user_id),
-    )
-    return {
-        "success": True,
-        "message": f"Nuevo PIN generado: {pin_generado} — el anterior (si tenía) dejó de funcionar.",
-        "pinDocente": pin_generado,
-    }
+    return {"success": True, "message": f"{user['full_name']} fue aprobado/a y ya tiene su ficha de tutor activa."}
 
 
 @router.post("/certificaciones/{user_id}/rechazar")
