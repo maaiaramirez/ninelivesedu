@@ -1,6 +1,18 @@
 """
-Base de datos SQLite (usa el módulo estándar sqlite3, sin dependencias externas).
-Reemplaza a src/db/database.js (Node + sql.js).
+Base de datos: SQLite local por defecto, o Turso (libSQL remoto) en
+producción si están seteadas TURSO_DATABASE_URL y TURSO_AUTH_TOKEN.
+
+Por qué: en el plan free de Render el sistema de archivos no persiste —
+se reinicia con cada redeploy y cada vez que el servicio "duerme" por
+inactividad (15 min sin tráfico), así que un archivo SQLite local pierde
+todos los datos constantemente. Turso resuelve esto sirviendo la misma
+base por HTTP desde un servicio externo que sí persiste, sin cambiar el
+SQL de ninguna consulta del proyecto (libSQL es un fork de SQLite,
+compatible a nivel de sintaxis).
+
+Sin esas dos variables de entorno, se sigue usando el archivo local
+de siempre — así el desarrollo y las pruebas no dependen de tener una
+cuenta de Turso.
 """
 import sqlite3
 import hashlib
@@ -13,6 +25,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DB_FILE = BASE_DIR / "storage" / "ninelivesedu.sqlite"
 DB_FILE.parent.mkdir(parents=True, exist_ok=True)
 
+TURSO_DATABASE_URL = os.environ.get("TURSO_DATABASE_URL")
+TURSO_AUTH_TOKEN = os.environ.get("TURSO_AUTH_TOKEN")
+
 PIN_HASH_SECRET = os.environ.get("PIN_HASH_SECRET", "nine-lives-edu-pin-secret")
 
 
@@ -22,8 +37,11 @@ def hash_pin(pin: str) -> str:
 
 @contextmanager
 def get_conn():
-    conn = sqlite3.connect(DB_FILE)
-    conn.row_factory = sqlite3.Row
+    if TURSO_DATABASE_URL:
+        import libsql  # se importa acá, no arriba, para no exigir el paquete cuando no se usa Turso
+        conn = libsql.connect(database=TURSO_DATABASE_URL, auth_token=TURSO_AUTH_TOKEN or "")
+    else:
+        conn = sqlite3.connect(DB_FILE)
     conn.execute("PRAGMA foreign_keys = ON")
     try:
         yield conn
@@ -34,8 +52,10 @@ def get_conn():
 
 def exec_all(sql, params=()):
     with get_conn() as conn:
-        rows = conn.execute(sql, params).fetchall()
-        return [dict(r) for r in rows]
+        cursor = conn.execute(sql, params)
+        columnas = [col[0] for col in cursor.description] if cursor.description else []
+        filas = cursor.fetchall()
+        return [dict(zip(columnas, fila)) for fila in filas]
 
 
 def exec_one(sql, params=()):
@@ -153,53 +173,10 @@ CREATE TABLE IF NOT EXISTS reservas (
     fecha TEXT NOT NULL,
     modalidad TEXT DEFAULT 'online',
     estado TEXT NOT NULL DEFAULT 'pending' CHECK (estado IN ('pending','confirmed','rejected')),
-    pin_alumno TEXT UNIQUE,
     created_at TEXT NOT NULL,
     FOREIGN KEY (tutor_id) REFERENCES tutores(id),
     FOREIGN KEY (sesion_id) REFERENCES tutoria_sesiones(id),
     FOREIGN KEY (student_user_id) REFERENCES users(id)
-);
-
--- Máquina de estados de la asistencia FÍSICA de la sesión (terminal ESP32):
--- bloqueada -> activa (check-in del tutor) -> completada (check-out del tutor).
--- Es independiente del estado de INSCRIPCIÓN (tutoria_sesiones.estado), que
--- sigue rigiendo cupo de reservas/PIN de hardware compartido como antes.
-CREATE TABLE IF NOT EXISTS asistencia_fisica (
-    sesion_id TEXT PRIMARY KEY,
-    estado TEXT NOT NULL DEFAULT 'bloqueada' CHECK (estado IN ('bloqueada','activa','completada')),
-    tutor_checkin_at TEXT,
-    tutor_checkout_at TEXT,
-    FOREIGN KEY (sesion_id) REFERENCES tutoria_sesiones(id)
-);
-
--- Registro de presencia física de cada alumno en una sesión. El UNIQUE
--- evita doble check-in y, junto al COUNT(*) por sesion_id, es la fuente
--- de verdad del aforo en tiempo real.
-CREATE TABLE IF NOT EXISTS asistencia_alumnos (
-    id TEXT PRIMARY KEY,
-    sesion_id TEXT NOT NULL,
-    student_user_id TEXT NOT NULL,
-    reserva_id TEXT NOT NULL,
-    checkin_at TEXT NOT NULL,
-    encuesta_completada INTEGER NOT NULL DEFAULT 0,
-    UNIQUE (sesion_id, student_user_id),
-    FOREIGN KEY (sesion_id) REFERENCES tutoria_sesiones(id),
-    FOREIGN KEY (student_user_id) REFERENCES users(id),
-    FOREIGN KEY (reserva_id) REFERENCES reservas(id)
-);
-
-CREATE TABLE IF NOT EXISTS encuestas_satisfaccion (
-    id TEXT PRIMARY KEY,
-    sesion_id TEXT NOT NULL,
-    student_user_id TEXT NOT NULL,
-    tutor_id TEXT NOT NULL,
-    puntaje INTEGER NOT NULL CHECK (puntaje BETWEEN 1 AND 5),
-    comentario TEXT,
-    created_at TEXT NOT NULL,
-    UNIQUE (sesion_id, student_user_id),
-    FOREIGN KEY (sesion_id) REFERENCES tutoria_sesiones(id),
-    FOREIGN KEY (student_user_id) REFERENCES users(id),
-    FOREIGN KEY (tutor_id) REFERENCES tutores(id)
 );
 
 CREATE TABLE IF NOT EXISTS swap_requests (
@@ -267,9 +244,11 @@ def init_database():
 
 def _migrar_columnas_faltantes():
     """SQLite no agrega columnas nuevas a una tabla que ya existe solo con
-    CREATE TABLE IF NOT EXISTS — si el archivo .sqlite viene de antes de
-    que existieran estas columnas, hay que sumarlas a mano. ALTER TABLE
-    ADD COLUMN falla si la columna ya está, así que lo ignoramos."""
+    CREATE TABLE IF NOT EXISTS — si la base viene de antes de que existieran
+    estas columnas, hay que sumarlas a mano. ALTER TABLE ADD COLUMN falla si
+    la columna ya está, así que lo ignoramos: SQLite lanza
+    sqlite3.OperationalError para esto, pero libSQL/Turso lanza ValueError
+    con el mismo motivo — hay que atrapar los dos."""
     columnas_nuevas = {
         "teacher_profiles": [
             ("ai_is_valid", "INTEGER"),
@@ -277,16 +256,13 @@ def _migrar_columnas_faltantes():
             ("ai_reason", "TEXT"),
             ("ai_reviewed_at", "TEXT"),
         ],
-        "reservas": [
-            ("pin_alumno", "TEXT"),
-        ],
     }
     with get_conn() as conn:
         for tabla, columnas in columnas_nuevas.items():
             for nombre, tipo in columnas:
                 try:
                     conn.execute(f"ALTER TABLE {tabla} ADD COLUMN {nombre} {tipo}")
-                except sqlite3.OperationalError:
+                except (sqlite3.OperationalError, ValueError):
                     pass  # ya existía
 
 
