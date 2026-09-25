@@ -3,12 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="manifest" href="manifest.webmanifest">
-    <meta name="theme-color" content="#0E1626">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Nine Lives Edu">
     <title>Nine Lives Edu — Panel de Moderadores</title>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -336,12 +330,6 @@
             catch { return iso; }
         }
 
-        function esc(str) {
-            const div = document.createElement('div');
-            div.textContent = str ?? '';
-            return div.innerHTML;
-        }
-
         async function api(path, options = {}) {
             const res = await fetch(path, {
                 credentials: 'include',
@@ -459,10 +447,10 @@
             box.innerHTML = list.map(p => `
                 <div class="mod-item" data-id="${p.user_id}">
                     <div class="info">
-                        <strong>${esc(p.full_name)}</strong>
+                        <strong>${p.full_name}</strong>
                         <div class="meta">
-                            ${esc(p.email)} · Solicitado el ${fecha(p.created_at)}
-                            ${p.materia_interes ? ' · Materia: ' + esc(p.materia_interes) : ''}
+                            ${p.email} · Solicitado el ${fecha(p.created_at)}
+                            ${p.materia_interes ? ' · Materia: ' + p.materia_interes : ''}
                             ${p.credential_document_path ? ` · <a href="/api/admin/certificaciones/${p.user_id}/documento" target="_blank" style="color: var(--amber);">Ver título/documento</a>` : ''}
                         </div>
                         ${renderOpinionIA(p)}
@@ -483,7 +471,7 @@
                         : p.ai_is_valid === 0 ? '<span class="mod-badge rejected">IA: dudoso</span>'
                         : '<span class="mod-badge inactive">IA: no pudo evaluarlo</span>';
             const confianza = p.ai_confidence != null ? ` (confianza ${Math.round(p.ai_confidence * 100)}%)` : '';
-            return `<div class="meta" style="margin-top:0.4rem">🤖 ${badge}${confianza} — ${esc(p.ai_reason || '')}</div>`;
+            return `<div class="meta" style="margin-top:0.4rem">🤖 ${badge}${confianza} — ${p.ai_reason || ''}</div>`;
         }
 
         document.getElementById('cert-search').addEventListener('input', (e) => {
@@ -496,7 +484,15 @@
         async function resolverCert(userId, accion) {
             try {
                 const data = await api(`/api/admin/certificaciones/${userId}/${accion}`, { method: 'POST' });
-                showToast(data.message || 'Listo.');
+                if (data.pinDocente) {
+                    // El toast normal desaparece solo a los 2.6s -- muy poco
+                    // tiempo para leer y anotar un PIN de 6 dígitos. Un
+                    // alert() nativo se queda esperando hasta que lo cierres,
+                    // así no se pierde el único momento en que el PIN es visible.
+                    alert(data.message);
+                } else {
+                    showToast(data.message || 'Listo.');
+                }
                 loadCertificaciones();
                 loadMetrics();
                 loadUsuarios();
@@ -548,12 +544,13 @@
                 box.innerHTML = data.usuarios.map(u => `
                     <div class="mod-item" data-id="${u.id}">
                         <div class="info">
-                            <strong>${esc(u.full_name)}</strong>
-                            <div class="meta">${esc(u.email)} · ${esc(u.role)} · Registrado el ${fecha(u.created_at)}</div>
+                            <strong>${u.full_name}</strong>
+                            <div class="meta">${u.email} · ${u.role} · Registrado el ${fecha(u.created_at)}</div>
                         </div>
                         <div class="actions">
                             <span class="mod-badge ${u.is_active ? 'approved' : 'inactive'}">${u.is_active ? 'Activo' : 'Inactivo'}</span>
                             <span class="mod-badge ${u.validation_status}">${u.validation_status}</span>
+                            ${u.role === 'teacher' ? `<button class="mod-btn-toggle" onclick="regenerarPin('${u.id}')">Regenerar PIN</button>` : ''}
                             <button class="mod-btn-toggle" onclick="toggleUsuario('${u.id}', ${u.is_active ? 'false' : 'true'})">
                                 ${u.is_active ? 'Desactivar' : 'Activar'}
                             </button>
@@ -562,6 +559,16 @@
                 `).join('');
             } catch (e) {
                 box.innerHTML = `<div class="mod-empty">No se pudieron cargar los usuarios.</div>`;
+            }
+        }
+
+        async function regenerarPin(userId) {
+            if (!confirm('¿Generar un PIN nuevo? El anterior (si tenía) deja de funcionar.')) return;
+            try {
+                const data = await api(`/api/admin/usuarios/${userId}/regenerar-pin-docente`, { method: 'POST' });
+                alert(data.message); // se queda esperando -- tiempo de sobra para anotar el PIN
+            } catch (e) {
+                showToast('Error: ' + e.message);
             }
         }
 
@@ -589,8 +596,8 @@
                 box.innerHTML = data.administradores.map(a => `
                     <div class="mod-item" data-id="${a.id}">
                         <div class="info">
-                            <strong>${esc(a.full_name)}</strong>
-                            <div class="meta">${esc(a.email)} · Alta el ${fecha(a.created_at)}</div>
+                            <strong>${a.full_name}</strong>
+                            <div class="meta">${a.email} · Alta el ${fecha(a.created_at)}</div>
                         </div>
                         <div class="actions">
                             ${a.id === currentAdminId
