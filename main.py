@@ -51,9 +51,17 @@ if PUBLIC_DIR.exists():
 
 @app.exception_handler(404)
 async def not_found_handler(request: Request, exc):
-    # Si es un pedido a /api/... que no matcheó ninguna ruta: 404 en JSON
+    # Si es un pedido a /api/... que no matcheó ninguna ruta: 404 en JSON.
+    # Ojo: esto también intercepta los HTTPException(404, "...") que
+    # levanta nuestro propio código (PIN inválido, sesión no encontrada,
+    # etc.) -- antes se pisaba ese mensaje real con uno genérico, lo cual
+    # complica mucho el diagnóstico en el terminal/curl. Ahora: si el
+    # detail no es el "Not Found" por defecto de Starlette (o sea, si
+    # nuestro propio código lo puso explícitamente), se respeta tal cual.
     if request.url.path.startswith("/api"):
-        return JSONResponse(status_code=404, content={"message": "Recurso no encontrado"})
+        detail = getattr(exc, "detail", None)
+        mensaje = detail if (detail and detail != "Not Found") else "Recurso no encontrado"
+        return JSONResponse(status_code=404, content={"message": mensaje})
 
     # Si es un GET normal de navegador, servimos el index.html (SPA fallback)
     if request.method == "GET" and PUBLIC_DIR.exists():
