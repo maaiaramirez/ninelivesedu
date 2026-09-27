@@ -3,7 +3,7 @@ import json
 import os
 import sqlite3
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Dict, List
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, WebSocket, WebSocketDisconnect
@@ -351,7 +351,13 @@ def _resolver_sesion_para_tutor(tutor_id: str) -> dict | None:
     if activa:
         return activa
 
-    hoy = datetime.now(timezone.utc).date().isoformat()
+    # OJO: "hoy" se calcula en huso horario de Argentina (UTC-3), no en UTC.
+    # El <input type="date"> del navegador guarda el día calendario local del
+    # usuario (Argentina) sin ningún huso asociado. Entre las ~21:00 y las
+    # 23:59 hora argentina, UTC ya pasó a la fecha del día siguiente -- usar
+    # UTC acá haría que el terminal no encuentre "la sesión de hoy" durante
+    # esa franja horaria, aunque para el usuario siga siendo hoy.
+    hoy = (datetime.now(timezone.utc) - timedelta(hours=3)).date().isoformat()
     return exec_one(
         """SELECT s.* FROM tutoria_sesiones s
            LEFT JOIN asistencia_fisica af ON af.sesion_id = s.id
