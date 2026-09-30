@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nine Lives Edu — Encuentra apuntes y tutores al instante</title>
     <link rel="manifest" href="manifest.webmanifest">
-    <meta name="theme-color" content="#0E1626">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Nine Lives Edu">
+    <meta name="theme-color" content="#7c3aed">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -1154,6 +1150,7 @@
     <link rel="stylesheet" href="atlas-theme.css">
 </head>
 <body>
+    <div id="atlas-bg"><div class="atlas-glow"></div></div>
 
     <!-- NETWORK CANVAS -->
     <canvas id="network-canvas"></canvas>
@@ -1192,6 +1189,23 @@
          HERO
     ════════════════════════════════ -->
     <section class="hero" id="inicio">
+        <svg id="atlas-scene" viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+            <path class="atlas-line" d="M120,140 L340,90 L560,190 L820,110 L1040,170" style="animation-delay:.1s"/>
+            <path class="atlas-line" d="M340,90 L400,300 L220,420" style="animation-delay:.3s"/>
+            <path class="atlas-line" d="M560,190 L680,380 L500,480" style="animation-delay:.5s"/>
+            <path class="atlas-line" d="M820,110 L960,320 L1100,420" style="animation-delay:.7s"/>
+            <circle class="atlas-node" cx="120" cy="140" r="3"   style="animation-delay:.2s"/>
+            <circle class="atlas-node" cx="340" cy="90"  r="3.5" style="animation-delay:.35s"/>
+            <circle class="atlas-node" cx="560" cy="190" r="3"   style="animation-delay:.5s"/>
+            <circle class="atlas-node" cx="820" cy="110" r="3"   style="animation-delay:.65s"/>
+            <circle class="atlas-node" cx="1040" cy="170" r="2.5" style="animation-delay:.8s"/>
+            <circle class="atlas-node" cx="400" cy="300" r="3"   style="animation-delay:.85s"/>
+            <circle class="atlas-node" cx="220" cy="420" r="2.5" style="animation-delay:1s"/>
+            <circle class="atlas-node" cx="680" cy="380" r="3"   style="animation-delay:1.05s"/>
+            <circle class="atlas-node" cx="500" cy="480" r="2.5" style="animation-delay:1.2s"/>
+            <circle class="atlas-node" cx="960" cy="320" r="3"   style="animation-delay:1.25s"/>
+            <circle class="atlas-node" cx="1100" cy="420" r="2.5" style="animation-delay:1.4s"/>
+        </svg>
         <div class="container">
             <div class="hero-inner">
 

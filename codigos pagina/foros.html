@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Foros — Study Wawa</title>
     <link rel="manifest" href="manifest.webmanifest">
-    <meta name="theme-color" content="#0E1626">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Nine Lives Edu">
+    <meta name="theme-color" content="#7c3aed">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
@@ -143,6 +139,7 @@
     <link rel="stylesheet" href="atlas-theme.css">
 </head>
 <body>
+    <div id="atlas-bg"><div class="atlas-glow"></div></div>
     <canvas id="network-canvas"></canvas>
 
     <header class="header" id="header">
@@ -519,9 +516,8 @@
                 method:'POST',headers:{'Content-Type':'application/json'},
                 body:JSON.stringify({autor,texto})
             });
-            const data=await res.json().catch(()=>({}));
-            if(!res.ok)throw new Error(data.detail||'No se pudo enviar la respuesta. Intenta de nuevo.');
-            const nueva=data;
+            if(!res.ok)throw new Error();
+            const nueva=await res.json();
             const p=posts.find(x=>x.id===activePostId);
             if(p){
                 p.responses=p.responses||[];
@@ -534,7 +530,7 @@
             }
             alert('¡Respuesta publicada!');
         }catch(e){
-            alert(e.message||'No se pudo enviar la respuesta. Intenta de nuevo.');
+            alert('No se pudo enviar la respuesta. Intenta de nuevo.');
         }
     }
 
@@ -582,16 +578,15 @@
         if(!payload.titulo||!payload.contenido){alert('Completa el título y el contenido.');return;}
         try{
             const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-            const data=await res.json().catch(()=>({}));
-            if(!res.ok)throw new Error(data.detail||'No se pudo publicar el post. Intenta de nuevo.');
-            const nuevo=data;
+            if(!res.ok)throw new Error();
+            const nuevo=await res.json();
             posts.unshift(nuevo);
             applyFilters();
             e.target.reset();
             closeNewPost();
             alert('¡Post publicado correctamente!');
         }catch(err){
-            alert(err.message||'No se pudo publicar el post. Intenta de nuevo.');
+            alert('No se pudo publicar el post. Intenta de nuevo.');
         }
     });
 

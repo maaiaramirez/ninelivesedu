@@ -1,9 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════
-   NINE LIVES EDU — "ATLAS NOCTURNO"
-   Un mapa de constelaciones conectando estudiantes con conocimiento.
-   Tinta profunda, un solo acento cálido, tipografía editorial,
-   movimiento suave y contenido. Se aplica sobre las variables CSS
-   que ya usa el sitio — no toca estructura ni JS existente.
+   NINE LIVES EDU — "ATLAS NOCTURNO" (paleta violeta)
+   Fondo casi negro, paneles planos, bordes finos, sin desenfoque
+   ni degradados decorativos. Un acento principal (violeta) y dos
+   acentos secundarios (rosa, naranja) usados con moderación, más
+   los semánticos de estado (éxito, alerta, error). Se aplica sobre
+   las variables CSS que ya usa el sitio — no toca estructura ni JS.
    ═══════════════════════════════════════════════════════════════ */
 
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,450;9..144,600&family=Fraunces:ital,opsz,wght@1,9..144,450&family=Inter:wght@400;500;600&display=swap');
@@ -12,26 +13,43 @@
    1. TOKENS
 ───────────────────────────────────────── */
 :root {
-    --ink:          #0E1626;   /* fondo, tinta profunda casi negra */
-    --ink-panel:    #16213A;   /* paneles */
-    --ink-panel-2:  #1D2B48;   /* paneles elevados / hover */
-    --parchment:    #F3ECDD;   /* texto principal cálido */
-    --amber:        #E2A257;   /* único acento: ámbar */
-    --amber-soft:   #F0CB93;
-    --line:         rgba(243,236,221,0.14);
-    --line-strong:  rgba(243,236,221,0.28);
-    --muted:        #8B93A8;
+    --ink:          #0D0B18;   /* fondo, casi negro con un dejo violeta */
+    --ink-panel:    #17132B;   /* paneles */
+    --ink-panel-2:  #201A3B;   /* paneles elevados / hover */
+    --parchment:    #F1F0FF;   /* texto principal */
+    --violet:       #8B5CF6;   /* acento principal */
+    --violet-deep:  #6D28D9;   /* violeta, estados hover/presionado */
+    --violet-soft:  #A78BFA;   /* violeta claro, sobre fondo oscuro */
+    --pink:         #EC4899;   /* acento secundario, uso puntual */
+    --orange:       #F97316;   /* acento secundario, uso puntual */
+    --orange-warm:  #FF6B35;
+    --success:      #34D399;
+    --warning:      #F0A833;
+    --danger:       #F87171;
+    --line:         rgba(241,240,255,0.12);
+    --line-strong:  rgba(241,240,255,0.24);
+    --muted:        #9D98C4;
 
-    --c-purple:       var(--ink-panel-2);
-    --c-purple-mid:   var(--amber);
+    --c-purple:       var(--violet);
+    --c-purple-mid:   var(--violet-soft);
     --c-purple-light: var(--parchment);
-    --c-pink:         var(--amber);
-    --c-orange:       var(--amber);
-    --c-orange-warm:  var(--amber-soft);
-    --c-teal:         var(--amber);
+    --c-purple-deep:  var(--violet-deep);
+    --c-purple-wash:  rgba(139,92,246,0.14);
+    --c-pink:         var(--pink);
+    --c-pink-wash:    rgba(236,72,153,0.14);
+    --c-orange:       var(--orange);
+    --c-orange-warm:  var(--orange-warm);
+    --c-teal:         var(--violet);
+
+    --c-success:      var(--success);
+    --c-success-wash: rgba(52,211,153,0.14);
+    --c-warning:      var(--warning);
+    --c-warning-wash: rgba(240,168,51,0.14);
+    --c-danger:       var(--danger);
+    --c-danger-wash:  rgba(248,113,113,0.14);
 
     --c-bg:           var(--ink);
-    --c-bg-2:         #0A1120;
+    --c-bg-2:         #0A0815;
     --c-bg-3:         var(--ink-panel);
 
     --c-surface:      var(--ink-panel);
@@ -40,9 +58,9 @@
     --c-surface-xl:   var(--ink-panel-2);
 
     --c-border:       var(--line);
-    --c-border-glow:  var(--amber);
-    --c-border-pink:  var(--amber);
-    --c-border-orange:var(--amber);
+    --c-border-glow:  var(--violet);
+    --c-border-pink:  var(--pink);
+    --c-border-orange:var(--orange);
 
     --c-text:         var(--parchment);
     --c-text-muted:   var(--muted);
@@ -69,12 +87,12 @@ html, body {
 body {
     font-family: var(--font-body);
 }
-::selection { background: var(--amber); color: var(--ink); }
+::selection { background: var(--violet); color: var(--ink); }
 
 ::-webkit-scrollbar { width: 10px; }
 ::-webkit-scrollbar-track { background: var(--ink); }
 ::-webkit-scrollbar-thumb { background: var(--ink-panel-2); border: 2px solid var(--ink); }
-::-webkit-scrollbar-thumb:hover { background: var(--amber); }
+::-webkit-scrollbar-thumb:hover { background: var(--violet); }
 
 /* ─────────────────────────────────────────
    3. TIPOGRAFÍA
@@ -88,7 +106,7 @@ h1, h2, h3, .hero-title, .section-title, .hgc-title {
 .hero-title .highlight {
     font-style: italic;
     font-weight: 450;
-    color: var(--amber) !important;
+    color: var(--violet) !important;
     position: relative;
 }
 
@@ -98,7 +116,7 @@ h1, h2, h3, .hero-title, .section-title, .hgc-title {
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--amber) !important;
+    color: var(--violet) !important;
 }
 
 p, span, li { font-family: var(--font-body); }
@@ -106,36 +124,85 @@ p, span, li { font-family: var(--font-body); }
 
 /* ─────────────────────────────────────────
    4. PANELES — hairline + elevación sutil
+   (todas las tarjetas del sitio: hero, métricas,
+   apuntes, foros, tutores, intercambios, chat)
 ───────────────────────────────────────── */
 .hero-glass-card,
 .metric-card,
 .benefit-card,
 .tile-card,
 .testimonial-card,
-.modal-card {
+.modal-card,
+.glass-card,
+.apunte-card,
+.category-item,
+.post-card,
+.response-item,
+.review-item,
+.swap-card,
+.tutor-card,
+.chatbot-window {
     background: var(--ink-panel) !important;
     border: 1px solid var(--line) !important;
     box-shadow: none !important;
     backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-radius: var(--radius-lg) !important;
     transition: transform 0.5s var(--ease), border-color 0.5s var(--ease), box-shadow 0.5s var(--ease) !important;
 }
 .hero-glass-card:hover,
 .benefit-card:hover,
 .tile-card:hover,
-.metric-card:hover {
+.metric-card:hover,
+.apunte-card:hover,
+.category-item:hover,
+.post-card:hover,
+.swap-card:hover,
+.tutor-card:hover {
     background: var(--ink-panel-2) !important;
     border-color: var(--line-strong) !important;
     transform: translateY(-4px);
     box-shadow: 0 24px 48px -16px rgba(0,0,0,0.5), 0 0 0 1px var(--line-strong) !important;
 }
 
+/* Texto adentro de las tarjetas: las de apuntes/foros/tutores traían
+   grises pensados para fondo claro (#333/#666) — sobre el panel
+   oscuro de arriba quedarían ilegibles, así que se corrigen acá. */
+.apunte-card, .category-item, .post-card, .response-item,
+.review-item, .swap-card, .tutor-card {
+    color: var(--c-text) !important;
+}
+.apunte-card *, .category-item *, .post-card *, .response-item *,
+.review-item *, .swap-card *, .tutor-card * {
+    color: inherit;
+}
+.apunte-card .text-muted, .post-card .text-muted, .tutor-card .text-muted,
+.apunte-card small, .post-card small, .tutor-card small,
+.apunte-card .meta, .post-card .meta, .tutor-card .meta,
+.apunte-card .fecha, .post-card .fecha, .tutor-card .fecha {
+    color: var(--c-text-muted) !important;
+}
+.apunte-card a, .post-card a, .tutor-card a, .response-item a {
+    color: var(--violet-soft) !important;
+}
+
 /* ─────────────────────────────────────────
    5. BOTONES
 ───────────────────────────────────────── */
-.btn-primary, .btn-cta, .btn-tutor {
-    background: var(--amber) !important;
+/* Cualquier botón del sitio (todas las variantes .btn-*): sin vidrio,
+   sin sombras de colores, radio consistente. El color de fondo de
+   cada variante lo sigue definiendo su propio archivo (para no
+   perder la diferencia entre botón principal, cancelar, votar, etc). */
+[class*="btn-"] {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-radius: var(--radius-sm) !important;
+}
+
+.btn-primary, .btn-cta, .btn-tutor, .btn-login {
+    background: var(--violet) !important;
     color: var(--ink) !important;
-    border: 1px solid var(--amber) !important;
+    border: 1px solid var(--violet) !important;
     font-family: var(--font-body) !important;
     font-weight: 600;
     box-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
@@ -150,13 +217,13 @@ p, span, li { font-family: var(--font-body); }
     transition: transform 0.35s var(--ease), border-color 0.35s var(--ease), background 0.35s var(--ease) !important;
 }
 .btn-primary:hover, .btn-cta:hover, .btn-tutor:hover {
-    background: var(--amber-soft) !important;
+    background: var(--violet-soft) !important;
     transform: translateY(-2px);
-    box-shadow: 0 12px 24px -8px rgba(226,162,87,0.45) !important;
+    box-shadow: 0 12px 24px -8px rgba(139,92,246,0.45) !important;
 }
 .btn-secondary:hover {
-    border-color: var(--amber) !important;
-    color: var(--amber) !important;
+    border-color: var(--violet) !important;
+    color: var(--violet) !important;
     transform: translateY(-2px);
 }
 .btn-primary:active, .btn-cta:active { transform: translateY(0); }
@@ -172,7 +239,7 @@ p, span, li { font-family: var(--font-body); }
     font-size: 2.4rem !important;
 }
 .metric-label {
-    color: var(--amber) !important;
+    color: var(--violet) !important;
     font-size: 0.7rem !important;
     font-weight: 600;
     letter-spacing: 0.1em;
@@ -189,7 +256,7 @@ p, span, li { font-family: var(--font-body); }
     border-bottom: 1px solid var(--line) !important;
 }
 .nav-link { color: var(--muted) !important; font-family: var(--font-body) !important; font-weight: 500; transition: color 0.3s var(--ease); }
-.nav-link.active, .nav-link:hover { color: var(--amber) !important; }
+.nav-link.active, .nav-link:hover { color: var(--violet) !important; }
 .logo-text { font-family: var(--font-display) !important; font-weight: 500 !important; color: var(--parchment) !important; }
 
 .footer { background: var(--ink-panel) !important; border-top: 1px solid var(--line) !important; }
@@ -199,7 +266,7 @@ p, span, li { font-family: var(--font-body); }
 ───────────────────────────────────────── */
 .hero { background: var(--ink) !important; position: relative; overflow: hidden; }
 .hero-title { color: var(--parchment) !important; }
-.highlight { color: var(--amber) !important; }
+.highlight { color: var(--violet) !important; }
 
 #atlas-scene {
     position: absolute;
@@ -219,7 +286,7 @@ p, span, li { font-family: var(--font-body); }
     animation: draw-line 1.8s var(--ease) forwards;
 }
 .atlas-node {
-    fill: var(--amber);
+    fill: var(--violet);
     opacity: 0;
     animation: node-in 0.6s var(--ease) forwards, node-pulse 3.5s ease-in-out infinite;
 }
@@ -231,23 +298,62 @@ p, span, li { font-family: var(--font-body); }
 }
 
 /* ─────────────────────────────────────────
-   9. FONDO GLOBAL — muy sutil, en toda la web
+   9. FONDO GLOBAL — cielo de estrellas muy sutil,
+   en las 7 páginas del sitio. Requiere <div id="atlas-bg">
+   como primer hijo de <body> (dos capas, ::before/::after,
+   con distinto tamaño y demora para que no se note el patrón
+   que se repite). Respeta "reducir movimiento".
 ───────────────────────────────────────── */
 #atlas-bg {
     position: fixed;
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    background:
-        radial-gradient(ellipse 60% 40% at 50% 0%, rgba(226,162,87,0.06), transparent 60%),
-        radial-gradient(1px 1px at 15% 20%, rgba(243,236,221,0.35) 1px, transparent 1px),
-        radial-gradient(1px 1px at 40% 55%, rgba(243,236,221,0.25) 1px, transparent 1px),
-        radial-gradient(1px 1px at 65% 15%, rgba(226,162,87,0.3) 1px, transparent 1px),
-        radial-gradient(1px 1px at 85% 65%, rgba(243,236,221,0.3) 1px, transparent 1px),
-        radial-gradient(1px 1px at 25% 80%, rgba(243,236,221,0.25) 1px, transparent 1px),
-        radial-gradient(1px 1px at 55% 90%, rgba(226,162,87,0.25) 1px, transparent 1px);
-    background-repeat: no-repeat, repeat, repeat, repeat, repeat, repeat, repeat;
-    background-size: 100% 100%, 480px 480px, 480px 480px, 480px 480px, 480px 480px, 480px 480px, 480px 480px;
+    background: var(--ink);
+}
+#atlas-bg::before, #atlas-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        radial-gradient(1.5px 1.5px at 8% 15%,  rgba(241,240,255,0.4) 0, transparent 100%),
+        radial-gradient(1.5px 1.5px at 22% 62%, rgba(139,92,246,0.5)  0, transparent 100%),
+        radial-gradient(1px 1px   at 37% 28%,   rgba(241,240,255,0.3) 0, transparent 100%),
+        radial-gradient(1.5px 1.5px at 51% 78%, rgba(241,240,255,0.35)0, transparent 100%),
+        radial-gradient(1px 1px   at 64% 12%,   rgba(139,92,246,0.45) 0, transparent 100%),
+        radial-gradient(1.5px 1.5px at 78% 55%, rgba(241,240,255,0.3) 0, transparent 100%),
+        radial-gradient(1px 1px   at 88% 33%,   rgba(241,240,255,0.35)0, transparent 100%),
+        radial-gradient(1.5px 1.5px at 15% 88%, rgba(139,92,246,0.4)  0, transparent 100%),
+        radial-gradient(1px 1px   at 45% 45%,   rgba(241,240,255,0.3) 0, transparent 100%),
+        radial-gradient(1.5px 1.5px at 93% 80%, rgba(241,240,255,0.35)0, transparent 100%);
+    background-repeat: repeat;
+    background-size: 520px 520px;
+    animation: atlas-twinkle 6s ease-in-out infinite alternate;
+}
+#atlas-bg::after {
+    background-size: 640px 640px;
+    background-position: 80px 120px;
+    animation-duration: 8s;
+    animation-delay: -3s;
+    opacity: 0.6;
+}
+#atlas-bg .atlas-glow {
+    position: absolute;
+    top: -10%;
+    left: 50%;
+    width: 60vw;
+    height: 40vw;
+    max-width: 700px;
+    max-height: 500px;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(139,92,246,0.16), transparent 70%);
+    animation: atlas-breathe 7s ease-in-out infinite;
+}
+@keyframes atlas-twinkle { from { opacity: 0.35; } to { opacity: 0.85; } }
+@keyframes atlas-breathe {
+    0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+    50%      { opacity: 1;   transform: translateX(-50%) scale(1.08); }
 }
 
 /* ─────────────────────────────────────────
