@@ -344,6 +344,50 @@
     }
 
     /* ── INIT ───────────────────────────────────────────── */
+    /* ── Menú lateral de celular (hamburguesa) ──────────── */
+    function initMobileSidebar() {
+        const toggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('mobileSidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const closeBtn = document.getElementById('sidebarClose');
+        if (!toggle || !sidebar || !overlay) return;
+
+        function abrir() {
+            sidebar.classList.add('is-open');
+            overlay.classList.add('is-open');
+            toggle.setAttribute('aria-expanded', 'true');
+            sidebar.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('sidebar-open');
+        }
+        function cerrar() {
+            sidebar.classList.remove('is-open');
+            overlay.classList.remove('is-open');
+            toggle.setAttribute('aria-expanded', 'false');
+            sidebar.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('sidebar-open');
+        }
+
+        toggle.addEventListener('click', () => {
+            const abierto = sidebar.classList.contains('is-open');
+            if (abierto) cerrar(); else abrir();
+        });
+        overlay.addEventListener('click', cerrar);
+        if (closeBtn) closeBtn.addEventListener('click', cerrar);
+        // Cerrar solo si tocan un link (no al tocar el fondo de los botones)
+        sidebar.querySelectorAll('.nav-link, .header-buttons button').forEach(el => {
+            el.addEventListener('click', cerrar);
+        });
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') cerrar();
+        });
+        // Si la pantalla se agranda (girar el celu, o pasar a compu) y
+        // el menú había quedado abierto, lo cerramos para no dejarlo
+        // "pegado" sobre el layout de escritorio.
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 900) cerrar();
+        });
+    }
+
     function init() {
         injectGlobalBackground();
         injectHeroScene();
@@ -351,6 +395,7 @@
         animateCounters();
         initTutorApplication();
         initAuthSystem();
+        initMobileSidebar();
     }
 
     if (document.readyState === 'loading') {

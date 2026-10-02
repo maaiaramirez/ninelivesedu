@@ -190,13 +190,18 @@ p, span, li { font-family: var(--font-body); }
    5. BOTONES
 ───────────────────────────────────────── */
 /* Cualquier botón del sitio (todas las variantes .btn-*): sin vidrio,
-   sin sombras de colores, radio consistente. El color de fondo de
+   sin sombras de colores, forma de píldora. El color de fondo de
    cada variante lo sigue definiendo su propio archivo (para no
-   perder la diferencia entre botón principal, cancelar, votar, etc). */
+   perder la diferencia entre botón principal, cancelar, votar, etc).
+   Las tarjetas y paneles siguen con el radio chico (sección 4) —
+   el contraste entre contenido filoso y botones redondeados es
+   a propósito. */
 [class*="btn-"] {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    border-radius: var(--radius-sm) !important;
+    border-radius: var(--radius-full) !important;
+    padding-left: 1.3em !important;
+    padding-right: 1.3em !important;
 }
 
 .btn-primary, .btn-cta, .btn-tutor, .btn-login {
@@ -386,7 +391,141 @@ p, span, li { font-family: var(--font-body); }
 }
 
 /* ─────────────────────────────────────────
-   13. ACCESIBILIDAD
+   14. MENÚ LATERAL DE CELULAR
+   El botón hamburguesa y el panel lateral solo existen por debajo de
+   900px; arriba de eso se ocultan y sigue el nav horizontal de siempre.
+───────────────────────────────────────── */
+.menu-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 1300;
+}
+.menu-toggle span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--parchment);
+    border-radius: var(--radius-full);
+    transition: transform 0.3s var(--ease), opacity 0.3s var(--ease);
+}
+.menu-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.menu-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+.menu-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+.sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5,4,10,0.6);
+    z-index: 1200;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.35s var(--ease), visibility 0s linear 0.35s;
+}
+.sidebar-overlay.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity 0.35s var(--ease), visibility 0s linear 0s;
+}
+
+.mobile-sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(82vw, 320px);
+    background: var(--ink-panel);
+    border-left: 1px solid var(--line);
+    z-index: 1250;
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom, 0px));
+    padding-top: calc(1.25rem + env(safe-area-inset-top, 0px));
+    transform: translateX(100%);
+    transition: transform 0.35s var(--ease);
+    overflow-y: auto;
+}
+.mobile-sidebar.is-open {
+    transform: translateX(0);
+}
+.mobile-sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+.mobile-sidebar-header .logo-text {
+    font-family: var(--font-display);
+    color: var(--parchment);
+    font-size: 1.1rem;
+}
+.sidebar-close {
+    background: transparent;
+    border: none;
+    color: var(--parchment);
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+}
+.mobile-nav .nav-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.mobile-nav .nav-link {
+    display: block;
+    padding: 0.85rem 0.75rem;
+    color: var(--muted);
+    text-decoration: none;
+    font-weight: 500;
+    border-radius: var(--radius-lg);
+}
+.mobile-nav .nav-link.active,
+.mobile-nav .nav-link:hover {
+    color: var(--parchment);
+    background: var(--ink-panel-2);
+}
+.mobile-sidebar-buttons {
+    margin-top: auto;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+}
+.mobile-sidebar-buttons .header-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.mobile-sidebar-buttons .header-buttons button {
+    width: 100%;
+}
+
+body.sidebar-open {
+    overflow: hidden;
+}
+
+@media (max-width: 900px) {
+    .menu-toggle { display: flex; }
+    .header .nav,
+    .header .header-buttons {
+        display: none;
+    }
+}
+
+/* ─────────────────────────────────────────
+   15. ACCESIBILIDAD
 ───────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }

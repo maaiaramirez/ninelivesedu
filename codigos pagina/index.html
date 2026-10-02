@@ -1150,8 +1150,6 @@
     <link rel="stylesheet" href="atlas-theme.css">
 </head>
 <body>
-    <div id="atlas-bg"><div class="atlas-glow"></div></div>
-
     <!-- NETWORK CANVAS -->
     <canvas id="network-canvas"></canvas>
 
@@ -1181,31 +1179,42 @@
                     <button class="btn-tutor">Unirse como tutor</button>
                     <button class="btn-login">Registro / Iniciar Sesión</button>
                 </div>
-            </div>
+            <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileSidebar">
+                    <span></span><span></span><span></span>
+                </button>
+                </div>
+        </div>    </header>
+    
+    <!-- Menú lateral para celular -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <aside class="mobile-sidebar" id="mobileSidebar" aria-hidden="true">
+        <div class="mobile-sidebar-header">
+            <span class="logo-text">Nine Lives Edu</span>
+            <button class="sidebar-close" id="sidebarClose" aria-label="Cerrar menú">&times;</button>
         </div>
-    </header>
+        <nav class="mobile-nav" aria-label="Navegación principal">
+                    <ul class="nav-list">
+                        <li><a href="index.html" class="nav-link active">Inicio</a></li>
+                        <li><a href="apuntes.html" class="nav-link">Apuntes</a></li>
+                        <li><a href="tutores.html" class="nav-link">Tutores</a></li>
+                        <li><a href="foros.html" class="nav-link">Foros</a></li>
+                        <li><a href="asistencia.html" class="nav-link">Asistencia</a></li>
+                        <li><a href="#contacto" class="nav-link">Contacto</a></li>
+                    </ul>
+                </nav>
+        <div class="mobile-sidebar-buttons">
+            <div class="header-buttons">
+                    <button class="btn-tutor">Unirse como tutor</button>
+                    <button class="btn-login">Registro / Iniciar Sesión</button>
+                </div>
+        </div>
+    </aside>
+
 
     <!-- ════════════════════════════════
          HERO
     ════════════════════════════════ -->
     <section class="hero" id="inicio">
-        <svg id="atlas-scene" viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-            <path class="atlas-line" d="M120,140 L340,90 L560,190 L820,110 L1040,170" style="animation-delay:.1s"/>
-            <path class="atlas-line" d="M340,90 L400,300 L220,420" style="animation-delay:.3s"/>
-            <path class="atlas-line" d="M560,190 L680,380 L500,480" style="animation-delay:.5s"/>
-            <path class="atlas-line" d="M820,110 L960,320 L1100,420" style="animation-delay:.7s"/>
-            <circle class="atlas-node" cx="120" cy="140" r="3"   style="animation-delay:.2s"/>
-            <circle class="atlas-node" cx="340" cy="90"  r="3.5" style="animation-delay:.35s"/>
-            <circle class="atlas-node" cx="560" cy="190" r="3"   style="animation-delay:.5s"/>
-            <circle class="atlas-node" cx="820" cy="110" r="3"   style="animation-delay:.65s"/>
-            <circle class="atlas-node" cx="1040" cy="170" r="2.5" style="animation-delay:.8s"/>
-            <circle class="atlas-node" cx="400" cy="300" r="3"   style="animation-delay:.85s"/>
-            <circle class="atlas-node" cx="220" cy="420" r="2.5" style="animation-delay:1s"/>
-            <circle class="atlas-node" cx="680" cy="380" r="3"   style="animation-delay:1.05s"/>
-            <circle class="atlas-node" cx="500" cy="480" r="2.5" style="animation-delay:1.2s"/>
-            <circle class="atlas-node" cx="960" cy="320" r="3"   style="animation-delay:1.25s"/>
-            <circle class="atlas-node" cx="1100" cy="420" r="2.5" style="animation-delay:1.4s"/>
-        </svg>
         <div class="container">
             <div class="hero-inner">
 

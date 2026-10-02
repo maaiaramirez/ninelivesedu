@@ -146,8 +146,6 @@
     </style>
 </head>
 <body>
-    <div id="atlas-bg"><div class="atlas-glow"></div></div>
-
     <!-- ════════════════════════════════
          HEADER
     ════════════════════════════════ -->
@@ -173,9 +171,36 @@
                     <button class="btn-tutor">Unirse como tutor</button>
                     <button class="btn-login">Registro / Iniciar Sesión</button>
                 </div>
-            </div>
+            <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileSidebar">
+                    <span></span><span></span><span></span>
+                </button>
+                </div>
+        </div>    </header>
+    
+    <!-- Menú lateral para celular -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <aside class="mobile-sidebar" id="mobileSidebar" aria-hidden="true">
+        <div class="mobile-sidebar-header">
+            <span class="logo-text">Nine Lives Edu</span>
+            <button class="sidebar-close" id="sidebarClose" aria-label="Cerrar menú">&times;</button>
         </div>
-    </header>
+        <nav class="mobile-nav" aria-label="Navegación principal">
+                    <ul class="nav-list">
+                        <li><a href="index.html" class="nav-link">Inicio</a></li>
+                        <li><a href="apuntes.html" class="nav-link">Apuntes</a></li>
+                        <li><a href="tutores.html" class="nav-link">Tutores</a></li>
+                        <li><a href="foros.html" class="nav-link">Foros</a></li>
+                        <li><a href="asistencia.html" class="nav-link active">Asistencia</a></li>
+                    </ul>
+                </nav>
+        <div class="mobile-sidebar-buttons">
+            <div class="header-buttons">
+                    <button class="btn-tutor">Unirse como tutor</button>
+                    <button class="btn-login">Registro / Iniciar Sesión</button>
+                </div>
+        </div>
+    </aside>
+
 
     <!-- ════════════════════════════════
          HERO DE LA SECCIÓN
