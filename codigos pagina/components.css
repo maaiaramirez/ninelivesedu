@@ -263,6 +263,17 @@ body {
     flex-direction: column;
     align-items: flex-end;
     gap: 1rem;
+    /* El panel del chat (.chatbot-window) queda oculto con opacity/scale
+       en vez de display:none, así que sigue ocupando lugar en este flex
+       column aunque no se vea -- eso hacía que esta caja, invisible,
+       tapara los clics de lo que hay debajo (ej. el botón de subir
+       apuntes) en páginas donde caía en esa zona. Solución: el wrapper
+       no recibe clics por sí mismo, y cada hijo visible se los habilita
+       de nuevo (ver .chatbot-btn y .chatbot-window.open más abajo). */
+    pointer-events: none;
+}
+.chatbot-wrapper > * {
+    pointer-events: auto;
 }
 
 /* Bubble button */
