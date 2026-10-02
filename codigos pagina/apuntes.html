@@ -864,16 +864,30 @@
     /* ─────────────────────────────────────────
        UPLOAD MODAL
     ───────────────────────────────────────── */
-    const uploadModal = document.getElementById('uploadModal');
-    const openUpload = () => { uploadModal.classList.add('is-visible'); };
-    const closeUpload = () => { uploadModal.classList.remove('is-visible'); };
-    document.getElementById('openUploadModal').addEventListener('click', openUpload);
+    // Nota: antes esto guardaba uploadModal en una sola variable al cargar
+    // la página. Se cambió a buscar el elemento de nuevo en cada acción
+    // (document.getElementById('uploadModal') adentro de cada función) para
+    // que no dependa de esa referencia guardada en ningún caso.
+    const openUpload = () => {
+        const m = document.getElementById('uploadModal');
+        if (m) m.classList.add('is-visible');
+        else console.error('No se encontró #uploadModal en la página.');
+    };
+    const closeUpload = () => {
+        const m = document.getElementById('uploadModal');
+        if (m) m.classList.remove('is-visible');
+    };
+    const btnAbrir = document.getElementById('openUploadModal');
+    if (btnAbrir) btnAbrir.addEventListener('click', openUpload);
+    else console.error('No se encontró #openUploadModal en la página.');
     document.getElementById('closeUploadModal').addEventListener('click', closeUpload);
     document.getElementById('cancelUpload').addEventListener('click', closeUpload);
-    uploadModal.addEventListener('click', e => { if(e.target === uploadModal) closeUpload(); });
+    document.getElementById('uploadModal').addEventListener('click', e => {
+        if (e.target.id === 'uploadModal') closeUpload();
+    });
     document.getElementById('uploadForm').addEventListener('submit', async e => {
         e.preventDefault();
-        const submitBtn = uploadModal.querySelector('button[type="submit"]');
+        const submitBtn = document.getElementById('uploadModal').querySelector('button[type="submit"]');
         const archivoInput = document.getElementById('apunteArchivo');
 
         const formData = new FormData();
