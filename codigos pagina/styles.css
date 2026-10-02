@@ -8,18 +8,18 @@
 ───────────────────────────────────────── */
 :root {
     /* Palette */
-    --c-purple:       #7c3aed;
-    --c-purple-mid:   #8b5cf6;
-    --c-purple-light: #a78bfa;
+    --c-purple:       #8b5cf6;
+    --c-purple-mid:   #a78bfa;
+    --c-purple-light: #f1f0ff;
     --c-pink:         #ec4899;
     --c-orange:       #f97316;
     --c-orange-warm:  #ff6b35;
-    --c-teal:         #06b6d4;
+    --c-teal:         #8b5cf6;
 
     /* Backgrounds */
     --c-bg:           #0d0b18;
-    --c-bg-2:         #120f22;
-    --c-bg-3:         #1a1535;
+    --c-bg-2:         #0a0815;
+    --c-bg-3:         #17132b;
 
     /* Glass surfaces */
     --c-surface:      rgba(255,255,255,0.04);
@@ -64,11 +64,13 @@
     --nav-h:      72px;
     --container:  1240px;
 
-    /* Gradients */
-    --grad-primary:  linear-gradient(135deg, var(--c-purple) 0%, var(--c-pink) 100%);
-    --grad-warm:     linear-gradient(135deg, var(--c-orange-warm) 0%, var(--c-orange) 100%);
-    --grad-cool:     linear-gradient(135deg, var(--c-teal) 0%, var(--c-purple) 100%);
-    --grad-text:     linear-gradient(135deg, var(--c-purple-light) 0%, var(--c-pink) 50%, var(--c-orange) 100%);
+    /* Antes eran degradados; ahora un color plano (mismas variables,
+       así no hace falta tocar cada botón que las usa, ni los que
+       están escritos directo dentro de los .html). */
+    --grad-primary:  var(--c-purple);
+    --grad-warm:     var(--c-orange);
+    --grad-cool:     var(--c-purple);
+    --grad-text:     var(--c-purple-light);
 }
 
 /* ─────────────────────────────────────────
@@ -172,9 +174,7 @@ section { position: relative; z-index: 1; }
 .header::before {
     content: '';
     position: absolute; inset: 0;
-    background: rgba(13,11,24,0.55);
-    backdrop-filter: blur(22px) saturate(1.7);
-    -webkit-backdrop-filter: blur(22px) saturate(1.7);
+    background: var(--c-bg);
     border-bottom: 1px solid var(--c-border);
     z-index: -1;
     transition: background var(--motion-slow) var(--ease-smooth),
@@ -321,7 +321,7 @@ section { position: relative; z-index: 1; }
 .btn-primary::after {
     content: '';
     position: absolute; inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 60%);
+    background: var(--c-purple);
     opacity: 0;
     transition: opacity var(--motion-fast);
 }
@@ -431,7 +431,7 @@ section { position: relative; z-index: 1; }
 .chip-pink    { background: rgba(236,72,153,0.15); color: #f9a8d4; border: 1px solid rgba(236,72,153,0.25); }
 .chip-orange  { background: rgba(249,115,22,0.15); color: #fdba74; border: 1px solid rgba(249,115,22,0.25); }
 .chip-teal    { background: rgba(6,182,212,0.15);  color: #67e8f9; border: 1px solid rgba(6,182,212,0.25); }
-.chip-success { background: rgba(34,197,94,0.15);  color: #4ade80; border: 1px solid rgba(34,197,94,0.25); }
+.chip-success { background: rgba(34,197,94,0.15);  color: var(--c-success); border: 1px solid rgba(34,197,94,0.25); }
 
 /* ─────────────────────────────────────────
    FORM ELEMENTS

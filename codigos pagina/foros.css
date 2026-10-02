@@ -14,13 +14,13 @@
 .page-header h1 {
     font-size: 2.5rem;
     font-weight: 700;
-    color: #333;
+    color: var(--c-text);
     margin-bottom: 1rem;
 }
 
 .page-header p {
     font-size: 1.1rem;
-    color: #666;
+    color: var(--c-text-muted);
 }
 
 /* Barra de búsqueda */
@@ -42,14 +42,14 @@
 .search-input-container i {
     position: absolute;
     left: 1rem;
-    color: #8b5cf6;
+    color: var(--c-purple);
     font-size: 1.1rem;
 }
 
 #searchInput {
     flex: 1;
     padding: 1rem 1rem 1rem 3rem;
-    border: 2px solid #e9ecef;
+    border: 2px solid var(--c-border);
     border-radius: 25px;
     font-size: 1rem;
     transition: border-color var(--motion-base) var(--motion-ease);
@@ -57,13 +57,13 @@
 
 #searchInput:focus {
     outline: none;
-    border-color: #8b5cf6;
+    border-color: var(--c-purple);
 }
 
 .search-btn {
     position: absolute;
     right: 0.5rem;
-    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    background: var(--c-purple);
     color: white;
     border: none;
     padding: 0.75rem 1.5rem;
@@ -93,13 +93,13 @@
 
 .filter-group label {
     font-weight: 600;
-    color: #333;
+    color: var(--c-text);
     margin-bottom: 0.5rem;
 }
 
 .filter-group select {
     padding: 0.75rem;
-    border: 2px solid #e9ecef;
+    border: 2px solid var(--c-border);
     border-radius: 10px;
     font-size: 0.9rem;
     transition: border-color var(--motion-base) var(--motion-ease);
@@ -107,7 +107,7 @@
 
 .filter-group select:focus {
     outline: none;
-    border-color: #8b5cf6;
+    border-color: var(--c-purple);
 }
 
 /* Layout principal */
@@ -131,7 +131,7 @@
 .categories-sidebar h3 {
     font-size: 1.2rem;
     font-weight: 600;
-    color: #333;
+    color: var(--c-text);
     margin-bottom: 1.5rem;
 }
 
@@ -142,7 +142,7 @@
 .category-section h4 {
     font-size: 1rem;
     font-weight: 600;
-    color: #333;
+    color: var(--c-text);
     margin-bottom: 1rem;
 }
 
@@ -159,7 +159,7 @@
     padding: 0.75rem;
     border-radius: 10px;
     text-decoration: none;
-    color: #666;
+    color: var(--c-text-muted);
     transition: transform var(--motion-slow) var(--motion-ease-out),
         box-shadow var(--motion-slow) var(--motion-ease),
         border-color var(--motion-base) var(--motion-ease-soft),
@@ -167,8 +167,8 @@
 }
 
 .category-item:hover {
-    background: #f8f9fa;
-    color: #8b5cf6;
+    background: var(--c-surface);
+    color: var(--c-purple);
 }
 
 .category-item i {
@@ -178,8 +178,8 @@
 
 .category-item .count {
     margin-left: auto;
-    background: #e9ecef;
-    color: #666;
+    background: var(--c-border);
+    color: var(--c-text-muted);
     padding: 0.25rem 0.5rem;
     border-radius: 12px;
     font-size: 0.75rem;
@@ -187,13 +187,13 @@
 }
 
 .category-item:hover .count {
-    background: #8b5cf6;
+    background: var(--c-purple);
     color: white;
 }
 
 .btn-nuevo-post {
     width: 100%;
-    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    background: var(--c-purple);
     color: white;
     border: none;
     padding: 1rem;
@@ -226,19 +226,19 @@
     align-items: center;
     margin-bottom: 2rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid var(--c-border);
 }
 
 .posts-header h2 {
     font-size: 1.5rem;
     font-weight: 600;
-    color: #333;
+    color: var(--c-text);
 }
 
 .results-count {
     display: block;
     font-size: 0.9rem;
-    color: #666;
+    color: var(--c-text-muted);
     margin-top: 0.25rem;
 }
 
@@ -250,7 +250,7 @@
 .view-btn {
     width: 40px;
     height: 40px;
-    border: 2px solid #e9ecef;
+    border: 2px solid var(--c-border);
     background: white;
     border-radius: 8px;
     cursor: pointer;
@@ -265,8 +265,8 @@
 
 .view-btn.active,
 .view-btn:hover {
-    border-color: #8b5cf6;
-    color: #8b5cf6;
+    border-color: var(--c-purple);
+    color: var(--c-purple);
 }
 
 .posts-container {
@@ -284,7 +284,7 @@
 
 /* Tarjeta de post */
 .post-card {
-    background: #f8f9fa;
+    background: var(--c-surface);
     border-radius: 15px;
     padding: 1.5rem;
     transition: transform var(--motion-slow) var(--motion-ease-out),
@@ -300,19 +300,19 @@
 }
 
 .post-card.pregunta {
-    border-left-color: #8b5cf6;
+    border-left-color: var(--c-purple);
 }
 
 .post-card.debate {
-    border-left-color: #ff6b35;
+    border-left-color: var(--c-orange-warm);
 }
 
 .post-card.recurso {
-    border-left-color: #10b981;
+    border-left-color: var(--c-success);
 }
 
 .post-card.anuncio {
-    border-left-color: #f59e0b;
+    border-left-color: var(--c-warning);
 }
 
 .post-header {
@@ -326,7 +326,7 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    background: var(--c-purple);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -340,13 +340,13 @@
 
 .post-author {
     font-weight: 600;
-    color: #333;
+    color: var(--c-text);
     margin-bottom: 0.25rem;
 }
 
 .post-date {
     font-size: 0.85rem;
-    color: #666;
+    color: var(--c-text-muted);
 }
 
 .post-type-badge {
@@ -358,23 +358,23 @@
 }
 
 .post-type-badge.pregunta {
-    background: #e0e7ff;
-    color: #8b5cf6;
+    background: var(--c-purple-wash);
+    color: var(--c-purple);
 }
 
 .post-type-badge.debate {
-    background: #fed7aa;
-    color: #ff6b35;
+    background: var(--c-warning-wash);
+    color: var(--c-orange-warm);
 }
 
 .post-type-badge.recurso {
-    background: #d1fae5;
-    color: #10b981;
+    background: var(--c-success-wash);
+    color: var(--c-success);
 }
 
 .post-type-badge.anuncio {
-    background: #fef3c7;
-    color: #f59e0b;
+    background: var(--c-warning-wash);
+    color: var(--c-warning);
 }
 
 .post-content {
@@ -384,13 +384,13 @@
 .post-title {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #333;
+    color: var(--c-text);
     margin-bottom: 0.5rem;
     line-height: 1.4;
 }
 
 .post-preview {
-    color: #666;
+    color: var(--c-text-muted);
     font-size: 0.9rem;
     line-height: 1.5;
     margin-bottom: 1rem;
@@ -404,8 +404,8 @@
 }
 
 .post-tag {
-    background: #e9ecef;
-    color: #666;
+    background: var(--c-border);
+    color: var(--c-text-muted);
     padding: 0.25rem 0.5rem;
     border-radius: 8px;
     font-size: 0.75rem;
@@ -422,7 +422,7 @@
     display: flex;
     gap: 1rem;
     font-size: 0.85rem;
-    color: #666;
+    color: var(--c-text-muted);
 }
 
 .post-stat {
@@ -455,22 +455,22 @@
 
 .btn-vote {
     background: transparent;
-    color: #666;
-    border: 1px solid #e9ecef;
+    color: var(--c-text-muted);
+    border: 1px solid var(--c-border);
 }
 
 .btn-vote:hover {
-    background: #f8f9fa;
-    color: #8b5cf6;
+    background: var(--c-surface);
+    color: var(--c-purple);
 }
 
 .btn-vote.voted {
-    background: #8b5cf6;
+    background: var(--c-purple);
     color: white;
 }
 
 .btn-responder {
-    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    background: var(--c-purple);
     color: white;
 }
 
@@ -493,13 +493,13 @@
     justify-content: space-between;
     align-items: center;
     padding: 1.5rem;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid var(--c-border);
 }
 
 .modal-header h2 {
     font-size: 1.5rem;
     font-weight: 600;
-    color: #333;
+    color: var(--c-text);
 }
 
 .close-modal {
@@ -507,7 +507,7 @@
     border: none;
     font-size: 1.5rem;
     cursor: pointer;
-    color: #666;
+    color: var(--c-text-muted);
 }
 
 .modal-body {
@@ -521,7 +521,7 @@
 .form-group label {
     display: block;
     font-weight: 600;
-    color: #333;
+    color: var(--c-text);
     margin-bottom: 0.5rem;
 }
 
@@ -530,7 +530,7 @@
 .form-group textarea {
     width: 100%;
     padding: 0.75rem;
-    border: 2px solid #e9ecef;
+    border: 2px solid var(--c-border);
     border-radius: 10px;
     font-size: 0.9rem;
     transition: border-color var(--motion-base) var(--motion-ease);
@@ -540,7 +540,7 @@
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #8b5cf6;
+    border-color: var(--c-purple);
 }
 
 .form-row {
@@ -557,8 +557,8 @@
 
 .btn-cancel {
     background: transparent;
-    color: #666;
-    border: 2px solid #e9ecef;
+    color: var(--c-text-muted);
+    border: 2px solid var(--c-border);
     padding: 0.75rem 1.5rem;
     border-radius: 10px;
     font-weight: 600;
@@ -570,12 +570,12 @@
 }
 
 .btn-cancel:hover {
-    border-color: #666;
-    color: #333;
+    border-color: var(--c-text-muted);
+    color: var(--c-text);
 }
 
 .btn-submit {
-    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    background: var(--c-purple);
     color: white;
     border: none;
     padding: 0.75rem 1.5rem;
@@ -599,7 +599,7 @@
 .post-content {
     margin-bottom: 2rem;
     padding-bottom: 2rem;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid var(--c-border);
 }
 
 .post-responses {
@@ -609,14 +609,14 @@
 .no-responses {
     text-align: center;
     padding: 1rem;
-    background: #f8f9fa;
+    background: var(--c-surface);
     border-radius: 12px;
-    color: #666;
+    color: var(--c-text-muted);
     font-size: 0.95rem;
 }
 
 .response-item {
-    background: #f8f9fa;
+    background: var(--c-surface);
     padding: 1rem;
     border-radius: 10px;
     margin-bottom: 1rem;
@@ -633,7 +633,7 @@
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    background: var(--c-purple);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -644,22 +644,22 @@
 
 .response-author {
     font-weight: 600;
-    color: #333;
+    color: var(--c-text);
 }
 
 .response-date {
     font-size: 0.8rem;
-    color: #666;
+    color: var(--c-text-muted);
     margin-left: auto;
 }
 
 .response-text {
-    color: #666;
+    color: var(--c-text-muted);
     line-height: 1.5;
 }
 
 .add-response {
-    background: #f8f9fa;
+    background: var(--c-surface);
     padding: 1.5rem;
     border-radius: 15px;
 }
@@ -667,14 +667,14 @@
 .add-response h4 {
     font-size: 1rem;
     font-weight: 600;
-    color: #333;
+    color: var(--c-text);
     margin-bottom: 1rem;
 }
 
 .add-response textarea {
     width: 100%;
     padding: 0.75rem;
-    border: 2px solid #e9ecef;
+    border: 2px solid var(--c-border);
     border-radius: 10px;
     font-size: 0.9rem;
     margin-bottom: 1rem;
@@ -683,11 +683,11 @@
 
 .add-response textarea:focus {
     outline: none;
-    border-color: #8b5cf6;
+    border-color: var(--c-purple);
 }
 
 .btn-add-response {
-    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    background: var(--c-purple);
     color: white;
     border: none;
     padding: 0.75rem 1.5rem;
@@ -713,7 +713,7 @@
 .page-btn {
     width: 40px;
     height: 40px;
-    border: 2px solid #e9ecef;
+    border: 2px solid var(--c-border);
     background: white;
     border-radius: 8px;
     cursor: pointer;
@@ -732,8 +732,8 @@
 }
 
 .page-btn:not(:disabled):hover {
-    border-color: #8b5cf6;
-    color: #8b5cf6;
+    border-color: var(--c-purple);
+    color: var(--c-purple);
 }
 
 .page-numbers {
@@ -744,7 +744,7 @@
 .page-number {
     width: 40px;
     height: 40px;
-    border: 2px solid #e9ecef;
+    border: 2px solid var(--c-border);
     background: white;
     border-radius: 8px;
     cursor: pointer;
@@ -760,8 +760,8 @@
 
 .page-number.active,
 .page-number:hover {
-    border-color: #8b5cf6;
-    background: #8b5cf6;
+    border-color: var(--c-purple);
+    background: var(--c-purple);
     color: white;
 }
 
@@ -806,6 +806,6 @@
 
 /* Estado activo para navegación */
 .nav-link.active {
-    color: #8b5cf6;
+    color: var(--c-purple);
     font-weight: 600;
 }
