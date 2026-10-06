@@ -59,7 +59,7 @@ def get_moderator_by_session(token: str):
         return None
 
     return exec_one(
-        "SELECT id, email, full_name FROM moderators WHERE id = ?",
+        "SELECT id, email, full_name, rol, must_change_password FROM moderators WHERE id = ?",
         (session["moderator_id"],),
     )
 

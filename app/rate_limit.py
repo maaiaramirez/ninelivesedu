@@ -41,3 +41,29 @@ def reset_login_rate_limit(key: str) -> None:
     un usuario legítimo no quede limitado por errores de tipeo previos."""
     with _lock:
         _attempts.pop(key, None)
+
+
+# ─────────────────────────────────────────
+# Límite GENERAL por IP, para toda /api/* (más permisivo que el de login:
+# esto es para frenar abuso/DoS básico, no para casos de uso normales).
+# Mismo diseño en memoria, misma limitación de una sola instancia.
+# ─────────────────────────────────────────
+WINDOW_GENERAL_SECONDS = 60
+MAX_REQUESTS_GENERAL = 60  # por IP, por minuto, sobre toda la API
+
+_general_hits: dict[str, list[float]] = defaultdict(list)
+_general_lock = Lock()
+
+
+def check_general_rate_limit(ip: str) -> bool:
+    """Devuelve True si `ip` todavía puede hacer una solicitud más dentro
+    de la ventana; False si ya superó el límite. No lanza la excepción acá
+    (eso lo hace el middleware) para poder testear esta función sola."""
+    now = time.time()
+    with _general_lock:
+        hits = _general_hits[ip]
+        hits[:] = [t for t in hits if now - t < WINDOW_GENERAL_SECONDS]
+        if len(hits) >= MAX_REQUESTS_GENERAL:
+            return False
+        hits.append(now)
+        return True

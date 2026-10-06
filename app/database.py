@@ -13,6 +13,7 @@ detrás hay un archivo .sqlite local o una base Turso remota.
 """
 import sqlite3
 import hashlib
+from datetime import datetime, timezone
 import os
 import json
 from pathlib import Path
@@ -38,6 +39,17 @@ if TURSO_DATABASE_URL:
     _turso_client = libsql_client.create_client_sync(
         url=_turso_http_url, auth_token=TURSO_AUTH_TOKEN
     )
+    # Igual que en sqlite3, libSQL no aplica las claves foráneas a menos que
+    # se pida explícitamente. Esto es "mejor esfuerzo": el transporte HTTP de
+    # libsql_client no mantiene una conexión persistente entre llamadas, así
+    # que no hay garantía de que este PRAGMA siga valiendo en cada statement
+    # posterior (no se pudo probar en vivo contra Turso real desde este
+    # entorno). Si hiciera falta reforzarlo de verdad, hay que migrar a
+    # batch() mandando el PRAGMA junto con cada sentencia relevante.
+    try:
+        _turso_client.execute("PRAGMA foreign_keys = ON")
+    except Exception:
+        pass
 
 
 def hash_pin(pin: str) -> str:
@@ -270,7 +282,11 @@ CREATE TABLE IF NOT EXISTS posts (
     votos INTEGER DEFAULT 0,
     respuestas INTEGER DEFAULT 0,
     vistas INTEGER DEFAULT 0,
-    resuelto INTEGER DEFAULT 0
+    resuelto INTEGER DEFAULT 0,
+    estado_moderacion TEXT NOT NULL DEFAULT 'pendiente',
+    ai_confidence REAL,
+    ai_reason TEXT,
+    autor_user_id TEXT
 );
 
 CREATE TABLE IF NOT EXISTS post_responses (
@@ -287,7 +303,9 @@ CREATE TABLE IF NOT EXISTS moderators (
     email TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
     full_name TEXT NOT NULL,
-    created_at TEXT NOT NULL
+    created_at TEXT NOT NULL,
+    rol TEXT NOT NULL DEFAULT 'admin',
+    must_change_password INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS moderator_sessions (
@@ -296,6 +314,17 @@ CREATE TABLE IF NOT EXISTS moderator_sessions (
     created_at TEXT NOT NULL,
     expires_at TEXT NOT NULL,
     FOREIGN KEY (moderator_id) REFERENCES moderators(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS auditoria (
+    id TEXT PRIMARY KEY,
+    moderator_id TEXT,
+    moderator_nombre TEXT,
+    accion TEXT NOT NULL,
+    objetivo_tipo TEXT,
+    objetivo_id TEXT,
+    detalle TEXT,
+    created_at TEXT NOT NULL
 );
 """
 
@@ -308,10 +337,17 @@ def init_database():
             conn.executescript(SCHEMA)
 
     _migrar_columnas_faltantes()
-    seed_teacher_demo()
-    seed_pending_examples()
+    # Los datos de ejemplo (profesor demo, postulaciones ficticias) solo se
+    # cargan si NO hay una base Turso configurada (o sea, en desarrollo
+    # local) -- o si se pide explícitamente con SEED_DEMO_DATA=true. En
+    # producción (con Turso) nunca se cargan sin que alguien lo pida a
+    # propósito.
+    permitir_demo = (not _turso_client) or os.environ.get("SEED_DEMO_DATA", "").lower() == "true"
+    if permitir_demo:
+        seed_teacher_demo()
+        seed_pending_examples()
+        seed_if_empty()
     seed_moderator()
-    seed_if_empty()
 
 
 def _migrar_columnas_faltantes():
@@ -329,6 +365,19 @@ def _migrar_columnas_faltantes():
         "reservas": [
             ("pin_alumno", "TEXT"),
         ],
+        "moderators": [
+            ("rol", "TEXT NOT NULL DEFAULT 'admin'"),
+            ("must_change_password", "INTEGER NOT NULL DEFAULT 0"),
+        ],
+        "teacher_profiles": [
+            ("rejection_reason", "TEXT"),
+        ],
+        "posts": [
+            ("estado_moderacion", "TEXT NOT NULL DEFAULT 'aprobado'"),
+            ("ai_confidence", "REAL"),
+            ("ai_reason", "TEXT"),
+            ("autor_user_id", "TEXT"),
+        ],
     }
     for tabla, columnas in columnas_nuevas.items():
         for nombre, tipo in columnas:
@@ -336,6 +385,18 @@ def _migrar_columnas_faltantes():
                 run(f"ALTER TABLE {tabla} ADD COLUMN {nombre} {tipo}")
             except Exception:
                 pass  # ya existía (sqlite3.OperationalError en local, LibsqlError en Turso)
+
+
+def registrar_auditoria(moderator_id, moderator_nombre, accion, objetivo_tipo=None, objetivo_id=None, detalle=None):
+    """Deja constancia de una acción de moderación (aprobar, rechazar,
+    desactivar, etc.). Nunca registra PIN ni contraseñas."""
+    import uuid
+    run(
+        """INSERT INTO auditoria (id, moderator_id, moderator_nombre, accion, objetivo_tipo, objetivo_id, detalle, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+        (str(uuid.uuid4()), moderator_id, moderator_nombre, accion, objetivo_tipo, objetivo_id, detalle,
+         datetime.now(timezone.utc).isoformat()),
+    )
 
 
 def seed_moderator():
@@ -351,14 +412,20 @@ def seed_moderator():
     if exec_one("SELECT id FROM moderators LIMIT 1"):
         return
 
-    email = os.environ.get("MODERATOR_EMAIL", "admin@ninelivesedu.org")
-    password = os.environ.get("MODERATOR_PASSWORD", "changeme123")
+    email_default = "admin@ninelivesedu.org"
+    password_default = "changeme123"
+    email = os.environ.get("MODERATOR_EMAIL", email_default)
+    password = os.environ.get("MODERATOR_PASSWORD", password_default)
     now = datetime.now(timezone.utc).isoformat()
+    # Si se usó la contraseña de ejemplo (nadie configuró MODERATOR_PASSWORD),
+    # se obliga a cambiarla en el primer login -- esa contraseña está en el
+    # código fuente público, así que es un secreto conocido por cualquiera.
+    debe_cambiar = 1 if password == password_default else 0
 
     run(
-        """INSERT INTO moderators (id, email, password_hash, full_name, created_at)
-           VALUES (?, ?, ?, ?, ?)""",
-        (str(uuid.uuid4()), email, hash_password(password), "Moderador Principal", now),
+        """INSERT INTO moderators (id, email, password_hash, full_name, created_at, rol, must_change_password)
+           VALUES (?, ?, ?, ?, ?, 'admin', ?)""",
+        (str(uuid.uuid4()), email, hash_password(password), "Moderador Principal", now, debe_cambiar),
     )
 
 
