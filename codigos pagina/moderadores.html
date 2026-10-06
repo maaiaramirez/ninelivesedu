@@ -35,7 +35,7 @@
             font-weight: 600;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: var(--amber);
+            color: var(--violet);
             margin-bottom: 0.4rem;
         }
         .mod-field input {
@@ -48,7 +48,7 @@
             font-size: 0.95rem;
             transition: border-color 0.3s var(--ease);
         }
-        .mod-field input:focus { outline: none; border-color: var(--amber); }
+        .mod-field input:focus { outline: none; border-color: var(--violet); }
         .mod-error {
             display: none;
             background: rgba(220,90,90,0.12);
@@ -74,7 +74,7 @@
             padding: 0.5rem 1rem; font-size: 0.85rem; cursor: pointer; font-family: var(--font-body);
             transition: all 0.3s var(--ease);
         }
-        .mod-logout:hover { border-color: var(--amber); color: var(--amber); }
+        .mod-logout:hover { border-color: var(--violet); color: var(--violet); }
 
         .mod-tabs { display: flex; gap: 0.5rem; margin-bottom: 2rem; border-bottom: 1px solid var(--line); }
         .mod-tab {
@@ -83,7 +83,7 @@
             font-size: 0.9rem; cursor: pointer; border-bottom: 2px solid transparent;
             transition: all 0.25s var(--ease);
         }
-        .mod-tab.active { color: var(--amber); border-bottom-color: var(--amber); }
+        .mod-tab.active { color: var(--violet); border-bottom-color: var(--violet); }
 
         .mod-view { display: none; }
         .mod-view.active { display: block; }
@@ -100,7 +100,7 @@
         .mod-metric .num { font-family: var(--font-display); font-size: 2rem; color: var(--parchment); }
         .mod-metric .lbl {
             font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em;
-            text-transform: uppercase; color: var(--amber); margin-top: 0.35rem;
+            text-transform: uppercase; color: var(--violet); margin-top: 0.35rem;
         }
 
         /* Certificaciones / Usuarios: lista */
@@ -119,14 +119,14 @@
         }
         .mod-btn-approve:hover { background: #4E9E4E; border-color: #4E9E4E; color: #fff; }
         .mod-btn-reject:hover { background: #C24E4E; border-color: #C24E4E; color: #fff; }
-        .mod-btn-toggle:hover { background: var(--amber); border-color: var(--amber); color: var(--ink); }
+        .mod-btn-toggle:hover { background: var(--violet); border-color: var(--violet); color: var(--ink); }
 
         .mod-badge {
             font-size: 0.68rem; font-weight: 700; padding: 0.25rem 0.6rem;
             text-transform: uppercase; letter-spacing: 0.05em;
         }
         .mod-badge.approved { background: rgba(78,158,78,0.18); color: #8fd18f; }
-        .mod-badge.pending { background: rgba(226,162,87,0.18); color: var(--amber); }
+        .mod-badge.pending { background: rgba(226,162,87,0.18); color: var(--violet); }
         .mod-badge.rejected { background: rgba(194,78,78,0.18); color: #e39a9a; }
         .mod-badge.inactive { background: rgba(139,147,168,0.18); color: var(--muted); }
 
@@ -140,7 +140,7 @@
             font-family: var(--font-body); font-size: 0.9rem;
             transition: border-color 0.3s var(--ease);
         }
-        .mod-search:focus { outline: none; border-color: var(--amber); }
+        .mod-search:focus { outline: none; border-color: var(--violet); }
         .mod-search::placeholder { color: var(--muted); }
 
         .mod-search-row { display: flex; gap: 0.6rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
@@ -149,7 +149,7 @@
             padding: 0.6rem 0.8rem; font-family: var(--font-body); font-size: 0.9rem;
             flex: 1 1 200px; min-width: 0;
         }
-        .mod-search-input:focus, .mod-search-select:focus { outline: none; border-color: var(--amber); }
+        .mod-search-input:focus, .mod-search-select:focus { outline: none; border-color: var(--violet); }
         .mod-search-select { flex: 0 1 170px; cursor: pointer; }
 
         .mod-settings-block {
@@ -165,7 +165,7 @@
         .mod-settings-ok.show { display: block; }
         .mod-toast {
             position: fixed; bottom: 1.5rem; right: 1.5rem;
-            background: var(--ink-panel); border: 1px solid var(--amber);
+            background: var(--ink-panel); border: 1px solid var(--violet);
             color: var(--parchment); padding: 0.85rem 1.25rem;
             font-size: 0.9rem; transform: translateY(120%); opacity: 0;
             transition: all 0.4s var(--ease); z-index: 200;
@@ -354,6 +354,17 @@
             catch { return iso; }
         }
 
+        // Escapa texto que viene de un usuario (nombre, email, materia, etc.)
+        // antes de insertarlo con innerHTML. Sin esto, alguien podría
+        // registrarse con un nombre que contenga HTML/JS y ejecutarlo en la
+        // sesión del moderador que lo ve en este panel.
+        function esc(texto) {
+            if (texto === null || texto === undefined) return '';
+            const div = document.createElement('div');
+            div.textContent = String(texto);
+            return div.innerHTML;
+        }
+
         async function api(path, options = {}) {
             const res = await fetch(path, {
                 credentials: 'include',
@@ -471,11 +482,11 @@
             box.innerHTML = list.map(p => `
                 <div class="mod-item" data-id="${p.user_id}">
                     <div class="info">
-                        <strong>${p.full_name}</strong>
+                        <strong>${esc(p.full_name)}</strong>
                         <div class="meta">
-                            ${p.email} · Solicitado el ${fecha(p.created_at)}
-                            ${p.materia_interes ? ' · Materia: ' + p.materia_interes : ''}
-                            ${p.credential_document_path ? ` · <a href="/api/admin/certificaciones/${p.user_id}/documento" target="_blank" style="color: var(--amber);">Ver título/documento</a>` : ''}
+                            ${esc(p.email)} · Solicitado el ${fecha(p.created_at)}
+                            ${p.materia_interes ? ' · Materia: ' + esc(p.materia_interes) : ''}
+                            ${p.credential_document_path ? ` · <a href="/api/admin/certificaciones/${p.user_id}/documento" target="_blank" style="color: var(--violet);">Ver título/documento</a>` : ''}
                         </div>
                         ${renderOpinionIA(p)}
                     </div>
@@ -495,7 +506,7 @@
                         : p.ai_is_valid === 0 ? '<span class="mod-badge rejected">IA: dudoso</span>'
                         : '<span class="mod-badge inactive">IA: no pudo evaluarlo</span>';
             const confianza = p.ai_confidence != null ? ` (confianza ${Math.round(p.ai_confidence * 100)}%)` : '';
-            return `<div class="meta" style="margin-top:0.4rem">🤖 ${badge}${confianza} — ${p.ai_reason || ''}</div>`;
+            return `<div class="meta" style="margin-top:0.4rem">🤖 ${badge}${confianza} — ${esc(p.ai_reason || '')}</div>`;
         }
 
         document.getElementById('cert-search').addEventListener('input', (e) => {
@@ -568,13 +579,13 @@
                 box.innerHTML = data.usuarios.map(u => `
                     <div class="mod-item" data-id="${u.id}">
                         <div class="info">
-                            <strong>${u.full_name}</strong>
-                            <div class="meta">${u.email} · ${u.role} · Registrado el ${fecha(u.created_at)}</div>
+                            <strong>${esc(u.full_name)}</strong>
+                            <div class="meta">${esc(u.email)} · ${esc(u.role)} · Registrado el ${fecha(u.created_at)}</div>
                         </div>
                         <div class="actions">
                             <span class="mod-badge ${u.is_active ? 'approved' : 'inactive'}">${u.is_active ? 'Activo' : 'Inactivo'}</span>
                             <span class="mod-badge ${u.validation_status}">${u.validation_status}</span>
-                            ${u.role === 'teacher' ? `<button class="mod-btn-toggle" onclick="regenerarPin('${u.id}')">Regenerar PIN</button>` : ''}
+                            ${u.role === 'teacher' && u.validation_status === 'approved' ? `<button class="mod-btn-toggle" onclick="regenerarPin('${u.id}')">Regenerar PIN</button>` : ''}
                             <button class="mod-btn-toggle" onclick="toggleUsuario('${u.id}', ${u.is_active ? 'false' : 'true'})">
                                 ${u.is_active ? 'Desactivar' : 'Activar'}
                             </button>
@@ -620,8 +631,8 @@
                 box.innerHTML = data.administradores.map(a => `
                     <div class="mod-item" data-id="${a.id}">
                         <div class="info">
-                            <strong>${a.full_name}</strong>
-                            <div class="meta">${a.email} · Alta el ${fecha(a.created_at)}</div>
+                            <strong>${esc(a.full_name)}</strong>
+                            <div class="meta">${esc(a.email)} · Alta el ${fecha(a.created_at)}</div>
                         </div>
                         <div class="actions">
                             ${a.id === currentAdminId

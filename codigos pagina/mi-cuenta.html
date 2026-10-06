@@ -19,7 +19,7 @@
             padding: 0.5rem 1rem; font-size: 0.85rem; cursor: pointer; font-family: var(--font-body);
             float: right; transition: all 0.3s var(--ease);
         }
-        .mc-logout:hover { border-color: var(--amber); color: var(--amber); }
+        .mc-logout:hover { border-color: var(--violet); color: var(--violet); }
 
         .mc-item {
             background: var(--ink-panel); border: 1px solid var(--line);
@@ -32,16 +32,16 @@
             font-size: 0.68rem; font-weight: 700; padding: 0.25rem 0.6rem;
             text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; margin-top: 0.5rem;
         }
-        .mc-badge.pending, .mc-badge.abierta { background: rgba(226,162,87,0.18); color: var(--amber); }
+        .mc-badge.pending, .mc-badge.abierta { background: rgba(226,162,87,0.18); color: var(--violet); }
         .mc-badge.confirmed, .mc-badge.cerrada { background: rgba(78,158,78,0.18); color: #8fd18f; }
         .mc-badge.rejected { background: rgba(194,78,78,0.18); color: #e39a9a; }
 
         .mc-pin {
             margin-top: 0.85rem; padding: 0.85rem 1rem; background: var(--ink);
-            border: 1px dashed var(--amber); text-align: center;
+            border: 1px dashed var(--violet); text-align: center;
         }
         .mc-pin .label { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-        .mc-pin .pin { font-family: var(--font-display); font-size: 1.6rem; color: var(--amber); letter-spacing: 0.1em; }
+        .mc-pin .pin { font-family: var(--font-display); font-size: 1.6rem; color: var(--violet); letter-spacing: 0.1em; }
 
         .mc-alumno-row {
             display: flex; justify-content: space-between; align-items: center;
@@ -56,7 +56,7 @@
         .mc-btn.approve:hover { background: #4E9E4E; border-color: #4E9E4E; color: #fff; }
         .mc-btn.reject:hover { background: #C24E4E; border-color: #C24E4E; color: #fff; }
         .mc-btn.cerrar { margin-top: 0.75rem; }
-        .mc-btn.cerrar:hover { background: var(--amber); border-color: var(--amber); color: var(--ink); }
+        .mc-btn.cerrar:hover { background: var(--violet); border-color: var(--violet); color: var(--ink); }
 
         .mc-empty { color: var(--muted); text-align: center; padding: 3rem 1rem; }
         .mc-loading { color: var(--muted); text-align: center; padding: 2rem; }
@@ -77,7 +77,7 @@
         .mc-modal p.sub { color: var(--muted); font-size: 0.88rem; margin-bottom: 1.1rem; }
         .mc-estrellas { display: flex; gap: 0.4rem; margin-bottom: 1.1rem; font-size: 1.6rem; }
         .mc-estrellas span { cursor: pointer; color: var(--line-strong); transition: color 0.15s; }
-        .mc-estrellas span.activa { color: var(--amber); }
+        .mc-estrellas span.activa { color: var(--violet); }
         .mc-modal textarea {
             width: 100%; background: var(--ink); border: 1px solid var(--line);
             color: var(--parchment); padding: 0.6rem; font-family: var(--font-body);
@@ -182,7 +182,7 @@
                 iniciarEscuchaEncuestas();
             } else if (user.role === 'teacher') renderTutor(user);
             else {
-                main.innerHTML = `<div class="mc-empty">Tu cuenta (${user.role}) no tiene una vista acá. Los moderadores usan <a href="moderadores.html" style="color:var(--amber);">/moderadores.html</a>.</div>`;
+                main.innerHTML = `<div class="mc-empty">Tu cuenta (${user.role}) no tiene una vista acá. Los moderadores usan <a href="moderadores.html" style="color:var(--violet);">/moderadores.html</a>.</div>`;
             }
         }
 
@@ -282,15 +282,10 @@
                                 <div class="label">Tu PIN de asistencia (terminal físico)</div>
                                 <div class="pin">${r.pin_alumno}</div>
                             </div>` : ''}
-                        ${r.pin_hardware ? `
-                            <div class="mc-pin">
-                                <div class="label">PIN para el hardware de esta sesión</div>
-                                <div class="pin">${r.pin_hardware}</div>
-                            </div>` : ''}
                     </div>`).join('')
-                : `<div class="mc-empty">Todavía no reservaste ninguna tutoría. <a href="tutores.html" style="color:var(--amber);">Buscar tutores</a>.</div>`;
+                : `<div class="mc-empty">Todavía no reservaste ninguna tutoría. <a href="tutores.html" style="color:var(--violet);">Buscar tutores</a>.</div>`;
 
-            main.innerHTML = header(user, 'Tus tutorías reservadas — acá aparece el PIN de hardware cuando se llena el cupo.') + lista;
+            main.innerHTML = header(user, 'Tus tutorías reservadas — tu PIN de asistencia aparece cuando el tutor aprueba la reserva.') + lista;
         }
 
         // ── VISTA TUTOR ──
@@ -343,13 +338,10 @@
                                         <button class="mc-btn reject" onclick="rechazar('${a.id}')">Rechazar</button>
                                     </span>` : ''}
                             </div>`).join('')}
-                        ${s.pin_hardware
-                            ? `<div class="mc-pin"><div class="label">PIN de hardware</div><div class="pin">${s.pin_hardware}</div></div>`
-                            : s.estado === 'abierta' ? `<button class="mc-btn cerrar" onclick="cerrarSesion_('${s.id}')">Cerrar inscripción y generar PIN</button>` : ''}
                     </div>`).join('')
                 : `<div class="mc-empty">Todavía no tenés sesiones de tutoría.</div>`;
 
-            main.innerHTML = header(user, 'Aprobá alumnos — cuando se llena el cupo, se genera el PIN de hardware solo.') + formularioNuevaSesion + lista;
+            main.innerHTML = header(user, 'Aprobá alumnos — al aprobar una reserva, el alumno recibe su PIN personal para el terminal del aula.') + formularioNuevaSesion + lista;
 
             document.getElementById('mc-nueva-sesion').addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -380,7 +372,7 @@
                 // se autodestruye) -- el profesor necesita tiempo para anotar
                 // el PIN del alumno, no solo un vistazo de medio segundo.
                 if (data.pinAlumno) alert(`PIN del alumno: ${data.pinAlumno}`);
-                if (data.cupoLleno) alert('¡Cupo lleno! PIN de hardware: ' + data.pin);
+                if (data.cupoLleno) alert('¡Se llenó el cupo de esta tutoría!');
                 init();
             } catch (e) { alert('Error: ' + e.message); }
         }
@@ -388,14 +380,6 @@
         async function rechazar(reservaId) {
             try {
                 await api(`/api/tutores/reservas/${reservaId}/rechazar`, { method: 'POST' });
-                init();
-            } catch (e) { alert('Error: ' + e.message); }
-        }
-
-        async function cerrarSesion_(sesionId) {
-            try {
-                const data = await api(`/api/tutores/sesiones/${sesionId}/cerrar`, { method: 'POST' });
-                alert('PIN generado: ' + data.pin);
                 init();
             } catch (e) { alert('Error: ' + e.message); }
         }
