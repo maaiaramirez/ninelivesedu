@@ -283,7 +283,7 @@ CREATE TABLE IF NOT EXISTS posts (
     respuestas INTEGER DEFAULT 0,
     vistas INTEGER DEFAULT 0,
     resuelto INTEGER DEFAULT 0,
-    estado_moderacion TEXT NOT NULL DEFAULT 'pendiente',
+    estado_moderacion TEXT NOT NULL DEFAULT 'aprobado',
     ai_confidence REAL,
     ai_reason TEXT,
     autor_user_id TEXT
