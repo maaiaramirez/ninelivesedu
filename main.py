@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 
 from app.database import init_database
+from app.rate_limit import check_general_rate_limit
 from app.routers import apuntes, tutores, foros, asistencia, chat, auth, admin, usuarios
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -18,6 +19,19 @@ UPLOADS_DIR = BASE_DIR / "storage" / "uploads"
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(title="Nine Lives Edu API")
+
+
+@app.middleware("http")
+async def limite_general_por_ip(request: Request, call_next):
+    """Tope de 60 pedidos por minuto por IP sobre TODA la API (no solo
+    login). No reemplaza al límite de login (más estricto, 5 cada 15 min);
+    este es la red de contención más amplia, pensada para frenar abuso
+    básico de los endpoints del terminal (que no tenían ningún límite) y
+    de las rutas públicas de escritura."""
+    ip = request.client.host if request.client else "desconocida"
+    if not check_general_rate_limit(ip):
+        return JSONResponse(status_code=429, content={"detail": "Demasiadas solicitudes. Esperá un momento y volvé a intentar."})
+    return await call_next(request)
 
 # ─────────────────────────────────────────────
 # Rutas de la API (equivalentes a src/routes/*.js)
