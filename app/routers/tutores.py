@@ -10,6 +10,7 @@ from pydantic import BaseModel
 
 from ..database import exec_all, exec_one, run
 from ..auth import hash_password
+from .. import cloud_storage
 from ..user_auth import require_role, require_user
 
 router = APIRouter(prefix="/api/tutores", tags=["tutores"])
@@ -64,13 +65,27 @@ def normalize(row: dict) -> dict:
 
 @router.get("")
 def listar_tutores():
-    rows = exec_all("SELECT * FROM tutores ORDER BY nombre ASC")
+    # Antes traía TODO lo que alguna vez hubo en "tutores", sin mirar si
+    # a esa persona después la rechazaron, la revocaron o la desactivaron
+    # -- quedaban visibles públicamente igual. Ahora solo entra quien
+    # sigue aprobado y activo en este mismo momento.
+    rows = exec_all(
+        """SELECT t.* FROM tutores t
+           JOIN users u ON u.id = t.user_id
+           WHERE u.validation_status = 'approved' AND u.is_active = 1
+           ORDER BY t.nombre ASC"""
+    )
     return [normalize(r) for r in rows]
 
 
 @router.get("/{tutor_id}")
 def obtener_tutor(tutor_id: str):
-    row = exec_one("SELECT * FROM tutores WHERE id = ?", (tutor_id,))
+    row = exec_one(
+        """SELECT t.* FROM tutores t
+           JOIN users u ON u.id = t.user_id
+           WHERE t.id = ? AND u.validation_status = 'approved' AND u.is_active = 1""",
+        (tutor_id,),
+    )
     if not row:
         raise HTTPException(404, "Tutor no encontrado")
     return normalize(row)
@@ -373,10 +388,17 @@ async def postularse_como_tutor(
         raise HTTPException(400, "El archivo no puede superar los 8 MB.")
 
     filename = f"{int(time.time() * 1000)}-{uuid.uuid4().hex[:8]}.{SAFE_EXT_BY_MIME[titulo.content_type]}"
-    dest = UPLOADS_DIR / filename
-    with open(dest, "wb") as f:
-        f.write(contenido)
-    archivo_path = f"/uploads/{filename}"
+    if cloud_storage.CLOUDINARY_CONFIGURADO:
+        # PRIVADO: a diferencia de los apuntes, esto nunca debe quedar
+        # accesible con un link público fijo -- se guarda el public_id,
+        # no una URL. Ver /api/admin/certificaciones/.../documento, que es
+        # el único lugar que genera una URL temporal para verlo.
+        archivo_path = cloud_storage.subir_privado(contenido, filename, "titulos")
+    else:
+        dest = UPLOADS_DIR / filename
+        with open(dest, "wb") as f:
+            f.write(contenido)
+        archivo_path = f"/uploads/{filename}"
 
     user_id = str(uuid.uuid4())
     now = datetime.now(timezone.utc).isoformat()
