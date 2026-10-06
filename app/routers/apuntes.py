@@ -3,10 +3,11 @@ import uuid
 from datetime import date
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends
 from fastapi.responses import FileResponse
 
 from ..database import exec_all, exec_one, run
+from ..user_auth import require_user
 
 router = APIRouter(prefix="/api/apuntes", tags=["apuntes"])
 
@@ -69,6 +70,7 @@ async def crear_apunte(
     descripcion: str = Form(None),
     tipo: str = Form(None),
     archivo: UploadFile = File(None),
+    user=Depends(require_user),
 ):
     archivo_path = None
     if archivo is not None:

@@ -10,7 +10,7 @@ from pydantic import BaseModel
 
 from ..database import exec_all, exec_one, run
 from ..auth import hash_password
-from ..user_auth import require_role
+from ..user_auth import require_role, require_user
 
 router = APIRouter(prefix="/api/tutores", tags=["tutores"])
 
@@ -326,7 +326,7 @@ class IntercambioIn(BaseModel):
 
 
 @router.post("/intercambios", status_code=201)
-def crear_intercambio(body: IntercambioIn):
+def crear_intercambio(body: IntercambioIn, user=Depends(require_user)):
     solicitud_id = f"swap-{uuid.uuid4()}"
     fecha = datetime.now(timezone.utc).isoformat()
     run(

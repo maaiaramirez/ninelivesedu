@@ -3,11 +3,12 @@ import uuid
 from datetime import date
 from typing import List, Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
-from ..database import exec_all, exec_one, run
+from ..database import exec_all, exec_one, run, registrar_auditoria
 from ..content_moderation import exigir_contenido_apropiado
+from ..user_auth import require_user
 
 router = APIRouter(prefix="/api/foros", tags=["foros"])
 
@@ -59,19 +60,32 @@ class PostIn(BaseModel):
     tags: Optional[List[str]] = None
 
 
+def _revisar_o_auditar(texto: str, user, tipo_objetivo: str, objetivo_id: str = None):
+    """Igual que exigir_contenido_apropiado, pero además deja constancia en
+    auditoría cuando algo se rechaza -- así un moderador puede ver después
+    qué se bloqueó y por qué, no solo el usuario que lo escribió."""
+    try:
+        exigir_contenido_apropiado(texto)
+    except HTTPException as e:
+        registrar_auditoria(None, user["full_name"] if user else "(desconocido)",
+                             "contenido_rechazado_automaticamente", tipo_objetivo, objetivo_id,
+                             f"{e.detail}  ·  texto: {texto[:200]}")
+        raise
+
+
 @router.post("", status_code=201)
-def crear_post(body: PostIn):
-    exigir_contenido_apropiado(f"{body.titulo}\n\n{body.contenido}")
+def crear_post(body: PostIn, user=Depends(require_user)):
+    _revisar_o_auditar(f"{body.titulo}\n\n{body.contenido}", user, "post")
 
     post_id = f"post-{uuid.uuid4()}"
     fecha = date.today().isoformat()
     tags = body.tags or []
     run(
         """INSERT INTO posts (id, titulo, contenido, autor, fecha, nivel, materia, tipo,
-           tags_json, votos, respuestas, vistas, resuelto)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0)""",
+           tags_json, votos, respuestas, vistas, resuelto, autor_user_id)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, ?)""",
         (post_id, body.titulo, body.contenido, body.autor, fecha, body.nivel, body.materia,
-         body.tipo, json.dumps(tags)),
+         body.tipo, json.dumps(tags), user["id"]),
     )
     return {
         "id": post_id, "titulo": body.titulo, "contenido": body.contenido, "autor": body.autor,
@@ -81,7 +95,7 @@ def crear_post(body: PostIn):
 
 
 @router.post("/{post_id}/vote")
-def votar_post(post_id: str):
+def votar_post(post_id: str, user=Depends(require_user)):
     post = exec_one("SELECT id, votos FROM posts WHERE id = ?", (post_id,))
     if not post:
         raise HTTPException(404, "Post no encontrado")
@@ -95,12 +109,12 @@ class RespuestaIn(BaseModel):
 
 
 @router.post("/{post_id}/respuestas", status_code=201)
-def agregar_respuesta(post_id: str, body: RespuestaIn):
+def agregar_respuesta(post_id: str, body: RespuestaIn, user=Depends(require_user)):
     post = exec_one("SELECT id FROM posts WHERE id = ?", (post_id,))
     if not post:
         raise HTTPException(404, "Post no encontrado")
 
-    exigir_contenido_apropiado(body.texto)
+    _revisar_o_auditar(body.texto, user, "respuesta", post_id)
 
     respuesta_id = f"resp-{uuid.uuid4()}"
     fecha = date.today().isoformat()

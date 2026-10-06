@@ -45,7 +45,8 @@ def login(body: LoginIn, request: Request, response: Response):
     )
     return {
         "success": True,
-        "moderator": {"id": moderator["id"], "email": moderator["email"], "fullName": moderator["full_name"]},
+        "moderator": {"id": moderator["id"], "email": moderator["email"], "fullName": moderator["full_name"],
+                       "rol": moderator["rol"], "mustChangePassword": bool(moderator["must_change_password"])},
     }
 
 
@@ -76,7 +77,7 @@ def cambiar_password(body: CambiarPasswordIn, request: Request, moderator=Depend
         raise HTTPException(400, "La nueva contraseña debe tener al menos 8 caracteres.")
 
     run(
-        "UPDATE moderators SET password_hash = ? WHERE id = ?",
+        "UPDATE moderators SET password_hash = ?, must_change_password = 0 WHERE id = ?",
         (hash_password(body.newPassword), moderator["id"]),
     )
 

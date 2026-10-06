@@ -61,7 +61,8 @@ def _find_teacher_by_pin(pin: str):
         """SELECT u.id AS userId, u.full_name AS fullName
            FROM teacher_profiles tp
            INNER JOIN users u ON u.id = tp.user_id
-           WHERE u.role = 'teacher' AND u.validation_status = 'approved' AND tp.unique_pin_ciphertext = ?""",
+           WHERE u.role = 'teacher' AND u.validation_status = 'approved'
+             AND u.is_active = 1 AND tp.unique_pin_ciphertext = ?""",
         (pin_hash,),
     )
 
@@ -358,12 +359,20 @@ def _resolver_sesion_para_tutor(tutor_id: str) -> dict | None:
     # UTC acá haría que el terminal no encuentre "la sesión de hoy" durante
     # esa franja horaria, aunque para el usuario siga siendo hoy.
     hoy = (datetime.now(timezone.utc) - timedelta(hours=3)).date().isoformat()
+    # Si hay más de una sesión de hoy para este tutor (por ejemplo, el cupo
+    # de la primera se llenó y una reserva nueva disparó la creación de una
+    # segunda), se prioriza la que tenga reservas confirmadas de verdad por
+    # sobre la más reciente -- si no, el terminal podía terminar abriendo
+    # una sesión vacía mientras la que sí tenía alumnos quedaba de lado.
     return exec_one(
-        """SELECT s.* FROM tutoria_sesiones s
+        """SELECT s.*,
+                  (SELECT COUNT(*) FROM reservas r
+                    WHERE r.sesion_id = s.id AND r.estado = 'confirmed') AS confirmados
+           FROM tutoria_sesiones s
            LEFT JOIN asistencia_fisica af ON af.sesion_id = s.id
            WHERE s.tutor_id = ? AND s.fecha = ?
              AND (af.estado IS NULL OR af.estado != 'completada')
-           ORDER BY s.created_at DESC LIMIT 1""",
+           ORDER BY confirmados DESC, s.created_at DESC LIMIT 1""",
         (tutor_id, hoy),
     )
 
@@ -448,7 +457,7 @@ async def check_in_alumno(body: CheckInAlumnoIn, request: Request):
         """SELECT r.*, u.full_name AS student_full_name
            FROM reservas r
            JOIN users u ON u.id = r.student_user_id
-           WHERE r.pin_alumno = ? AND r.estado = 'confirmed'""",
+           WHERE r.pin_alumno = ? AND r.estado = 'confirmed' AND u.is_active = 1""",
         (body.pin,),
     )
     if not reserva:
@@ -459,24 +468,45 @@ async def check_in_alumno(body: CheckInAlumnoIn, request: Request):
     if _estado_fisico(sesion["id"]) != "activa":
         raise HTTPException(403, "El profesor todavía no inició la sesión en el terminal.")
 
-    cupo_actual = exec_one(
-        "SELECT COUNT(*) AS n FROM asistencia_alumnos WHERE sesion_id = ?", (sesion["id"],)
-    )["n"]
-    if cupo_actual >= sesion["cupo_maximo"]:
-        # El ESP32 intercepta este 409 y muestra "Cupo lleno" en el LCD.
-        raise HTTPException(409, "Cupo lleno para esta sesión.")
+    # Chequeo específico primero (para el mensaje correcto): si ESTE alumno
+    # ya estaba, que lo diga clarito -- no "cupo lleno", aunque el cupo
+    # también esté lleno con su propio lugar.
+    ya_estaba = exec_one(
+        "SELECT id FROM asistencia_alumnos WHERE sesion_id = ? AND student_user_id = ?",
+        (sesion["id"], reserva["student_user_id"]),
+    )
+    if ya_estaba:
+        raise HTTPException(409, "Este alumno ya había registrado su asistencia en esta sesión.")
 
     now = datetime.now(timezone.utc).isoformat()
+    nuevo_id = f"asist-{uuid.uuid4()}"
+    # Aforo atómico: el chequeo de cupo va DENTRO del INSERT (una sola
+    # sentencia), no en un SELECT separado de antes. Si no hay cupo, el
+    # WHERE no matchea y no se inserta ninguna fila -- no hace falta que
+    # dos pedidos casi simultáneos se "crucen" entre el conteo y el guardado,
+    # porque no hay dos pasos: es uno solo. El chequeo de "ya_estaba" de
+    # arriba es solo para el mensaje; el UNIQUE(sesion_id, student_user_id)
+    # de la tabla sigue siendo la protección real contra la carrera de dos
+    # pedidos del mismo alumno llegando casi al mismo tiempo.
     try:
         run(
             """INSERT INTO asistencia_alumnos (id, sesion_id, student_user_id, reserva_id, checkin_at)
-               VALUES (?, ?, ?, ?, ?)""",
-            (f"asist-{uuid.uuid4()}", sesion["id"], reserva["student_user_id"], reserva["id"], now),
+               SELECT ?, ?, ?, ?, ?
+               WHERE (SELECT COUNT(*) FROM asistencia_alumnos WHERE sesion_id = ?) < ?""",
+            (nuevo_id, sesion["id"], reserva["student_user_id"], reserva["id"], now,
+             sesion["id"], sesion["cupo_maximo"]),
         )
     except sqlite3.IntegrityError:
         raise HTTPException(409, "Este alumno ya había registrado su asistencia en esta sesión.")
 
-    cupo_actual += 1
+    inserto = exec_one("SELECT id FROM asistencia_alumnos WHERE id = ?", (nuevo_id,))
+    if not inserto:
+        # El INSERT condicional no insertó nada: no había cupo.
+        raise HTTPException(409, "Cupo lleno para esta sesión.")
+
+    cupo_actual = exec_one(
+        "SELECT COUNT(*) AS n FROM asistencia_alumnos WHERE sesion_id = ?", (sesion["id"],)
+    )["n"]
     await _publish_aforo(sesion["id"], cupo_actual, sesion["cupo_maximo"])
 
     return {
