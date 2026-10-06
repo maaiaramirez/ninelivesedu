@@ -287,6 +287,39 @@ def desactivar_usuario(user_id: str, actor=Depends(require_moderator)):
 
 
 # ─────────────────────────────────────────
+# POSTS DE FOROS RETENIDOS PARA REVISIÓN
+# ─────────────────────────────────────────
+@router.get("/foros/pendientes")
+def posts_pendientes():
+    rows = exec_all(
+        """SELECT id, titulo, contenido, autor, fecha, materia, ai_reason
+           FROM posts WHERE estado_moderacion = 'pendiente'
+           ORDER BY date(fecha) ASC"""
+    )
+    return {"total": len(rows), "pendientes": rows}
+
+
+@router.post("/foros/{post_id}/aprobar")
+def aprobar_post(post_id: str, actor=Depends(require_moderator)):
+    post = exec_one("SELECT id, titulo FROM posts WHERE id = ? AND estado_moderacion = 'pendiente'", (post_id,))
+    if not post:
+        raise HTTPException(404, "No hay un post pendiente con ese id.")
+    run("UPDATE posts SET estado_moderacion = 'aprobado' WHERE id = ?", (post_id,))
+    registrar_auditoria(actor["id"], actor["full_name"], "aprobar_post", "post", post_id, post["titulo"])
+    return {"success": True, "message": "El post ya está publicado en el foro."}
+
+
+@router.post("/foros/{post_id}/rechazar")
+def rechazar_post(post_id: str, actor=Depends(require_moderator)):
+    post = exec_one("SELECT id, titulo FROM posts WHERE id = ? AND estado_moderacion = 'pendiente'", (post_id,))
+    if not post:
+        raise HTTPException(404, "No hay un post pendiente con ese id.")
+    run("UPDATE posts SET estado_moderacion = 'rechazado' WHERE id = ?", (post_id,))
+    registrar_auditoria(actor["id"], actor["full_name"], "rechazar_post", "post", post_id, post["titulo"])
+    return {"success": True, "message": "El post queda rechazado, no se publica."}
+
+
+# ─────────────────────────────────────────
 # AUDITORÍA (solo lectura)
 # ─────────────────────────────────────────
 @router.get("/auditoria")
@@ -363,6 +396,9 @@ def metricas():
         "usuarios_activos": count("SELECT COUNT(*) AS n FROM users WHERE is_active = 1"),
         "certificaciones_pendientes": count(
             "SELECT COUNT(*) AS n FROM teacher_profiles WHERE credential_document_status = 'pending'"
+        ),
+        "posts_pendientes_revision": count(
+            "SELECT COUNT(*) AS n FROM posts WHERE estado_moderacion = 'pendiente'"
         ),
         "profesores_en_linea_ahora": count(
             "SELECT COUNT(*) AS n FROM teacher_attendance WHERE is_available = 1"

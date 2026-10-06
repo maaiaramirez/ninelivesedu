@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
 from ..database import exec_all, exec_one, run, registrar_auditoria
-from ..content_moderation import exigir_contenido_apropiado
+from ..content_moderation import exigir_contenido_apropiado, revisar_contenido
 from ..user_auth import require_user
 
 router = APIRouter(prefix="/api/foros", tags=["foros"])
@@ -38,13 +38,16 @@ def hydrate(row: dict) -> dict:
 
 @router.get("")
 def listar_posts():
-    rows = exec_all("SELECT * FROM posts ORDER BY date(fecha) DESC")
+    # Solo lo que ya está aprobado es público -- lo "pendiente" (retenido
+    # por el análisis automático) no aparece acá, solo en la cola de
+    # revisión del panel de moderadores.
+    rows = exec_all("SELECT * FROM posts WHERE estado_moderacion = 'aprobado' ORDER BY date(fecha) DESC")
     return [hydrate(r) for r in rows]
 
 
 @router.get("/{post_id}")
 def obtener_post(post_id: str):
-    row = exec_one("SELECT * FROM posts WHERE id = ?", (post_id,))
+    row = exec_one("SELECT * FROM posts WHERE id = ? AND estado_moderacion = 'aprobado'", (post_id,))
     if not row:
         raise HTTPException(404, "Post no encontrado")
     return hydrate(row)
@@ -75,18 +78,36 @@ def _revisar_o_auditar(texto: str, user, tipo_objetivo: str, objetivo_id: str = 
 
 @router.post("", status_code=201)
 def crear_post(body: PostIn, user=Depends(require_user)):
-    _revisar_o_auditar(f"{body.titulo}\n\n{body.contenido}", user, "post")
+    """Si el análisis automático no detecta nada raro, el post se publica
+    al toque (estado 'aprobado'). Si sospecha algo (spam, insultos), el
+    post NO se pierde ni se publica solo: queda 'pendiente', invisible
+    para el público, esperando que un moderador lo revise y decida —
+    igual que una postulación de tutor."""
+    texto = f"{body.titulo}\n\n{body.contenido}"
+    revision = revisar_contenido(texto)
+    aprobado = bool(revision.get("apropiado", True))
+    estado = "aprobado" if aprobado else "pendiente"
 
     post_id = f"post-{uuid.uuid4()}"
     fecha = date.today().isoformat()
     tags = body.tags or []
     run(
         """INSERT INTO posts (id, titulo, contenido, autor, fecha, nivel, materia, tipo,
-           tags_json, votos, respuestas, vistas, resuelto, autor_user_id)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, ?)""",
+           tags_json, votos, respuestas, vistas, resuelto, autor_user_id,
+           estado_moderacion, ai_confidence, ai_reason)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, ?, ?, ?, ?)""",
         (post_id, body.titulo, body.contenido, body.autor, fecha, body.nivel, body.materia,
-         body.tipo, json.dumps(tags), user["id"]),
+         body.tipo, json.dumps(tags), user["id"], estado, None, revision.get("motivo") or None),
     )
+
+    if not aprobado:
+        registrar_auditoria(None, user["full_name"], "post_retenido_para_revision", "post", post_id,
+                             f"Motivo: {revision.get('motivo', '')}  ·  texto: {texto[:200]}")
+        return {
+            "id": post_id, "pendiente": True,
+            "message": "Tu publicación quedó retenida para revisión de un moderador antes de aparecer en el foro.",
+        }
+
     return {
         "id": post_id, "titulo": body.titulo, "contenido": body.contenido, "autor": body.autor,
         "fecha": fecha, "nivel": body.nivel, "materia": body.materia, "tipo": body.tipo,
