@@ -261,6 +261,9 @@
                     <div class="mod-metrics-grid" id="metrics-grid">
                         <div class="mod-loading">Cargando métricas…</div>
                     </div>
+                    <h3 style="margin-top:2rem;font-size:1rem;color:var(--parchment);">Posts del foro pendientes de revisión</h3>
+                    <p style="color:var(--muted);font-size:0.85rem;margin-top:0.2rem;">El análisis automático retuvo estos posts antes de publicarlos — decidí si se publican o se rechazan.</p>
+                    <div id="posts-pendientes-list" style="margin-top:1rem;"><div class="mod-loading">Cargando…</div></div>
                 </div>
 
                 <div class="mod-view" id="view-certificaciones">
@@ -434,9 +437,46 @@
 
         function loadAll() {
             loadMetrics();
+            loadPostsPendientes();
             loadCertificaciones();
             loadUsuarios();
             loadAdministradores();
+        }
+
+        // ── Posts del foro pendientes de revisión ──
+        async function loadPostsPendientes() {
+            const box = document.getElementById('posts-pendientes-list');
+            try {
+                const data = await api('/api/admin/foros/pendientes');
+                box.innerHTML = data.pendientes.length
+                    ? data.pendientes.map(p => `
+                        <div class="mod-item" data-id="${p.id}">
+                            <div class="info">
+                                <strong>${esc(p.titulo)}</strong>
+                                <div class="meta">${esc(p.autor)} · ${esc(p.materia || '')}</div>
+                                <div class="meta" style="margin-top:0.3rem;">${esc(p.contenido)}</div>
+                                ${p.ai_reason ? `<div class="meta" style="margin-top:0.3rem;">🤖 ${esc(p.ai_reason)}</div>` : ''}
+                            </div>
+                            <div class="actions">
+                                <span class="mod-badge pending">Pendiente</span>
+                                <button class="mod-btn-approve" onclick="resolverPost('${p.id}', 'aprobar')">Publicar</button>
+                                <button class="mod-btn-reject" onclick="resolverPost('${p.id}', 'rechazar')">Rechazar</button>
+                            </div>
+                        </div>`).join('')
+                    : `<div class="mod-empty">No hay posts pendientes de revisión.</div>`;
+            } catch (e) {
+                box.innerHTML = `<div class="mod-empty">No se pudieron cargar los posts pendientes.</div>`;
+            }
+        }
+
+        async function resolverPost(postId, accion) {
+            try {
+                await api(`/api/admin/foros/${postId}/${accion}`, { method: 'POST' });
+                loadPostsPendientes();
+                loadMetrics();
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
         }
 
         // ── Métricas ──
@@ -450,6 +490,7 @@
                     ['Posts en foros', m.posts_foro], ['Respuestas en foros', m.respuestas_foro],
                     ['Usuarios totales', m.usuarios_totales], ['Usuarios activos', m.usuarios_activos],
                     ['Certificaciones pendientes', m.certificaciones_pendientes],
+                    ['Posts pendientes de revisión', m.posts_pendientes_revision],
                     ['Profesores en línea ahora', m.profesores_en_linea_ahora],
                 ];
                 grid.innerHTML = items.map(([lbl, num]) => `

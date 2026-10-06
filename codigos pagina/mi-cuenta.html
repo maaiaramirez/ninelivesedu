@@ -270,19 +270,30 @@
                 return;
             }
 
+            // Comparación de fecha en huso de Argentina (UTC-3), igual que
+            // usa el backend para "hoy" -- así no queda desfasado cerca de
+            // la medianoche.
+            const hoyArg = new Date(Date.now() - 3 * 3600 * 1000).toISOString().slice(0, 10);
+            const esPasada = (f) => f < hoyArg;
+
             const lista = data.reservas.length
-                ? data.reservas.map(r => `
-                    <div class="mc-item">
+                ? data.reservas.map(r => {
+                    const pasada = esPasada(r.fecha);
+                    return `
+                    <div class="mc-item" style="${pasada ? 'opacity:0.6;' : ''}">
                         <strong>${r.tutor_nombre}</strong> — ${r.materia}
                         <div class="meta">${fecha(r.fecha)} · ${r.modalidad}</div>
                         <span class="mc-badge ${r.estado_reserva}">${ESTADO_LABEL[r.estado_reserva]}</span>
-                        <span class="mc-badge ${r.estado_sesion}">Cupo ${ESTADO_LABEL[r.estado_sesion]}</span>
-                        ${r.pin_alumno ? `
+                        ${pasada
+                            ? `<span class="mc-badge" style="background:rgba(157,152,196,0.15);color:var(--muted);">Finalizada</span>`
+                            : `<span class="mc-badge ${r.estado_sesion}">Cupo ${ESTADO_LABEL[r.estado_sesion]}</span>`}
+                        ${(r.pin_alumno && !pasada) ? `
                             <div class="mc-pin">
                                 <div class="label">Tu PIN de asistencia (terminal físico)</div>
                                 <div class="pin">${r.pin_alumno}</div>
                             </div>` : ''}
-                    </div>`).join('')
+                    </div>`;
+                }).join('')
                 : `<div class="mc-empty">Todavía no reservaste ninguna tutoría. <a href="tutores.html" style="color:var(--violet);">Buscar tutores</a>.</div>`;
 
             main.innerHTML = header(user, 'Tus tutorías reservadas — tu PIN de asistencia aparece cuando el tutor aprueba la reserva.') + lista;

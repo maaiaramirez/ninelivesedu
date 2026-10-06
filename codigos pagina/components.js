@@ -10,35 +10,26 @@
     ───────────────────────────────────────── */
     const THEME_KEY = 'sw_theme';
 
+    // El modo claro quedó con la paleta vieja (ámbar, vidrio) de antes del
+    // rediseño violeta, y nadie lo actualizó -- mostrarlo mezclado con el
+    // resto del sitio ya rediseñado se ve roto. Hasta que se rehaga el
+    // modo claro con la paleta nueva, el sitio fuerza oscuro siempre: ni
+    // mira localStorage ni la preferencia del sistema, y de paso borra
+    // cualquier "light" que haya quedado guardado de antes en el navegador
+    // de alguien que ya había tocado el botón.
     function getTheme() {
-        return localStorage.getItem(THEME_KEY) ||
-            (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+        return 'dark';
     }
 
     function applyTheme(theme) {
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem(THEME_KEY, theme);
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.removeItem(THEME_KEY);
     }
 
     function injectThemeToggle() {
-        // Inject button into every .header-buttons found
-        const containers = document.querySelectorAll('.header-buttons');
-        containers.forEach(function (container) {
-            if (container.querySelector('.btn-theme-toggle')) return; // already there
-            const btn = document.createElement('button');
-            btn.className = 'btn-theme-toggle';
-            btn.setAttribute('aria-label', 'Cambiar tema');
-            btn.innerHTML = `
-                <i class="fas fa-sun icon-sun"></i>
-                <i class="fas fa-moon icon-moon"></i>
-            `;
-            btn.addEventListener('click', function () {
-                const current = document.documentElement.getAttribute('data-theme') || 'dark';
-                applyTheme(current === 'dark' ? 'light' : 'dark');
-            });
-            // Insert before the first child
-            container.insertBefore(btn, container.firstChild);
-        });
+        // Deshabilitado junto con el modo claro (ver nota en getTheme).
+        // Si en algún momento se rehace el modo claro con la paleta nueva,
+        // esta función es la que hay que volver a llamar desde init().
     }
 
   /* ─────────────────────────────────────────
