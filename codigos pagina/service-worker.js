@@ -1,4 +1,4 @@
-const CACHE_NAME = 'studywawa-cache-v4';
+const CACHE_NAME = 'studywawa-cache-v5';
 const ASSETS = [
   '/styles.css',
   '/atlas-theme.css',
@@ -6,6 +6,7 @@ const ASSETS = [
   '/script.js',
   '/atlas.js',
   '/components.js',
+  '/avisos.js',
   '/logo.png',
   '/apple-touch-icon.png',
   '/icon-512.png',

@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nine Lives Edu — Mi cuenta</title>
+    <link rel="icon" href="logo.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
@@ -144,6 +146,7 @@
         </div>
     </footer>
 
+    <script src="avisos.js"></script>
     <script src="atlas.js"></script>
     <script>
         const main = document.getElementById('mc-main');
@@ -229,7 +232,7 @@
             overlay.querySelector('#mc-encuesta-cerrar').onclick = () => overlay.remove();
 
             overlay.querySelector('#mc-encuesta-enviar').onclick = async () => {
-                if (!puntaje) { alert('Elegí un puntaje de 1 a 5 estrellas.'); return; }
+                if (!puntaje) { Aviso.advertencia('Elegí un puntaje de 1 a 5 estrellas.'); return; }
                 try {
                     await api('/api/asistencia/encuestas', {
                         method: 'POST',
@@ -241,7 +244,7 @@
                     });
                     overlay.remove();
                 } catch (e) {
-                    alert('No se pudo enviar la encuesta: ' + e.message);
+                    Aviso.error('No se pudo enviar la encuesta: ' + e.message);
                 }
             };
         }
@@ -379,20 +382,26 @@
         async function aprobar(reservaId) {
             try {
                 const data = await api(`/api/tutores/reservas/${reservaId}/aprobar`, { method: 'POST' });
-                // alert() se queda fijo en pantalla (a diferencia de un toast que
-                // se autodestruye) -- el profesor necesita tiempo para anotar
-                // el PIN del alumno, no solo un vistazo de medio segundo.
-                if (data.pinAlumno) alert(`PIN del alumno: ${data.pinAlumno}`);
-                if (data.cupoLleno) alert('¡Se llenó el cupo de esta tutoría!');
+                // El PIN va en un aviso fijo (no se cierra solo, a diferencia de un
+                // toast): el profesor necesita tiempo para anotar el PIN del alumno,
+                // no solo un vistazo de medio segundo.
+                if (data.cupoLleno) Aviso.info('¡Se llenó el cupo de esta tutoría!');
                 init();
-            } catch (e) { alert('Error: ' + e.message); }
+                if (data.pinAlumno) {
+                    Aviso.fijo('PIN del alumno', 'Pasale este PIN al alumno para que haga el check-in en el terminal.', {
+                        codigo: data.pinAlumno,
+                        nota: 'No se vuelve a mostrar. Anotalo o copialo ahora.',
+                    });
+                }
+            } catch (e) { Aviso.error(e.message); }
         }
 
         async function rechazar(reservaId) {
             try {
                 await api(`/api/tutores/reservas/${reservaId}/rechazar`, { method: 'POST' });
+                Aviso.info('Reserva rechazada.');
                 init();
-            } catch (e) { alert('Error: ' + e.message); }
+            } catch (e) { Aviso.error(e.message); }
         }
 
         init();

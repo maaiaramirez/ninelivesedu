@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Foros — Study Wawa</title>
+    <link rel="icon" href="logo.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="manifest.webmanifest">
     <meta name="theme-color" content="#7c3aed">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
@@ -348,6 +350,7 @@
         </div>
     </div>
 
+    <script src="avisos.js"></script>
     <script src="script.js"></script>
     <script>
     /* CANVAS */
@@ -477,7 +480,7 @@
             const fp=filtered.find(x=>x.id===id);if(fp)fp.votos=data.votos;
             render();
         }catch(e){
-            alert('No se pudo registrar tu voto. Intenta de nuevo.');
+            Aviso.error('No se pudo registrar tu voto. Intentá de nuevo.');
         }
     }
 
@@ -499,7 +502,7 @@
             const idx=posts.findIndex(x=>x.id===id);
             if(idx>=0)posts[idx]=p;else posts.push(p);
         }catch(e){
-            if(!p){alert('No se pudo cargar la publicación.');return;}
+            if(!p){Aviso.error('No se pudo cargar la publicación.');return;}
         }
         activePostId=id;
         document.getElementById('postModalTitle').textContent=p.titulo;
@@ -535,8 +538,8 @@
     async function submitReply(){
         const textEl=document.getElementById('replyText');
         const texto=textEl.value.trim();
-        if(!texto){alert('Escribe tu respuesta antes de enviarla.');return;}
-        if(!activePostId){alert('Selecciona una publicación antes de responder.');return;}
+        if(!texto){Aviso.advertencia('Escribí tu respuesta antes de enviarla.');return;}
+        if(!activePostId){Aviso.advertencia('Seleccioná una publicación antes de responder.');return;}
         const autor=document.getElementById('replyAutor').value.trim()||'Anónimo';
         try{
             const res=await fetch(`${API_URL}/${activePostId}/respuestas`,{
@@ -555,9 +558,9 @@
                 textEl.value='';
                 applyFilters();
             }
-            alert('¡Respuesta publicada!');
+            Aviso.exito('¡Respuesta publicada!');
         }catch(e){
-            alert('No se pudo enviar la respuesta. Intenta de nuevo.');
+            Aviso.error('No se pudo enviar la respuesta. Intentá de nuevo.');
         }
     }
 
@@ -602,7 +605,7 @@
             tipo:document.getElementById('postTipo').value,
             tags:document.getElementById('postTags').value.split(',').map(t=>t.trim()).filter(Boolean)
         };
-        if(!payload.titulo||!payload.contenido){alert('Completa el título y el contenido.');return;}
+        if(!payload.titulo||!payload.contenido){Aviso.advertencia('Completá el título y el contenido.');return;}
         try{
             const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
             if(!res.ok)throw new Error();
@@ -611,9 +614,9 @@
             applyFilters();
             e.target.reset();
             closeNewPost();
-            alert('¡Post publicado correctamente!');
+            Aviso.exito('¡Post publicado correctamente!');
         }catch(err){
-            alert('No se pudo publicar el post. Intenta de nuevo.');
+            Aviso.error('No se pudo publicar el post. Intentá de nuevo.');
         }
     });
 

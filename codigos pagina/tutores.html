@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tutores — Study Wawa</title>
+    <link rel="icon" href="logo.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="manifest.webmanifest">
     <meta name="theme-color" content="#7c3aed">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
@@ -570,6 +572,7 @@
         </div>
     </div>
 
+    <script src="avisos.js"></script>
     <script src="script.js"></script>
     <script>
     /* CANVAS */
@@ -794,7 +797,7 @@
         const fechaSel=document.getElementById('reservaFecha').value;
         const horaSel=document.getElementById('reservaHora').value;
         const modalidad=document.getElementById('reservaModalidad').value;
-        if(!fechaSel||!horaSel){alert('Completa la fecha y el horario.');return;}
+        if(!fechaSel||!horaSel){Aviso.advertencia('Completá la fecha y el horario.');return;}
         const fecha=`${fechaSel} ${horaSel}`;
         try{
             const res=await fetch(`${API_URL}/${activeReserveTutor.id}/reservas`,{
@@ -803,19 +806,19 @@
             });
             if(res.status===401){
                 closeReservation();
-                alert('Necesitás iniciar sesión como alumno para reservar una clase.');
+                Aviso.advertencia('Necesitás iniciar sesión como alumno para reservar una clase.');
                 window.location.href='mi-cuenta.html';
                 return;
             }
             const data=await res.json().catch(()=>({}));
             if(!res.ok){
-                alert(data.detail||'No se pudo completar la reserva.');
+                Aviso.error(data.detail||'No se pudo completar la reserva.');
                 return;
             }
-            alert(data.message||'¡Reserva solicitada!');
+            Aviso.exito(data.message||'¡Reserva solicitada!');
             closeReservation();
         }catch(err){
-            alert('No se pudo completar la reserva. Intenta de nuevo.');
+            Aviso.error('No se pudo completar la reserva. Intentá de nuevo.');
         }
     });
 
@@ -829,7 +832,7 @@
             descripcion:document.getElementById('swapDescripcion').value.trim()||undefined
         };
         if(!payload.nombre||!payload.materiaOfreces||!payload.materiaSolicitas){
-            alert('Completa todos los campos obligatorios.');return;
+            Aviso.advertencia('Completá todos los campos obligatorios.');return;
         }
         try{
             const res=await fetch(SWAP_URL,{
@@ -837,11 +840,11 @@
                 body:JSON.stringify(payload)
             });
             const data=await res.json().catch(()=>({}));
-            if(!res.ok){alert(data.detail||'No se pudo registrar tu intercambio.');return;}
-            alert(data.message||'¡Intercambio publicado! Revisaremos tu solicitud en breve.');
+            if(!res.ok){Aviso.error(data.detail||'No se pudo registrar tu intercambio.');return;}
+            Aviso.exito(data.message||'¡Intercambio publicado! Revisaremos tu solicitud en breve.');
             e.target.reset();
         }catch(err){
-            alert('No se pudo registrar tu intercambio. Intenta de nuevo.');
+            Aviso.error('No se pudo registrar tu intercambio. Intentá de nuevo.');
         }
     });
 

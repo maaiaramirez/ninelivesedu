@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nine Lives Edu — Panel de Moderadores</title>
+    <link rel="icon" href="logo.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
@@ -163,14 +165,6 @@
         .mod-settings-block button { margin-top: 0.3rem; cursor: pointer; }
         .mod-settings-ok { color: #8fd18f; font-size: 0.85rem; margin-top: 0.6rem; display: none; }
         .mod-settings-ok.show { display: block; }
-        .mod-toast {
-            position: fixed; bottom: 1.5rem; right: 1.5rem;
-            background: var(--ink-panel); border: 1px solid var(--violet);
-            color: var(--parchment); padding: 0.85rem 1.25rem;
-            font-size: 0.9rem; transform: translateY(120%); opacity: 0;
-            transition: all 0.4s var(--ease); z-index: 200;
-        }
-        .mod-toast.show { transform: translateY(0); opacity: 1; }
     </style>
 </head>
 <body>
@@ -333,8 +327,7 @@
         </footer>
     </div>
 
-    <div class="mod-toast" id="mod-toast"></div>
-
+    <script src="avisos.js"></script>
     <script src="atlas.js"></script>
     <script>
         const loginBox = document.getElementById('mod-login');
@@ -342,13 +335,14 @@
         const loginForm = document.getElementById('mod-login-form');
         const loginError = document.getElementById('mod-login-error');
         const whoEl = document.getElementById('mod-who');
-        const toast = document.getElementById('mod-toast');
         let currentAdminId = null;
 
+        // Avisos del sistema (avisos.js). Los mensajes que empiezan con "Error: "
+        // salen como error; el resto como éxito.
         function showToast(msg) {
-            toast.textContent = msg;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 2600);
+            msg = String(msg ?? '');
+            if (/^error:\s*/i.test(msg)) Aviso.error(msg.replace(/^error:\s*/i, ''));
+            else Aviso.exito(msg);
         }
 
         function fecha(iso) {
@@ -475,7 +469,7 @@
                 loadPostsPendientes();
                 loadMetrics();
             } catch (e) {
-                alert('Error: ' + e.message);
+                Aviso.error(e.message);
             }
         }
 
@@ -561,11 +555,14 @@
             try {
                 const data = await api(`/api/admin/certificaciones/${userId}/${accion}`, { method: 'POST' });
                 if (data.pinDocente) {
-                    // El toast normal desaparece solo a los 2.6s -- muy poco
-                    // tiempo para leer y anotar un PIN de 6 dígitos. Un
-                    // alert() nativo se queda esperando hasta que lo cierres,
-                    // así no se pierde el único momento en que el PIN es visible.
-                    alert(data.message);
+                    // Un toast normal desaparece solo -- muy poco tiempo para
+                    // leer y anotar un PIN de 6 dígitos. El aviso fijo se queda
+                    // hasta que lo cierres, así no se pierde el único momento
+                    // en que el PIN es visible.
+                    Aviso.fijo('Docente aprobado', data.message, {
+                        codigo: data.pinDocente,
+                        nota: 'Este PIN no se vuelve a mostrar. Anotalo o copialo ahora.',
+                    });
                 } else {
                     showToast(data.message || 'Listo.');
                 }
@@ -639,10 +636,17 @@
         }
 
         async function regenerarPin(userId) {
-            if (!confirm('¿Generar un PIN nuevo? El anterior (si tenía) deja de funcionar.')) return;
+            const ok = await Aviso.confirmar('¿Generar un PIN nuevo? El anterior (si tenía) deja de funcionar.', {
+                titulo: 'Generar PIN nuevo', textoOk: 'Generar PIN', peligro: true,
+            });
+            if (!ok) return;
             try {
                 const data = await api(`/api/admin/usuarios/${userId}/regenerar-pin-docente`, { method: 'POST' });
-                alert(data.message); // se queda esperando -- tiempo de sobra para anotar el PIN
+                // aviso fijo -- tiempo de sobra para anotar el PIN
+                Aviso.fijo('PIN nuevo generado', data.message, {
+                    codigo: data.pinDocente,
+                    nota: 'Este PIN no se vuelve a mostrar. Anotalo o copialo ahora.',
+                });
             } catch (e) {
                 showToast('Error: ' + e.message);
             }
@@ -688,7 +692,10 @@
         }
 
         async function eliminarAdministrador(adminId) {
-            if (!confirm('¿Eliminar esta cuenta de administrador?')) return;
+            const ok = await Aviso.confirmar('¿Eliminar esta cuenta de administrador? Esta acción no se puede deshacer.', {
+                titulo: 'Eliminar administrador', textoOk: 'Eliminar', peligro: true,
+            });
+            if (!ok) return;
             try {
                 await api(`/api/admin/administradores/${adminId}`, { method: 'DELETE' });
                 showToast('Administrador eliminado.');
