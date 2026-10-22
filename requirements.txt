@@ -4,3 +4,4 @@ pydantic>=2.10.0
 python-multipart==0.0.9
 requests==2.32.3
 libsql-client==0.3.1
+cloudinary>=1.40.0
